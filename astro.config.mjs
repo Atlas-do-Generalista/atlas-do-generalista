@@ -2,11 +2,11 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
+  site: 'https://atlasgeneralista.netlify.app',
   integrations: [
     starlight({
       title: 'Atlas do Generalista: Manual Aberto de Medicina para o Generalista',
       customCss: [],
-      // ATIVA O NOSSO NOVO CABEÇALHO PERSONALIZADO
       components: {
         PageTitle: './src/components/CustomTitle.astro',
       },
@@ -17,6 +17,8 @@ export default defineConfig({
             src: 'https://identity.netlify.com/v1/netlify-identity-widget.js',
           },
         },
+        { tag: 'meta', attrs: { name: 'citation_publisher', content: 'Atlas do Generalista: Manual Aberto de Medicina' } },
+        { tag: 'meta', attrs: { name: 'citation_language', content: 'pt-BR' } },
       ],
       sidebar: [
         {
