@@ -2,15 +2,12 @@ backend:
   name: git-gateway
   branch: main
   repo: Atlas-do-Generalista/atlas-do-generalista
-
 # Ativa o modo de revisão (Rascunho -> Em Revisão -> Pronto -> Publicado)
 publish_mode: editorial_workflow
-
 # Onde as imagens enviadas pelos autores serão salvas no repositório
 media_folder: "public/images/uploads"
 # Como o link da imagem vai aparecer no texto final
 public_folder: "/images/uploads"
-
 # Configuração dos Livros (Collections)
 collections:
   - name: "livro1"
@@ -24,8 +21,11 @@ collections:
       - { label: "Autor Principal", name: "autor", widget: "string" }
       - { label: "ORCID do Autor", name: "orcid", widget: "string" }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      # --- NOVOS CAMPOS PARA EXTRAÇÃO DE DADOS ---
+      - { label: "Data de Publicação", name: "date", widget: "datetime" }
+      - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
+      # -------------------------------------------
       - { label: "Corpo do Texto", name: "body", widget: "markdown" }
-
   - name: "livro2"
     label: "Livro II: Procedimentos Médicos, Habilidades Invasivas & Trauma"
     folder: "src/content/docs/livro2"
@@ -37,8 +37,11 @@ collections:
       - { label: "Autor Principal", name: "autor", widget: "string" }
       - { label: "ORCID do Autor", name: "orcid", widget: "string" }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      # --- NOVOS CAMPOS PARA EXTRAÇÃO DE DADOS ---
+      - { label: "Data de Publicação", name: "date", widget: "datetime" }
+      - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
+      # -------------------------------------------
       - { label: "Corpo do Texto", name: "body", widget: "markdown" }
-
   - name: "livro3"
     label: "Livro III: Oncologia Prática, Emergências Oncológicas & Paliativismo"
     folder: "src/content/docs/livro3"
@@ -50,8 +53,11 @@ collections:
       - { label: "Autor Principal", name: "autor", widget: "string" }
       - { label: "ORCID do Autor", name: "orcid", widget: "string" }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      # --- NOVOS CAMPOS PARA EXTRAÇÃO DE DADOS ---
+      - { label: "Data de Publicação", name: "date", widget: "datetime" }
+      - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
+      # -------------------------------------------
       - { label: "Corpo do Texto", name: "body", widget: "markdown" }
-
   - name: "livro4"
     label: "Livro IV: Pediatria e Emergências Pediátricas para o Generalista"
     folder: "src/content/docs/livro4"
@@ -63,8 +69,11 @@ collections:
       - { label: "Autor Principal", name: "autor", widget: "string" }
       - { label: "ORCID do Autor", name: "orcid", widget: "string" }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      # --- NOVOS CAMPOS PARA EXTRAÇÃO DE DADOS ---
+      - { label: "Data de Publicação", name: "date", widget: "datetime" }
+      - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
+      # -------------------------------------------
       - { label: "Corpo do Texto", name: "body", widget: "markdown" }
-
   - name: "livro5"
     label: "Livro V: Ginecologia, Obstetrícia & Urgências Gineco-Obstétricas"
     folder: "src/content/docs/livro5"
@@ -76,8 +85,11 @@ collections:
       - { label: "Autor Principal", name: "autor", widget: "string" }
       - { label: "ORCID do Autor", name: "orcid", widget: "string" }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      # --- NOVOS CAMPOS PARA EXTRAÇÃO DE DADOS ---
+      - { label: "Data de Publicação", name: "date", widget: "datetime" }
+      - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
+      # -------------------------------------------
       - { label: "Corpo do Texto", name: "body", widget: "markdown" }
-
   - name: "livro6"
     label: "Livro VI: Toxicologia Clínica e Envenenamentos"
     folder: "src/content/docs/livro6"
@@ -89,8 +101,11 @@ collections:
       - { label: "Autor Principal", name: "autor", widget: "string" }
       - { label: "ORCID do Autor", name: "orcid", widget: "string" }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      # --- NOVOS CAMPOS PARA EXTRAÇÃO DE DADOS ---
+      - { label: "Data de Publicação", name: "date", widget: "datetime" }
+      - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
+      # -------------------------------------------
       - { label: "Corpo do Texto", name: "body", widget: "markdown" }
-
   - name: "livro7"
     label: "Livro VII: Medicina Legal, Atestados, Documentação & Deontologia"
     folder: "src/content/docs/livro7"
@@ -102,8 +117,11 @@ collections:
       - { label: "Autor Principal", name: "autor", widget: "string" }
       - { label: "ORCID do Autor", name: "orcid", widget: "string" }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      # --- NOVOS CAMPOS PARA EXTRAÇÃO DE DADOS ---
+      - { label: "Data de Publicação", name: "date", widget: "datetime" }
+      - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
+      # -------------------------------------------
       - { label: "Corpo do Texto", name: "body", widget: "markdown" }
-
   - name: "livro8"
     label: "Livro VIII: Gestão do Plantão, Carreira, Prescrição & Ferramentas de Suporte"
     folder: "src/content/docs/livro8"
@@ -115,4 +133,8 @@ collections:
       - { label: "Autor Principal", name: "autor", widget: "string" }
       - { label: "ORCID do Autor", name: "orcid", widget: "string" }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      # --- NOVOS CAMPOS PARA EXTRAÇÃO DE DADOS ---
+      - { label: "Data de Publicação", name: "date", widget: "datetime" }
+      - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
+      # -------------------------------------------
       - { label: "Corpo do Texto", name: "body", widget: "markdown" }
