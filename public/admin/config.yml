@@ -1,6 +1,6 @@
 backend:
   name: git-gateway
-  branch: main 
+  branch: main
   repo: Atlas-do-Generalista/atlas-do-generalista
 
 # Ativa o modo de revisão (Rascunho -> Em Revisão -> Pronto -> Publicado)
@@ -14,14 +14,105 @@ public_folder: "/images/uploads"
 # Configuração dos Livros (Collections)
 collections:
   - name: "livro1"
-    label: "Livro 1: Raciocínio Clínico"
-    folder: "src/content/docs/livro1" # Pasta onde o Astro vai ler os arquivos
+    label: "Livro I: Raciocínio Clínico e Tomada de Decisão"
+    folder: "src/content/docs/livro1"
     create: true
     slug: "{{slug}}"
     fields:
       - { label: "Título do Capítulo", name: "title", widget: "string" }
       - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
       - { label: "Autor Principal", name: "autor", widget: "string" }
-      - { label: "ORCID do Autor", name: "orcid", widget: "string", required: false }
+      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      - { label: "Corpo do Texto", name: "body", widget: "markdown" }
+
+  - name: "livro2"
+    label: "Livro II: Procedimentos Médicos, Habilidades Invasivas & Trauma"
+    folder: "src/content/docs/livro2"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título do Capítulo", name: "title", widget: "string" }
+      - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
+      - { label: "Autor Principal", name: "autor", widget: "string" }
+      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      - { label: "Corpo do Texto", name: "body", widget: "markdown" }
+
+  - name: "livro3"
+    label: "Livro III: Oncologia Prática, Emergências Oncológicas & Paliativismo"
+    folder: "src/content/docs/livro3"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título do Capítulo", name: "title", widget: "string" }
+      - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
+      - { label: "Autor Principal", name: "autor", widget: "string" }
+      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      - { label: "Corpo do Texto", name: "body", widget: "markdown" }
+
+  - name: "livro4"
+    label: "Livro IV: Pediatria e Emergências Pediátricas para o Generalista"
+    folder: "src/content/docs/livro4"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título do Capítulo", name: "title", widget: "string" }
+      - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
+      - { label: "Autor Principal", name: "autor", widget: "string" }
+      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      - { label: "Corpo do Texto", name: "body", widget: "markdown" }
+
+  - name: "livro5"
+    label: "Livro V: Ginecologia, Obstetrícia & Urgências Gineco-Obstétricas"
+    folder: "src/content/docs/livro5"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título do Capítulo", name: "title", widget: "string" }
+      - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
+      - { label: "Autor Principal", name: "autor", widget: "string" }
+      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      - { label: "Corpo do Texto", name: "body", widget: "markdown" }
+
+  - name: "livro6"
+    label: "Livro VI: Toxicologia Clínica e Envenenamentos"
+    folder: "src/content/docs/livro6"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título do Capítulo", name: "title", widget: "string" }
+      - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
+      - { label: "Autor Principal", name: "autor", widget: "string" }
+      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      - { label: "Corpo do Texto", name: "body", widget: "markdown" }
+
+  - name: "livro7"
+    label: "Livro VII: Medicina Legal, Atestados, Documentação & Deontologia"
+    folder: "src/content/docs/livro7"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título do Capítulo", name: "title", widget: "string" }
+      - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
+      - { label: "Autor Principal", name: "autor", widget: "string" }
+      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      - { label: "Corpo do Texto", name: "body", widget: "markdown" }
+
+  - name: "livro8"
+    label: "Livro VIII: Gestão do Plantão, Carreira, Prescrição & Ferramentas de Suporte"
+    folder: "src/content/docs/livro8"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título do Capítulo", name: "title", widget: "string" }
+      - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
+      - { label: "Autor Principal", name: "autor", widget: "string" }
+      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
       - { label: "Corpo do Texto", name: "body", widget: "markdown" }
