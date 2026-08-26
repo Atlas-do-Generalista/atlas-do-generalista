@@ -18,7 +18,10 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Livro 1: Raciocínio Clínico',
-          autogenerate: { directory: 'livro1' },
+          // A NOVA SINTAXE EXIGIDA PELO STARLIGHT v0.39.0+
+          items: [
+            { autogenerate: { directory: 'livro1' } }
+          ],
         },
       ],
     }),
