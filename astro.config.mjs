@@ -6,7 +6,10 @@ export default defineConfig({
     starlight({
       title: 'Atlas do Generalista: Manual Aberto de Medicina para o Generalista',
       customCss: [],
-      // Injeta o script do Netlify Identity no head de todas as páginas
+      // ATIVA O NOSSO NOVO CABEÇALHO PERSONALIZADO
+      components: {
+        PageTitle: './src/components/CustomTitle.astro',
+      },
       head: [
         {
           tag: 'script',
