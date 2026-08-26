@@ -1,0 +1,27 @@
+backend:
+  name: git-gateway
+  branch: main 
+  repo: Atlas-do-Generalista/atlas-do-generalista
+
+# Ativa o modo de revisão (Rascunho -> Em Revisão -> Pronto -> Publicado)
+publish_mode: editorial_workflow
+
+# Onde as imagens enviadas pelos autores serão salvas no repositório
+media_folder: "public/images/uploads"
+# Como o link da imagem vai aparecer no texto final
+public_folder: "/images/uploads"
+
+# Configuração dos Livros (Collections)
+collections:
+  - name: "livro1"
+    label: "Livro 1: Raciocínio Clínico"
+    folder: "src/content/docs/livro1" # Pasta onde o Astro vai ler os arquivos
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Título do Capítulo", name: "title", widget: "string" }
+      - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
+      - { label: "Autor Principal", name: "autor", widget: "string" }
+      - { label: "ORCID do Autor", name: "orcid", widget: "string", required: false }
+      - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
+      - { label: "Corpo do Texto", name: "body", widget: "markdown" }
