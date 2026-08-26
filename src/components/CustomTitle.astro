@@ -1,26 +1,90 @@
+```astro
 ---
 import Default from '@astrojs/starlight/components/PageTitle.astro';
-const { entry } = Astro.props;
-const { autor, orcid, revisor, date, doi, description } = entry.data;
+
+const entry = Astro.locals.starlightRoute?.entry;
+const data = entry?.data;
+
+const autor = data?.autor;
+const orcid = data?.orcid;
+const revisor = data?.revisor;
+const date = data?.date;
+const doi = data?.doi;
+const description = data?.description;
 
 // Formata a data para o padrão brasileiro
-const formattedDate = date ? new Date(date).toLocaleDateString('pt-BR') : null;
+const formattedDate = date
+  ? new Date(date).toLocaleDateString('pt-BR')
+  : null;
 ---
-<!-- Renderiza o Título Original (H1) -->
+
+<!-- Renderiza o título original (H1) -->
 <Default {...Astro.props} />
 
-<!-- Nossa nova caixa de metadados acadêmicos -->
-<div style="background-color: var(--sl-color-bg-nav); padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0 2.5rem 0; border: 1px solid var(--sl-color-hairline);">
-  
-  {description && <p style="font-size: 1.05rem; margin-top: 0; margin-bottom: 1rem;"><em><strong>Resumo:</strong> {description}</em></p>}
-  
-  <hr style="border-color: var(--sl-color-hairline); margin-bottom: 1rem;" />
-  
-  <div style="display: grid; gap: 0.5rem; font-size: 0.9rem; color: var(--sl-color-text-muted);">
-    {autor && <div>✍️ <strong>Autor Principal:</strong> {autor}</div>}
-    {orcid && <div>🔗 <strong>ORCID:</strong> <a href={`https://orcid.org/${orcid}`} target="_blank">{orcid}</a></div>}
-    {revisor && <div>👀 <strong>Revisão Científica:</strong> {revisor}</div>}
-    {formattedDate && <div>📅 <strong>Publicado em:</strong> {formattedDate}</div>}
-    {doi && <div>🎓 <strong>DOI:</strong> <a href={`https://doi.org/${doi}`} target="_blank">{doi}</a></div>}
+<!-- Caixa de metadados acadêmicos -->
+{(description || autor || orcid || revisor || formattedDate || doi) && (
+  <div
+    style="background-color: var(--sl-color-bg-nav); padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0 2.5rem 0; border: 1px solid var(--sl-color-hairline);"
+  >
+    {description && (
+      <p style="font-size: 1.05rem; margin-top: 0; margin-bottom: 1rem;">
+        <em><strong>Resumo:</strong> {description}</em>
+      </p>
+    )}
+
+    {(description && (autor || orcid || revisor || formattedDate || doi)) && (
+      <hr
+        style="border-color: var(--sl-color-hairline); margin-bottom: 1rem;"
+      />
+    )}
+
+    <div
+      style="display: grid; gap: 0.5rem; font-size: 0.9rem; color: var(--sl-color-text-muted);"
+    >
+      {autor && (
+        <div>
+          ✍️ <strong>Autor Principal:</strong> {autor}
+        </div>
+      )}
+
+      {orcid && (
+        <div>
+          🔗 <strong>ORCID:</strong>{' '}
+          <a
+            href={`https://orcid.org/${orcid}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {orcid}
+          </a>
+        </div>
+      )}
+
+      {revisor && (
+        <div>
+          👀 <strong>Revisão Científica:</strong> {revisor}
+        </div>
+      )}
+
+      {formattedDate && (
+        <div>
+          📅 <strong>Publicado em:</strong> {formattedDate}
+        </div>
+      )}
+
+      {doi && (
+        <div>
+          🎓 <strong>DOI:</strong>{' '}
+          <a
+            href={`https://doi.org/${doi}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {doi}
+          </a>
+        </div>
+      )}
+    </div>
   </div>
-</div>
+)}
+```
