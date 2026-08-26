@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
   integrations: [
     starlight({
-      title: 'Atlas do Generalista',
+      title: 'Atlas do Generalista: Manual Aberto de Medicina para o Generalista',
       customCss: [],
       // Injeta o script do Netlify Identity no head de todas as páginas
       head: [
