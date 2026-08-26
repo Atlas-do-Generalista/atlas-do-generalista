@@ -1,8 +1,8 @@
 ---
 title: Atendimento Primário ao Traumatizado (xABCDE do ATLS)
-description: " Identificar as injúrias que ameaçam a vida, estabilizá-las e
-  implementar tratamentos prioritários, com reavaliação constante para ajuste
-  dos planos e organização do cuidado definitivo."
+description: No trauma o objetivo é identificar as injúrias que ameaçam a vida,
+  estabilizá-las e implementar tratamentos prioritários, com reavaliação
+  constante para ajuste dos planos e organização do cuidado definitivo.
 autor: João Pedro Lelis Ferreira
 orcid: https://orcid.org/0009-0007-1619-3096
 ---
