@@ -17,10 +17,51 @@ export default defineConfig({
       ],
       sidebar: [
         {
-          label: 'Livro 1: Raciocínio Clínico',
-          // A NOVA SINTAXE EXIGIDA PELO STARLIGHT v0.39.0+
+          label: 'Livro I: Raciocínio Clínico e Tomada de Decisão',
           items: [
-            { autogenerate: { directory: 'livro1' } }
+            { autogenerate: { directory: 'livro1' } },
+          ],
+        },
+        {
+          label: 'Livro II: Procedimentos Médicos, Habilidades Invasivas & Trauma',
+          items: [
+            { autogenerate: { directory: 'livro2' } },
+          ],
+        },
+        {
+          label: 'Livro III: Oncologia Prática, Emergências Oncológicas & Paliativismo',
+          items: [
+            { autogenerate: { directory: 'livro3' } },
+          ],
+        },
+        {
+          label: 'Livro IV: Pediatria e Emergências Pediátricas para o Generalista',
+          items: [
+            { autogenerate: { directory: 'livro4' } },
+          ],
+        },
+        {
+          label: 'Livro V: Ginecologia, Obstetrícia & Urgências Gineco-Obstétricas',
+          items: [
+            { autogenerate: { directory: 'livro5' } },
+          ],
+        },
+        {
+          label: 'Livro VI: Toxicologia Clínica e Envenenamentos',
+          items: [
+            { autogenerate: { directory: 'livro6' } },
+          ],
+        },
+        {
+          label: 'Livro VII: Medicina Legal, Atestados, Documentação & Deontologia',
+          items: [
+            { autogenerate: { directory: 'livro7' } },
+          ],
+        },
+        {
+          label: 'Livro VIII: Gestão do Plantão, Carreira, Prescrição & Ferramentas de Suporte',
+          items: [
+            { autogenerate: { directory: 'livro8' } },
           ],
         },
       ],
