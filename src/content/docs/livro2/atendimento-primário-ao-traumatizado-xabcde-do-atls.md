@@ -5,6 +5,7 @@ description: No trauma o objetivo é identificar as injúrias que ameaçam a vid
   constante para ajuste dos planos e organização do cuidado definitivo.
 autor: João Pedro Lelis Ferreira
 orcid: https://orcid.org/0009-0007-1619-3096
+date: 2026-08-26T17:48:00.000-03:00
 ---
 * Tratar a ameaça maior à vida **primeiro**
 * A falta de diagnóstico definitivo **não deve atrasar** condutas urgentes
