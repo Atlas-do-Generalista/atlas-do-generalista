@@ -1,4 +1,3 @@
-```astro
 ---
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 
@@ -15,13 +14,15 @@ const description = data?.description;
 const formattedDate = date
   ? new Date(date).toLocaleDateString('pt-BR')
   : null;
+
+const hasAutores = autores && autores.length > 0;
 ---
 
 <!-- Renderiza o título original (H1) -->
 <Default {...Astro.props} />
 
 <!-- Caixa de metadados acadêmicos -->
-{(description || autor || orcid || revisor || formattedDate || doi) && (
+{(description || hasAutores || revisor || formattedDate || doi) && (
   <div
     style="background-color: var(--sl-color-bg-nav); padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0 2.5rem 0; border: 1px solid var(--sl-color-hairline);"
   >
@@ -31,31 +32,39 @@ const formattedDate = date
       </p>
     )}
 
-    {(description && (autor || orcid || revisor || formattedDate || doi)) && (
+    {(description && (hasAutores || revisor || formattedDate || doi)) && (
       <hr
         style="border-color: var(--sl-color-hairline); margin-bottom: 1rem;"
       />
     )}
 
     <div
-      style="display: grid; gap: 0.5rem; font-size: 0.9rem; color: var(--sl-color-text-muted);"
+      style="display: grid; gap: 0.75rem; font-size: 0.9rem; color: var(--sl-color-text-muted);"
     >
-      {autor && (
+      {hasAutores && (
         <div>
-          ✍️ <strong>Autor Principal:</strong> {autor}
-        </div>
-      )}
+          ✍️ <strong>Autores:</strong>
 
-      {orcid && (
-        <div>
-          🔗 <strong>ORCID:</strong>{' '}
-          <a
-            href={`https://orcid.org/${orcid}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {orcid}
-          </a>
+          <div style="margin-top: 0.5rem; display: grid; gap: 0.35rem;">
+            {autores.map((autor) => (
+              <div>
+                {autor.nome}
+
+                {autor.orcid && (
+                  <>
+                    {' — '}
+                    <a
+                      href={`https://orcid.org/${autor.orcid}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      ORCID: {autor.orcid}
+                    </a>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -86,4 +95,3 @@ const formattedDate = date
     </div>
   </div>
 )}
-```
