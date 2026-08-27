@@ -2,7 +2,8 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
-  site: 'https://atlasgeneralista.netlify.app',
+  site: 'https://atlas-do-generalista.github.io',
+  base: '/atlas-do-generalista',
   integrations: [
     starlight({
       title: 'Atlas do Generalista: Manual Aberto de Medicina para o Generalista',
