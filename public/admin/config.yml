@@ -3,7 +3,7 @@ backend:
   branch: main
   repo: Atlas-do-Generalista/atlas-do-generalista
 
-# Ativa o modo de revisão (Rascunho -> Em Revisão -> Pronto -> Publicado)
+# Ativa o fluxo editorial (Rascunho -> Em Revisão -> Pronto -> Publicado)
 publish_mode: editorial_workflow
 
 # Onde as imagens enviadas pelos autores serão salvas no repositório
@@ -22,7 +22,15 @@ collections:
       - { label: "Título do Capítulo", name: "title", widget: "string" }
       - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
       - { label: "Autor Principal", name: "autor", widget: "string" }
-      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "ORCID do Autor Principal", name: "orcid", widget: "string" }
+      - { 
+          label: "Outros Autores (Opcional)", 
+          name: "coautores", 
+          widget: "list", 
+          required: false,
+          field: { label: "Nome e ORCID", name: "coautor", widget: "string" },
+          hint: "Ex: Maria Silva (https://orcid.org/0000-0002-1825-0097)"
+        }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
       - { label: "Data de Publicação", name: "date", widget: "datetime" }
       - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
@@ -37,7 +45,15 @@ collections:
       - { label: "Título do Capítulo", name: "title", widget: "string" }
       - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
       - { label: "Autor Principal", name: "autor", widget: "string" }
-      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "ORCID do Autor Principal", name: "orcid", widget: "string" }
+      - { 
+          label: "Outros Autores (Opcional)", 
+          name: "coautores", 
+          widget: "list", 
+          required: false,
+          field: { label: "Nome e ORCID", name: "coautor", widget: "string" },
+          hint: "Ex: Maria Silva (https://orcid.org/0000-0002-1825-0097)"
+        }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
       - { label: "Data de Publicação", name: "date", widget: "datetime" }
       - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
@@ -52,7 +68,15 @@ collections:
       - { label: "Título do Capítulo", name: "title", widget: "string" }
       - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
       - { label: "Autor Principal", name: "autor", widget: "string" }
-      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "ORCID do Autor Principal", name: "orcid", widget: "string" }
+      - { 
+          label: "Outros Autores (Opcional)", 
+          name: "coautores", 
+          widget: "list", 
+          required: false,
+          field: { label: "Nome e ORCID", name: "coautor", widget: "string" },
+          hint: "Ex: Maria Silva (https://orcid.org/0000-0002-1825-0097)"
+        }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
       - { label: "Data de Publicação", name: "date", widget: "datetime" }
       - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
@@ -67,7 +91,15 @@ collections:
       - { label: "Título do Capítulo", name: "title", widget: "string" }
       - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
       - { label: "Autor Principal", name: "autor", widget: "string" }
-      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "ORCID do Autor Principal", name: "orcid", widget: "string" }
+      - { 
+          label: "Outros Autores (Opcional)", 
+          name: "coautores", 
+          widget: "list", 
+          required: false,
+          field: { label: "Nome e ORCID", name: "coautor", widget: "string" },
+          hint: "Ex: Maria Silva (https://orcid.org/0000-0002-1825-0097)"
+        }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
       - { label: "Data de Publicação", name: "date", widget: "datetime" }
       - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
@@ -82,7 +114,15 @@ collections:
       - { label: "Título do Capítulo", name: "title", widget: "string" }
       - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
       - { label: "Autor Principal", name: "autor", widget: "string" }
-      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "ORCID do Autor Principal", name: "orcid", widget: "string" }
+      - { 
+          label: "Outros Autores (Opcional)", 
+          name: "coautores", 
+          widget: "list", 
+          required: false,
+          field: { label: "Nome e ORCID", name: "coautor", widget: "string" },
+          hint: "Ex: Maria Silva (https://orcid.org/0000-0002-1825-0097)"
+        }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
       - { label: "Data de Publicação", name: "date", widget: "datetime" }
       - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
@@ -97,7 +137,15 @@ collections:
       - { label: "Título do Capítulo", name: "title", widget: "string" }
       - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
       - { label: "Autor Principal", name: "autor", widget: "string" }
-      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "ORCID do Autor Principal", name: "orcid", widget: "string" }
+      - { 
+          label: "Outros Autores (Opcional)", 
+          name: "coautores", 
+          widget: "list", 
+          required: false,
+          field: { label: "Nome e ORCID", name: "coautor", widget: "string" },
+          hint: "Ex: Maria Silva (https://orcid.org/0000-0002-1825-0097)"
+        }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
       - { label: "Data de Publicação", name: "date", widget: "datetime" }
       - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
@@ -112,7 +160,15 @@ collections:
       - { label: "Título do Capítulo", name: "title", widget: "string" }
       - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
       - { label: "Autor Principal", name: "autor", widget: "string" }
-      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "ORCID do Autor Principal", name: "orcid", widget: "string" }
+      - { 
+          label: "Outros Autores (Opcional)", 
+          name: "coautores", 
+          widget: "list", 
+          required: false,
+          field: { label: "Nome e ORCID", name: "coautor", widget: "string" },
+          hint: "Ex: Maria Silva (https://orcid.org/0000-0002-1825-0097)"
+        }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
       - { label: "Data de Publicação", name: "date", widget: "datetime" }
       - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
@@ -127,7 +183,15 @@ collections:
       - { label: "Título do Capítulo", name: "title", widget: "string" }
       - { label: "Descrição Breve (Resumo)", name: "description", widget: "string", required: false }
       - { label: "Autor Principal", name: "autor", widget: "string" }
-      - { label: "ORCID do Autor", name: "orcid", widget: "string" }
+      - { label: "ORCID do Autor Principal", name: "orcid", widget: "string" }
+      - { 
+          label: "Outros Autores (Opcional)", 
+          name: "coautores", 
+          widget: "list", 
+          required: false,
+          field: { label: "Nome e ORCID", name: "coautor", widget: "string" },
+          hint: "Ex: Maria Silva (https://orcid.org/0000-0002-1825-0097)"
+        }
       - { label: "Revisor Científico", name: "revisor", widget: "string", required: false }
       - { label: "Data de Publicação", name: "date", widget: "datetime" }
       - { label: "DOI (Zenodo)", name: "doi", widget: "string", required: false }
