@@ -7,12 +7,16 @@ export const collections = {
     loader: docsLoader(),
     schema: docsSchema({
       extend: z.object({
-        autor: z.string().optional(),
-        orcid: z.string().optional(),
+        autores: z.array(
+          z.object({
+            nome: z.string(),
+            orcid: z.string().optional(),
+          })
+        ).optional(),
+
         revisor: z.string().optional(),
         date: z.coerce.date().optional(),
         doi: z.string().optional(),
-        status: z.enum(['pending', 'approved', 'rejected']).default('pending'),
       }),
     }),
   }),
