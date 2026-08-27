@@ -12,6 +12,7 @@ export const collections = {
         revisor: z.string().optional(),
         date: z.coerce.date().optional(),
         doi: z.string().optional(),
+        status: z.enum(['pending', 'approved', 'rejected']).default('pending'),
       }),
     }),
   }),
