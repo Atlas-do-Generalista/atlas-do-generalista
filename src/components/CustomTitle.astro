@@ -4,7 +4,7 @@ import Default from '@astrojs/starlight/components/PageTitle.astro';
 const entry = Astro.locals.starlightRoute?.entry;
 const data = entry?.data;
 
-const autores = data?.autores;
+const autores = data?.autores ?? [];
 const revisor = data?.revisor;
 const date = data?.date;
 const doi = data?.doi;
@@ -15,14 +15,19 @@ const formattedDate = date
   ? new Date(date).toLocaleDateString('pt-BR')
   : null;
 
-const hasAutores = autores && autores.length > 0;
+const hasMetadata =
+  description ||
+  autores.length > 0 ||
+  revisor ||
+  formattedDate ||
+  doi;
 ---
 
-<!-- Renderiza o título original (H1) -->
+<!-- Título original do Starlight -->
 <Default {...Astro.props} />
 
-<!-- Caixa de metadados acadêmicos -->
-{(description || hasAutores || revisor || formattedDate || doi) && (
+<!-- Metadados acadêmicos -->
+{hasMetadata && (
   <div
     style="background-color: var(--sl-color-bg-nav); padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0 2.5rem 0; border: 1px solid var(--sl-color-hairline);"
   >
@@ -32,7 +37,8 @@ const hasAutores = autores && autores.length > 0;
       </p>
     )}
 
-    {(description && (hasAutores || revisor || formattedDate || doi)) && (
+    {(description &&
+      (autores.length > 0 || revisor || formattedDate || doi)) && (
       <hr
         style="border-color: var(--sl-color-hairline); margin-bottom: 1rem;"
       />
@@ -41,15 +47,14 @@ const hasAutores = autores && autores.length > 0;
     <div
       style="display: grid; gap: 0.75rem; font-size: 0.9rem; color: var(--sl-color-text-muted);"
     >
-      {hasAutores && (
+      {autores.length > 0 && (
         <div>
           ✍️ <strong>Autores:</strong>
 
-          <div style="margin-top: 0.5rem; display: grid; gap: 0.35rem;">
+          <div style="margin-top: 0.4rem; display: grid; gap: 0.25rem;">
             {autores.map((autor) => (
               <div>
                 {autor.nome}
-
                 {autor.orcid && (
                   <>
                     {' — '}
