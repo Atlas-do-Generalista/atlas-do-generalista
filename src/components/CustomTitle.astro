@@ -15,6 +15,21 @@ const formattedDate = date
   ? new Date(date).toLocaleDateString('pt-BR')
   : null;
 
+// Processa os dados do revisor
+let revisorNome = revisor;
+let revisorOrcid = null;
+
+if (revisor) {
+  const match = revisor.match(
+    /^(.*?)\s*\((https?:\/\/orcid\.org\/[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X])\)\s*$/
+  );
+
+  if (match) {
+    revisorNome = match[1].trim();
+    revisorOrcid = match[2];
+  }
+}
+
 const hasMetadata =
   description ||
   autores.length > 0 ||
@@ -23,10 +38,8 @@ const hasMetadata =
   doi;
 ---
 
-<!-- Título original do Starlight -->
 <Default {...Astro.props} />
 
-<!-- Metadados acadêmicos -->
 {hasMetadata && (
   <div
     style="background-color: var(--sl-color-bg-nav); padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0 2.5rem 0; border: 1px solid var(--sl-color-hairline);"
@@ -75,7 +88,20 @@ const hasMetadata =
 
       {revisor && (
         <div>
-          👀 <strong>Revisão Científica:</strong> {revisor}
+          👀 <strong>Revisão Científica:</strong>{' '}
+          {revisorNome}
+          {revisorOrcid && (
+            <>
+              {' — '}
+              <a
+                href={revisorOrcid}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ORCID: {revisorOrcid.replace('https://orcid.org/', '')}
+              </a>
+            </>
+          )}
         </div>
       )}
 
