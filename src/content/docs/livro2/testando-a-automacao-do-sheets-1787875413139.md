@@ -2,7 +2,6 @@
 title: "Testando a Automação do Sheets"
 autor: "Treco Leco"
 orcid: "XXXX-XXXX-XXXX"
-draft: true
 date: "2026-08-28T00:03:33.139Z"
 ---
 
