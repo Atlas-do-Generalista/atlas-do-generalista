@@ -3,7 +3,6 @@ title: "Atendimento Primário ao Traumatizado (xABCDE do ATLS)"
 autores:
   - nome: "João Pedro Lelis Ferreira"
     orcid: "0009-0007-1619-3096"
-draft: true
 date: "2026-08-28T00:52:00.529Z"
 ---
 
