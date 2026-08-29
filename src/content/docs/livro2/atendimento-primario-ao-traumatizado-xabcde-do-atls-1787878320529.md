@@ -4,6 +4,7 @@ autores:
   - nome: "João Pedro Lelis Ferreira"
     orcid: "0009-0007-1619-3096"
 date: "2026-08-28T00:52:00.529Z"
+doi: "https://doi.org/10.5281/zenodo.22166802"
 ---
 
 # Avaliação e Manejo do Paciente Traumatizado
