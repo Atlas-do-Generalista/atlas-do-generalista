@@ -47,17 +47,12 @@ Ajude a avaliar a qualidade científica dos capítulos submetidos. Buscamos méd
 
 > Ao realizar uma revisão diretamente em um arquivo, adicione uma linha `[revisor: "Nome Completo (https://orcid.org/0000-0000-0000-0000)"]` logo abaixo do cabeçalho (frontmatter) do capítulo.
 
-### Painel editorial (para mantenedores)
-
-O projeto conta com um painel editorial em `/admin`, construído com **Decap CMS** + **Netlify Identity**, com fluxo de trabalho editorial (Rascunho → Em Revisão → Pronto → Publicado) e uma coleção dedicada para cada um dos 8 Livros.
-
 ---
 
 ## 🛠️ Stack técnica
 
 - **[Astro](https://astro.build)** + **[Starlight](https://starlight.astro.build)** — geração do site de documentação
 - **GitHub Pages** — hospedagem, com deploy automático via **GitHub Actions** a cada push em `main`
-- **Decap CMS** — painel editorial para autores/revisores, autenticado via Netlify Identity
 - Metadados de citação acadêmica (autores, ORCID, revisor, DOI) definidos em `src/content.config.ts` e renderizados por um componente customizado (`src/components/CustomTitle.astro`)
 
 ---
