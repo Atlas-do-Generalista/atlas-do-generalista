@@ -1,15 +1,16 @@
 /* =========================================
    Atlas do Generalista — Identidade Visual
+   Obsidian-inspired
    ========================================= */
 
 :root {
-  --sl-color-accent-low: #f1ebf7;
-  --sl-color-accent: #7048a8;
-  --sl-color-accent-high: #4b286f;
+  --sl-color-accent-low: #f0eef7;
+  --sl-color-accent: #7f6df2;
+  --sl-color-accent-high: #5b4bb7;
 }
 
 :root[data-theme='dark'] {
-  --sl-color-accent-low: #30223d;
-  --sl-color-accent: #a982d1;
-  --sl-color-accent-high: #e1cfee;
+  --sl-color-accent-low: #292641;
+  --sl-color-accent: #9b8cf2;
+  --sl-color-accent-high: #d5cdfb;
 }
