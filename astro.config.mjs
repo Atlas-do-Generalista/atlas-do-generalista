@@ -7,7 +7,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Atlas do Generalista: Manual Aberto de Medicina para o Generalista',
-      customCss: [],
+      customCss: ['./src/assets/custom.css'],
       components: {
         PageTitle: './src/components/CustomTitle.astro',
       },
