@@ -18,8 +18,20 @@ export default defineConfig({
             src: 'https://identity.netlify.com/v1/netlify-identity-widget.js',
           },
         },
-        { tag: 'meta', attrs: { name: 'citation_publisher', content: 'Atlas do Generalista: Manual Aberto de Medicina' } },
-        { tag: 'meta', attrs: { name: 'citation_language', content: 'pt-BR' } },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'citation_publisher',
+            content: 'Atlas do Generalista: Manual Aberto de Medicina',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'citation_language',
+            content: 'pt-BR',
+          },
+        },
       ],
       sidebar: [
         {
@@ -69,6 +81,10 @@ export default defineConfig({
           items: [
             { autogenerate: { directory: 'livro8' } },
           ],
+        },
+        {
+          label: '🧮 Motor de Decisão Clínica',
+          link: '/calculadora/',
         },
       ],
     }),

@@ -1,0 +1,1582 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Condição atual',
+    description:
+      'Coleta transversal de dados clínicos para alimentar automaticamente calculadoras e escores compatíveis.',
+    tableOfContents: false,
+  }}
+>
+  <main class="calculator-page">
+    <a class="back-link" href={`${base}/calculadora/`}>
+      ← Voltar ao Motor de Decisão Clínica
+    </a>
+
+    <header class="page-header">
+      <div class="eyebrow">MOTOR DE DECISÃO CLÍNICA</div>
+      <h1>Condição atual</h1>
+      <p>
+        Preencha os dados uma única vez. O motor reutiliza as mesmas informações
+        para todos os escores e fórmulas compatíveis, evitando formulários separados.
+      </p>
+    </header>
+
+    <form id="patient-form" class="clinical-form" autocomplete="off">
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">01</span>
+          <div>
+            <h2>Dados gerais</h2>
+            <p>Informações demográficas e situação clínica imediata.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-4">
+          <label class="field">
+            <span>Idade <small>(anos)</small></span>
+            <input name="idade" type="number" min="0" max="130" step="1" inputmode="numeric" placeholder="Ex.: 67" />
+          </label>
+
+          <label class="field">
+            <span>Sexo</span>
+            <select name="sexo">
+              <option value="">Não informado</option>
+              <option value="feminino">Feminino</option>
+              <option value="masculino">Masculino</option>
+              <option value="outro">Outro / não aplicável</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Altura <small>(cm)</small></span>
+            <input name="altura" type="number" min="30" max="250" step="1" inputmode="numeric" placeholder="Ex.: 170" />
+          </label>
+
+          <label class="field">
+            <span>Peso <small>(kg)</small></span>
+            <input name="peso" type="number" min="1" max="500" step="0.1" inputmode="decimal" placeholder="Ex.: 72" />
+          </label>
+
+          <label class="field">
+            <span>Oxigênio suplementar atual</span>
+            <select name="o2_suplementar">
+              <option value="">Não informado</option>
+              <option value="false">Não</option>
+              <option value="true">Sim</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Consciência (NEWS2)</span>
+            <select name="consciencia">
+              <option value="">Não informado</option>
+              <option value="alerta">Alerta</option>
+              <option value="confusao">Confusão / alteração aguda</option>
+              <option value="rebaixamento">Rebaixamento do nível de consciência</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">02</span>
+          <div>
+            <h2>Saúde crônica / tipo de admissão</h2>
+            <p>Usado principalmente na composição do APACHE II.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-3">
+          <label class="field field-wide">
+            <span>Insuficiência orgânica grave ou imunossupressão</span>
+            <select name="insuficiencia_organica_grave_imunossupressao">
+              <option value="">Não informado</option>
+              <option value="false">Não</option>
+              <option value="true">Sim</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Tipo de admissão</span>
+            <select name="tipo_admissao">
+              <option value="">Não informado</option>
+              <option value="clinica">Clínica / não operatório</option>
+              <option value="pos_operatorio_eletivo">Pós-operatório eletivo</option>
+              <option value="pos_operatorio_nao_eletivo">Pós-operatório não eletivo / urgência</option>
+            </select>
+          </label>
+        </div>
+
+        <p class="field-help">
+          No APACHE II, a combinação de doença crônica grave/imunossupressão e admissão
+          não eletiva recebe uma ponderação diferente da admissão eletiva.
+        </p>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">03</span>
+          <div>
+            <h2>Sinais vitais</h2>
+            <p>Valores da avaliação atual.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-3">
+          <label class="field">
+            <span>Frequência cardíaca <small>(bpm)</small></span>
+            <input name="fc" type="number" min="0" max="300" step="1" inputmode="numeric" placeholder="Ex.: 110" />
+          </label>
+
+          <label class="field">
+            <span>Frequência respiratória <small>(irpm)</small></span>
+            <input name="fr" type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="Ex.: 28" />
+          </label>
+
+          <label class="field">
+            <span>PAS <small>(mmHg)</small></span>
+            <input name="pas" type="number" min="0" max="300" step="1" inputmode="numeric" placeholder="Ex.: 95" />
+          </label>
+
+          <label class="field">
+            <span>PAD <small>(mmHg)</small></span>
+            <input name="pad" type="number" min="0" max="200" step="1" inputmode="numeric" placeholder="Ex.: 60" />
+          </label>
+
+          <label class="field">
+            <span>Temperatura <small>(°C)</small></span>
+            <input name="temperatura" type="number" min="25" max="45" step="0.1" inputmode="decimal" placeholder="Ex.: 38,2" />
+          </label>
+
+          <label class="field">
+            <span>Saturação O₂ <small>(SpO₂ %)</small></span>
+            <input name="spo2" type="number" min="50" max="100" step="1" inputmode="numeric" placeholder="Ex.: 91" />
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">04</span>
+          <div>
+            <h2>Neurológico</h2>
+            <p>O Glasgow é calculado automaticamente a partir dos três componentes.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-3">
+          <label class="field">
+            <span>Abertura ocular</span>
+            <select name="glasgow_ocular">
+              <option value="">Selecionar</option>
+              <option value="4">Espontânea — 4</option>
+              <option value="3">À voz — 3</option>
+              <option value="2">À pressão — 2</option>
+              <option value="1">Nenhuma — 1</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Resposta verbal</span>
+            <select name="glasgow_verbal">
+              <option value="">Selecionar</option>
+              <option value="5">Orientada — 5</option>
+              <option value="4">Confusa — 4</option>
+              <option value="3">Palavras inapropriadas — 3</option>
+              <option value="2">Sons incompreensíveis — 2</option>
+              <option value="1">Nenhuma — 1</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Resposta motora</span>
+            <select name="glasgow_motor">
+              <option value="">Selecionar</option>
+              <option value="6">Obedece comandos — 6</option>
+              <option value="5">Localiza pressão — 5</option>
+              <option value="4">Retira — 4</option>
+              <option value="3">Flexão anormal — 3</option>
+              <option value="2">Extensão — 2</option>
+              <option value="1">Nenhuma — 1</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field-grid field-grid-3 neuro-extra">
+          <label class="field">
+            <span>Avaliação do Glasgow limitada atualmente?</span>
+            <select name="glasgow_avaliacao_limitada">
+              <option value="">Não informado</option>
+              <option value="false">Não</option>
+              <option value="true">Sim — sedação / intubação / outra limitação</option>
+            </select>
+          </label>
+
+          <label class="field field-wide">
+            <span>GCS imediatamente antes da sedação/intubação <small>(se aplicável)</small></span>
+            <input name="glasgow_pre_sedacao" type="number" min="3" max="15" step="1" inputmode="numeric" placeholder="Ex.: 12" />
+          </label>
+
+        </div>
+
+        <div id="gcs-preview" class="computed-preview">
+          Glasgow: <strong>—</strong>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">05</span>
+          <div>
+            <h2>Laboratório</h2>
+            <p>Coleta ampla para gravidade, função renal, hematologia e função hepática.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-4">
+          <label class="field">
+            <span>Hemácias <small>(milhões/µL)</small></span>
+            <input name="hemacias" type="number" min="0" max="10" step="0.01" inputmode="decimal" placeholder="Ex.: 4,5" />
+          </label>
+
+          <label class="field">
+            <span>Hemoglobina <small>(g/dL)</small></span>
+            <input name="hemoglobina" type="number" min="0" max="30" step="0.1" inputmode="decimal" placeholder="Ex.: 13,2" />
+          </label>
+
+          <label class="field">
+            <span>Hematócrito <small>(%)</small></span>
+            <input name="hematocrito" type="number" min="0" max="80" step="0.1" inputmode="decimal" placeholder="Ex.: 40" />
+          </label>
+
+          <label class="field">
+            <span>Leucócitos <small>(×10³/µL)</small></span>
+            <input name="leucocitos" type="number" min="0" max="200" step="0.1" inputmode="decimal" placeholder="Ex.: 12" />
+          </label>
+
+          <label class="field">
+            <span>Plaquetas <small>(×10³/µL)</small></span>
+            <input name="plaquetas" type="number" min="0" max="2000" step="1" inputmode="numeric" placeholder="Ex.: 180" />
+          </label>
+
+          <label class="field">
+            <span>Ureia <small>(mg/dL)</small></span>
+            <input name="ureia" type="number" min="0" max="500" step="0.1" inputmode="decimal" placeholder="Ex.: 48" />
+          </label>
+
+          <label class="field">
+            <span>Creatinina <small>(mg/dL)</small></span>
+            <input name="creatinina" type="number" min="0" max="30" step="0.01" inputmode="decimal" placeholder="Ex.: 1,4" />
+          </label>
+
+          <label class="field">
+            <span>Glicemia <small>(mg/dL)</small></span>
+            <input name="glicemia" type="number" min="0" max="1500" step="1" inputmode="numeric" placeholder="Ex.: 130" />
+          </label>
+
+          <label class="field">
+            <span>Sódio <small>(mEq/L)</small></span>
+            <input name="sodio" type="number" min="80" max="220" step="1" inputmode="numeric" placeholder="Ex.: 138" />
+          </label>
+
+          <label class="field">
+            <span>Potássio <small>(mEq/L)</small></span>
+            <input name="potassio" type="number" min="1" max="10" step="0.1" inputmode="decimal" placeholder="Ex.: 4,2" />
+          </label>
+
+          <label class="field">
+            <span>Bilirrubina total <small>(mg/dL)</small></span>
+            <input name="bilirrubina" type="number" min="0" max="50" step="0.01" inputmode="decimal" placeholder="Ex.: 1,2" />
+          </label>
+
+          <label class="field">
+            <span>Albumina <small>(g/dL)</small></span>
+            <input name="albumina" type="number" min="0" max="8" step="0.1" inputmode="decimal" placeholder="Ex.: 3,2" />
+          </label>
+
+          <label class="field">
+            <span>INR</span>
+            <input name="inr" type="number" min="0" max="20" step="0.01" inputmode="decimal" placeholder="Ex.: 1,4" />
+          </label>
+
+          <label class="field">
+            <span>AST / TGO <small>(U/L)</small></span>
+            <input name="ast" type="number" min="0" max="10000" step="1" inputmode="numeric" placeholder="Ex.: 120" />
+          </label>
+
+          <label class="field">
+            <span>ALT / TGP <small>(U/L)</small></span>
+            <input name="alt" type="number" min="0" max="10000" step="1" inputmode="numeric" placeholder="Ex.: 95" />
+          </label>
+
+          <label class="field">
+            <span>Fosfatase alcalina <small>(U/L)</small></span>
+            <input name="fosfatase_alcalina" type="number" min="0" max="5000" step="1" inputmode="numeric" placeholder="Ex.: 180" />
+          </label>
+
+          <label class="field">
+            <span>GGT <small>(U/L)</small></span>
+            <input name="ggt" type="number" min="0" max="5000" step="1" inputmode="numeric" placeholder="Ex.: 140" />
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">06</span>
+          <div>
+            <h2>Gasometria</h2>
+            <p>Parâmetros comuns e variáveis utilizadas em APACHE II e SOFA-2.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-4">
+          <label class="field">
+            <span>pH</span>
+            <input name="ph" type="number" min="6" max="8" step="0.01" inputmode="decimal" placeholder="Ex.: 7,35" />
+          </label>
+
+          <label class="field">
+            <span>PaO₂ <small>(mmHg)</small></span>
+            <input name="pao2" type="number" min="20" max="700" step="1" inputmode="numeric" placeholder="Ex.: 80" />
+          </label>
+
+          <label class="field">
+            <span>PaCO₂ <small>(mmHg)</small></span>
+            <input name="paco2" type="number" min="10" max="150" step="1" inputmode="numeric" placeholder="Ex.: 40" />
+          </label>
+
+          <label class="field">
+            <span>HCO₃⁻ <small>(mEq/L)</small></span>
+            <input name="hco3" type="number" min="0" max="60" step="0.1" inputmode="decimal" placeholder="Ex.: 22" />
+          </label>
+
+          <label class="field">
+            <span>Excesso de base <small>(mEq/L)</small></span>
+            <input name="excesso_base" type="number" min="-40" max="40" step="0.1" inputmode="decimal" placeholder="Ex.: -3" />
+          </label>
+
+          <label class="field">
+            <span>Lactato <small>(mmol/L)</small></span>
+            <input name="lactato" type="number" min="0" max="30" step="0.1" inputmode="decimal" placeholder="Ex.: 3,2" />
+          </label>
+
+          <label class="field">
+            <span>SaO₂ da gasometria <small>(%)</small></span>
+            <input name="saturacao_gasometria" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="Ex.: 95" />
+          </label>
+
+          <label class="field">
+            <span>FiO₂ <small>(%)</small></span>
+            <input name="fio2_percent" type="number" min="21" max="100" step="1" inputmode="numeric" placeholder="Ex.: 40" />
+          </label>
+
+          <label class="field field-wide">
+            <span>Gradiente A–aDO₂ <small>(mmHg; necessário ao APACHE II quando FiO₂ ≥50%)</small></span>
+            <input name="aado2" type="number" min="0" max="800" step="1" inputmode="numeric" placeholder="Ex.: 180" />
+          </label>
+        </div>
+
+        <p class="field-help">
+          Se não houver O₂ suplementar, o sistema usa FiO₂ de 21% como valor de ar ambiente.
+          Quando houver O₂ suplementar, informe a FiO₂ correspondente à avaliação.
+        </p>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">07</span>
+          <div>
+            <h2>Drogas vasoativas</h2>
+            <p>Informe apenas as infusões que estão sendo utilizadas.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-3">
+          <label class="field">
+            <span>Uso de drogas vasoativas / inotrópicos</span>
+            <select name="vasoativos_em_uso" id="vasoativos-em-uso">
+              <option value="">Não informado</option>
+              <option value="false">Não</option>
+              <option value="true">Sim</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Infusão contínua há ≥1 hora?</span>
+            <select name="vasoativos_continuos_1h">
+              <option value="">Não informado</option>
+              <option value="false">Não</option>
+              <option value="true">Sim</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="vasoactive-extra" class="conditional-panel" hidden>
+          <div class="conditional-title">Doses atuais</div>
+
+          <div class="field-grid field-grid-4">
+            <label class="field">
+              <span>Noradrenalina <small>(µg/kg/min)</small></span>
+              <input name="norepinefrina" type="number" min="0" max="5" step="0.01" inputmode="decimal" placeholder="Ex.: 0,10" />
+            </label>
+
+            <label class="field">
+              <span>Adrenalina <small>(µg/kg/min)</small></span>
+              <input name="epinefrina" type="number" min="0" max="5" step="0.01" inputmode="decimal" placeholder="Ex.: 0" />
+            </label>
+
+            <label class="field">
+              <span>Dopamina <small>(µg/kg/min)</small></span>
+              <input name="dopamina" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="Ex.: 5" />
+            </label>
+
+            <label class="field">
+              <span>Vasopressina <small>(µg/kg/min)</small></span>
+              <input name="vasopressina" type="number" min="0" max="1" step="0.001" inputmode="decimal" placeholder="Ex.: 0,0007" />
+            </label>
+
+            <label class="field">
+              <span>Dobutamina <small>(µg/kg/min)</small></span>
+              <input name="dobutamina" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="Ex.: 5" />
+            </label>
+
+            <label class="field">
+              <span>Milrinona <small>(µg/kg/min)</small></span>
+              <input name="milrinona" type="number" min="0" max="1" step="0.01" inputmode="decimal" placeholder="Ex.: 0,2" />
+            </label>
+
+            <label class="field">
+              <span>Nitroprussiato <small>(µg/kg/min)</small></span>
+              <input name="nitroprussiato" type="number" min="0" max="20" step="0.1" inputmode="decimal" placeholder="Ex.: 0,5" />
+            </label>
+
+            <label class="field">
+              <span>Nitroglicerina <small>(µg/kg/min)</small></span>
+              <input name="nitroglicerina" type="number" min="0" max="20" step="0.1" inputmode="decimal" placeholder="Ex.: 0,5" />
+            </label>
+          </div>
+
+          <p class="field-help">
+            Para o SOFA-2, “outro vasoativo/inotrópico” considera vasopressina,
+            dobutamina e milrinona; a dopamina possui cortes próprios quando usada
+            como único vasopressor. Nitroprussiato e nitroglicerina são registrados,
+            mas não são tratados automaticamente como vasopressor/inotrópico pelo SOFA-2.
+          </p>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">08</span>
+          <div>
+            <h2>Outros dados</h2>
+            <p>Variáveis clínicas adicionais organizadas por sistema.</p>
+          </div>
+        </div>
+
+        <div class="systems-grid">
+          <div class="system-block">
+            <h3>Neuropsiquiátrico</h3>
+
+            <label class="field">
+              <span>Tratamento farmacológico do delirium</span>
+              <select name="delirium_tratamento">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="system-block">
+            <h3>Respiratório</h3>
+            <label class="field">
+              <span>Suporte ventilatório atual</span>
+              <select name="suporte_ventilatorio_tipo">
+                <option value="">Não informado</option>
+                <option value="nenhum">Nenhum</option>
+                <option value="alto_fluxo">Cateter nasal de alto fluxo</option>
+                <option value="cpap">CPAP</option>
+                <option value="bipap_niv">BiPAP / NIV</option>
+                <option value="ventilacao_mecanica_invasiva">Ventilação mecânica invasiva</option>
+                <option value="ventilacao_domestica">Ventilação domiciliar prolongada</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>ECMO para indicação respiratória?</span>
+              <select name="ecmo_respiratorio">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Suporte ventilatório indisponível ou limitado por teto terapêutico?</span>
+              <select name="suporte_ventilatorio_indisponivel_limite">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="system-block">
+            <h3>Cardiovascular</h3>
+            <label class="field">
+              <span>Vasoativos indisponíveis ou não utilizados por teto terapêutico?</span>
+              <select name="sofa2_vasoativos_indisponiveis_limite">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Suporte mecânico cardiovascular</span>
+              <select name="suporte_mecanico_cardiovascular">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>ECMO com indicação cardiovascular?</span>
+              <select name="ecmo_cardiovascular">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="system-block">
+            <h3>Renal</h3>
+            <label class="field">
+              <span>Diurese no período <small>(mL)</small></span>
+              <input name="diurese_ml" type="number" min="0" max="50000" step="1" inputmode="numeric" placeholder="Ex.: 420" />
+            </label>
+
+            <label class="field">
+              <span>Período da diurese <small>(horas)</small></span>
+              <input name="diurese_horas" type="number" min="1" max="48" step="1" inputmode="numeric" placeholder="Ex.: 12" />
+            </label>
+
+            <label class="field">
+              <span>IRA vigente</span>
+              <select name="ira_atual">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Terapia renal substitutiva</span>
+              <select name="terapia_renal_substitutiva">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Critérios para TRS presentes, mas TRS não realizada?</span>
+              <select name="indicacao_trs_sem_trs">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Diálise ≥2× na última semana ou CRRT ≥24h?</span>
+              <select name="meld_dialise_semana">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="system-block">
+            <h3>Hepático</h3>
+            <label class="field">
+              <span>Doença hepática crônica</span>
+              <select name="doenca_hepatica_cronica">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Cirrose conhecida</span>
+              <select name="cirrose">
+                <option value="">Não informado</option>
+                <option value="false">Não</option>
+                <option value="true">Sim</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Ascite</span>
+              <select name="ascite">
+                <option value="">Não informado</option>
+                <option value="nenhuma">Nenhuma</option>
+                <option value="leve_moderada_responsiva">Leve/moderada, responsiva a diurético</option>
+                <option value="grave_refrataria">Grave / refratária</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Encefalopatia hepática</span>
+              <select name="encefalopatia_hepatica">
+                <option value="">Não informado</option>
+                <option value="nenhuma">Nenhuma</option>
+                <option value="grau_1_2">Grau 1–2</option>
+                <option value="grau_3_4">Grau 3–4</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="results-section" aria-live="polite">
+        <div class="results-header">
+          <div>
+            <div class="eyebrow">RESULTADOS</div>
+            <h2>Calculadoras disponíveis</h2>
+          </div>
+          <span id="result-count" class="result-count">Aguardando dados</span>
+        </div>
+
+        <div id="assessment-summary" class="assessment-summary" hidden aria-live="polite"></div>
+
+        <div id="results" class="results-list">
+          <div class="empty-state">
+            <strong>Comece preenchendo os dados do paciente.</strong>
+            <span>
+              Conforme os dados forem informados, as calculadoras compatíveis aparecerão aqui.
+            </span>
+          </div>
+        </div>
+      </section>
+    </form>
+
+    <aside class="disclaimer">
+      <strong>Apoio à decisão clínica.</strong>
+      <span>
+        Os escores são calculados a partir dos dados informados e das versões descritas
+        em cada módulo. Eles não substituem julgamento clínico, protocolo institucional
+        ou referência primária atualizada.
+      </span>
+    </aside>
+  </main>
+</StarlightPage>
+
+<script>
+  import type { ContextoPaciente, ValorClinico } from '../../lib/calc-engine/types';
+
+  type Campo = HTMLInputElement | HTMLSelectElement;
+
+  let inicializado = false;
+
+  function parseBoolean(value: string): boolean | null {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return null;
+  }
+
+  function parseField(field: Campo): ValorClinico {
+    const value = field.value.trim();
+    if (value === '') return null;
+
+    if (field instanceof HTMLInputElement && field.type === 'number') {
+      const n = Number(value.replace(',', '.'));
+      return Number.isFinite(n) ? n : null;
+    }
+
+    const boolean = parseBoolean(value);
+    if (boolean !== null) return boolean;
+
+    return value;
+  }
+
+  function collectData(form: HTMLFormElement): ContextoPaciente {
+    const data: ContextoPaciente = {};
+
+    form.querySelectorAll<Campo>('input, select').forEach((field) => {
+      const value = parseField(field);
+      if (value !== null) data[field.name] = value;
+    });
+
+    // Os componentes do Glasgow vêm de <select>, portanto chegam
+    // como strings. Convertê-los aqui permite derivar automaticamente
+    // o GCS e reutilizá-lo no APACHE II e no SOFA-2.
+    for (const campo of [
+      'glasgow_ocular',
+      'glasgow_verbal',
+      'glasgow_motor',
+    ] as const) {
+      const valor = data[campo];
+
+      if (typeof valor === 'string' && valor.trim() !== '') {
+        const numero = Number(valor);
+
+        if (Number.isFinite(numero)) {
+          data[campo] = numero;
+        }
+      }
+    }
+
+    const tipoSuporte = data.suporte_ventilatorio_tipo;
+    if (typeof tipoSuporte === 'string' && tipoSuporte !== '' && tipoSuporte !== 'nenhum') {
+      data.suporte_ventilatorio_avancado = true;
+    } else if (tipoSuporte === 'nenhum') {
+      data.suporte_ventilatorio_avancado = false;
+    }
+
+    const o2 = data.o2_suplementar;
+    const fio2Percent = data.fio2_percent;
+    if (typeof fio2Percent === 'number') {
+      data.fio2 = fio2Percent / 100;
+    } else if (o2 === false) {
+      data.fio2 = 0.21;
+    }
+
+    const ocular = data.glasgow_ocular;
+    const verbal = data.glasgow_verbal;
+    const motor = data.glasgow_motor;
+    const gcsPre = data.glasgow_pre_sedacao;
+    const gcsLimitado = data.glasgow_avaliacao_limitada;
+
+    if (gcsLimitado === true && typeof gcsPre === 'number') {
+      data.gcs = gcsPre;
+    } else if (
+      typeof ocular === 'number' &&
+      typeof verbal === 'number' &&
+      typeof motor === 'number'
+    ) {
+      data.gcs = ocular + verbal + motor;
+    }
+
+    const vasoativoOn = data.vasoativos_em_uso;
+    const continuous = data.vasoativos_continuos_1h;
+
+    if (vasoativoOn !== true || continuous === false) {
+      data.norepinefrina = 0;
+      data.epinefrina = 0;
+      data.dopamina = 0;
+      data.vasopressina = 0;
+      data.dobutamina = 0;
+      data.milrinona = 0;
+      data.nitroprussiato = 0;
+      data.nitroglicerina = 0;
+    }
+
+    const otherSOFA =
+      Number(data.vasopressina ?? 0) > 0 ||
+      Number(data.dobutamina ?? 0) > 0 ||
+      Number(data.milrinona ?? 0) > 0;
+
+    data.sofa2_outro_vasoativo = otherSOFA;
+    data.sofa2_delirium_tratamento = data.delirium_tratamento;
+    data.sofa2_norepinefrina = data.norepinefrina;
+    data.sofa2_epinefrina = data.epinefrina;
+    data.sofa2_suporte_ventilatorio = data.suporte_ventilatorio_avancado;
+    data.sofa2_ecmo = data.ecmo_respiratorio;
+    data.sofa2_suporte_mecanico_cardiovascular = data.suporte_mecanico_cardiovascular;
+    data.sofa2_diurese_ml_hora =
+      typeof data.diurese_ml === 'number' && typeof data.diurese_horas === 'number' && data.diurese_horas > 0
+        ? data.diurese_ml / data.diurese_horas
+        : undefined;
+    data.sofa2_diurese_horas = data.diurese_horas;
+    data.sofa2_trs = data.terapia_renal_substitutiva;
+
+    return data;
+  }
+
+  function escapeHtml(value: unknown): string {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function formatNumber(value: unknown, digits = 1): string {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return String(value ?? '');
+    return new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(value);
+  }
+
+  function summaryToken(id: string, resultado: { valor: number; resumo?: string }): string {
+    const value = formatNumber(resultado.valor, ['news2', 'apache-ii', 'sofa-2', 'child-pugh', 'meld-3'].includes(id) ? 0 : 1);
+
+    switch (id) {
+      case 'pam': return `PAM ${value}`;
+      case 'shock-index': return `IC ${formatNumber(resultado.valor, 2)}`;
+      case 'news2': return `NEWS2 ${value}`;
+      case 'ckd-epi-2021': return `TFGe-EPI ${value}`;
+      case 'cockcroft-gault': return `ClCr-CG ${value}`;
+      case 'apache-ii': return `APACHE II ${value}`;
+      case 'sofa-2': return `SOFA-2 ${value}`;
+      case 'child-pugh': return resultado.resumo?.replace('.', ',') ?? `CTP ${value}`;
+      case 'meld-3': return `MELD 3.0 ${value}`;
+      case 'albi': return resultado.resumo?.replace('.', ',') ?? `ALBI ${value}`;
+      default:
+        return resultado.resumo ?? `${id} ${value}`;
+    }
+  }
+
+  function formatClinicalValue(value: unknown): string {
+    if (value === true) return 'Sim';
+    if (value === false) return 'Não';
+    if (typeof value === 'number') return formatNumber(value, Number.isInteger(value) ? 0 : 2);
+    if (value === null || value === undefined || value === '') return '—';
+    return String(value);
+  }
+
+  function toggleVasoactivePanel(form: HTMLFormElement): void {
+    const select = form.querySelector<HTMLSelectElement>('#vasoativos-em-uso');
+    const panel = form.querySelector<HTMLElement>('#vasoactive-extra');
+    if (!select || !panel) return;
+
+    panel.hidden = select.value !== 'true';
+  }
+
+  function updateGcsPreview(form: HTMLFormElement): void {
+    const preview = form.querySelector<HTMLElement>('#gcs-preview');
+    if (!preview) return;
+
+    const ocular = Number(form.querySelector<HTMLSelectElement>('select[name="glasgow_ocular"]')?.value);
+    const verbal = Number(form.querySelector<HTMLSelectElement>('select[name="glasgow_verbal"]')?.value);
+    const motor = Number(form.querySelector<HTMLSelectElement>('select[name="glasgow_motor"]')?.value);
+    const limitado = form.querySelector<HTMLSelectElement>('select[name="glasgow_avaliacao_limitada"]')?.value === 'true';
+    const pre = Number(form.querySelector<HTMLInputElement>('input[name="glasgow_pre_sedacao"]')?.value);
+
+    if (limitado && Number.isFinite(pre) && pre >= 3 && pre <= 15) {
+      preview.innerHTML = `Glasgow: <strong>${pre}</strong> (pré-sedação/intubação)`;
+      return;
+    }
+
+    if ([ocular, verbal, motor].every((v) => Number.isFinite(v))) {
+      preview.innerHTML = `Glasgow: <strong>${ocular + verbal + motor}</strong>`;
+      return;
+    }
+
+    preview.innerHTML = 'Glasgow: <strong>—</strong>';
+  }
+
+  async function render(
+    form: HTMLFormElement,
+    results: HTMLElement,
+    resultCount: HTMLElement,
+    assessmentSummary: HTMLElement,
+  ): Promise<void> {
+    const data = collectData(form);
+    const hasAny = Object.keys(data).length > 0;
+
+    updateGcsPreview(form);
+
+    if (!hasAny) {
+      resultCount.textContent = 'Aguardando dados';
+      assessmentSummary.hidden = true;
+      assessmentSummary.textContent = '';
+      results.innerHTML = `
+        <div class="empty-state">
+          <strong>Comece preenchendo os dados do paciente.</strong>
+          <span>Conforme os dados forem informados, as calculadoras compatíveis aparecerão aqui.</span>
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      const [{ registry }, { calcularDisponiveis }] = await Promise.all([
+        import('../../lib/calc-engine/registry'),
+        import('../../lib/calc-engine/engine'),
+      ]);
+
+      const available = calcularDisponiveis(data, registry);
+      const complete = available.filter((item) => item.status === 'ok');
+      const incomplete = available.filter((item) => item.status === 'incompleto');
+      const errors = available.filter((item) => item.status === 'erro');
+
+      resultCount.textContent =
+        `${complete.length} ${complete.length === 1 ? 'calculadora disponível' : 'calculadoras disponíveis'}`;
+
+      const summaryTokens = complete
+        .map((item) => item.status === 'ok' ? summaryToken(item.calc.id, item.resultado) : '')
+        .filter(Boolean);
+
+      if (summaryTokens.length > 0) {
+        assessmentSummary.hidden = false;
+        assessmentSummary.innerHTML = `Avaliação: ${summaryTokens.map((token) => escapeHtml(token)).join(' | ')}.`;
+      } else {
+        assessmentSummary.hidden = true;
+        assessmentSummary.textContent = '';
+      }
+
+      results.innerHTML = '';
+
+      if (complete.length > 0) {
+        const heading = document.createElement('div');
+        heading.className = 'subheading';
+        heading.textContent = 'Prontas para calcular';
+        results.appendChild(heading);
+
+        complete.forEach(({ calc, resultado }) => {
+          const card = document.createElement('article');
+          card.className = 'result-card';
+
+          const interpretacao =
+            typeof calc.interpretar === 'function'
+              ? (() => { try { return calc.interpretar(resultado); } catch { return ''; } })()
+              : '';
+
+          const detalhes = resultado.detalhamento ?? [];
+          const avisos = resultado.avisos ?? [];
+
+          const detalhesHtml = detalhes.length > 0
+            ? `
+              <details class="breakdown-details">
+                <summary>Ver detalhamento do cálculo</summary>
+                <div class="breakdown">
+                  ${detalhes.map((item) => `
+                    <div class="breakdown-row">
+                      <div class="breakdown-label">
+                        ${escapeHtml(item.descricao || item.campo)}
+                      </div>
+                      <div class="breakdown-data">
+                        <span class="breakdown-value">
+                          ${escapeHtml(formatClinicalValue(item.valor))}
+                        </span>
+                        ${typeof item.pontos === 'number'
+                          ? `<span class="breakdown-points">${item.pontos} pt${item.pontos === 1 ? '' : 's'}</span>`
+                          : ''}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </details>
+            `
+            : '';
+
+          const avisosHtml = avisos.length > 0
+            ? `
+              <div class="result-warnings">
+                <strong>Observações</strong>
+                <ul>${avisos.map((a) => `<li>${escapeHtml(a)}</li>`).join('')}</ul>
+              </div>
+            `
+            : '';
+
+          card.innerHTML = `
+            <div class="result-main">
+              <div>
+                <span class="result-category">${escapeHtml(calc.categoria)}</span>
+                <h3>${escapeHtml(calc.nome)}</h3>
+              </div>
+              <div class="result-value">
+                ${escapeHtml(formatClinicalValue(resultado.valor))}
+                ${resultado.unidade ? `<span class="result-unit">${escapeHtml(resultado.unidade)}</span>` : ''}
+              </div>
+            </div>
+            ${interpretacao ? `<p class="result-interpretation">${escapeHtml(interpretacao)}</p>` : ''}
+            ${detalhesHtml}
+            ${avisosHtml}
+          `;
+
+          results.appendChild(card);
+        });
+      } else {
+        results.innerHTML = `
+          <div class="empty-state">
+            <strong>Nenhuma calculadora está completa com os dados atuais.</strong>
+            <span>Preencha outros campos para habilitar mais cálculos.</span>
+          </div>
+        `;
+      }
+
+      if (incomplete.length > 0) {
+        const details = document.createElement('details');
+        details.className = 'incomplete-details';
+
+        const summary = document.createElement('summary');
+        summary.textContent =
+          `${incomplete.length} calculadora${incomplete.length === 1 ? '' : 's'} aguardando dados adicionais`;
+        details.appendChild(summary);
+
+        const list = document.createElement('div');
+        list.className = 'incomplete-list';
+
+        incomplete.forEach(({ calc, faltando }) => {
+          const item = document.createElement('div');
+          item.className = 'incomplete-item';
+          item.innerHTML = `
+            <strong>${escapeHtml(calc.nome)}</strong>
+            <span>Faltam: ${escapeHtml(faltando.join(', '))}</span>
+          `;
+          list.appendChild(item);
+        });
+
+        details.appendChild(list);
+        results.appendChild(details);
+      }
+
+      if (errors.length > 0) {
+        const details = document.createElement('details');
+        details.className = 'incomplete-details';
+
+        const summary = document.createElement('summary');
+        summary.textContent =
+          `${errors.length} calculadora${errors.length === 1 ? '' : 's'} com erro`;
+        details.appendChild(summary);
+
+        const list = document.createElement('div');
+        list.className = 'incomplete-list';
+
+        errors.forEach(({ calc, erro }) => {
+          const item = document.createElement('div');
+          item.className = 'incomplete-item';
+          item.innerHTML = `
+            <strong>${escapeHtml(calc.nome)}</strong>
+            <span>${escapeHtml(erro)}</span>
+          `;
+          list.appendChild(item);
+        });
+
+        details.appendChild(list);
+        results.appendChild(details);
+      }
+    } catch (error) {
+      console.error('[Atlas] Erro ao carregar/executar o motor:', error);
+      resultCount.textContent = 'Erro';
+      assessmentSummary.hidden = true;
+      assessmentSummary.textContent = '';
+      results.innerHTML = `
+        <div class="error-state">
+          <strong>O motor de decisão não pôde ser carregado.</strong>
+          <span>Abra o console do navegador para identificar o erro.</span>
+        </div>
+      `;
+    }
+  }
+
+  function iniciar(): void {
+    if (inicializado) return;
+
+    const form = document.querySelector<HTMLFormElement>('#patient-form');
+    const results = document.querySelector<HTMLElement>('#results');
+    const resultCount = document.querySelector<HTMLElement>('#result-count');
+    const assessmentSummary = document.querySelector<HTMLElement>('#assessment-summary');
+
+    if (!form || !results || !resultCount || !assessmentSummary) return;
+
+    inicializado = true;
+
+    form.addEventListener('input', () => {
+      updateGcsPreview(form);
+      void render(form, results, resultCount, assessmentSummary);
+    });
+
+    form.addEventListener('change', () => {
+      toggleVasoactivePanel(form);
+      updateGcsPreview(form);
+      void render(form, results, resultCount, assessmentSummary);
+    });
+
+    toggleVasoactivePanel(form);
+    updateGcsPreview(form);
+    void render(form, results, resultCount, assessmentSummary);
+  }
+
+  document.addEventListener('astro:page-load', iniciar);
+
+  if (document.readyState !== 'loading') {
+    queueMicrotask(iniciar);
+  } else {
+    document.addEventListener('DOMContentLoaded', iniciar, { once: true });
+  }
+</script>
+
+<style>
+  .calculator-page {
+    width: 100%;
+    padding: 8px 0 28px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    margin-bottom: 28px;
+    color: var(--sl-color-gray-2);
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    color: var(--sl-color-white);
+  }
+
+  .page-header {
+    max-width: 850px;
+    margin-bottom: 38px;
+  }
+
+  .eyebrow {
+    margin-bottom: 9px;
+    color: var(--sl-color-accent-high);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .page-header h1 {
+    margin: 0;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .page-header p {
+    max-width: 780px;
+    margin: 16px 0 0;
+    color: var(--sl-color-gray-2);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .clinical-form {
+    display: grid;
+    gap: 18px;
+  }
+
+  .form-section,
+  .results-section {
+    padding: 24px;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 18px;
+    background: var(--sl-color-bg-nav);
+  }
+
+  .section-title,
+  .results-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .section-title {
+    display: grid;
+    grid-template-columns: auto 1fr;
+  }
+
+  .section-number {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-accent-high);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+
+  .section-title h2,
+  .results-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+  }
+
+  .section-title p {
+    margin: 5px 0 0;
+    color: var(--sl-color-gray-3);
+    font-size: 0.9rem;
+  }
+
+  .field-grid {
+    display: grid;
+    gap: 15px;
+  }
+
+  .field-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .field-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .field {
+    display: grid;
+    gap: 7px;
+  }
+
+  .field-wide {
+    grid-column: span 2;
+  }
+
+  .field span {
+    font-size: 0.86rem;
+    font-weight: 650;
+  }
+
+  .field small {
+    color: var(--sl-color-gray-3);
+    font-weight: 500;
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    min-height: 46px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 10px;
+    background: var(--sl-color-bg);
+    color: var(--sl-color-white);
+    font: inherit;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--sl-color-accent);
+    outline: 0;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sl-color-accent) 18%, transparent);
+  }
+
+  .field-help {
+    margin: 14px 0 0;
+    color: var(--sl-color-gray-3);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .computed-preview {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-2);
+    font-size: 0.9rem;
+  }
+
+  .conditional-panel {
+    margin-top: 16px;
+    padding: 18px;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 14px;
+    background: var(--sl-color-bg);
+  }
+
+  .conditional-title {
+    margin-bottom: 15px;
+    color: var(--sl-color-gray-2);
+    font-size: 0.85rem;
+    font-weight: 750;
+  }
+
+  .systems-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+  }
+
+  .system-block {
+    display: grid;
+    gap: 13px;
+    padding: 17px;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 14px;
+    background: var(--sl-color-bg);
+  }
+
+  .system-block h3 {
+    margin: 0;
+    font-size: 0.98rem;
+  }
+
+  .results-section {
+    margin-top: 2px;
+  }
+
+  .results-header {
+    align-items: end;
+  }
+
+  .result-count {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-2);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .assessment-summary {
+    margin-bottom: 16px;
+    padding: 13px 16px;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 12px;
+    background: var(--sl-color-bg);
+    color: var(--sl-color-gray-1);
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  .results-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .subheading {
+    margin-top: 4px;
+    color: var(--sl-color-gray-3);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .result-card {
+    padding: 17px 18px;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 14px;
+    background: var(--sl-color-bg);
+  }
+
+  .result-main {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .result-category {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--sl-color-accent-high);
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .result-card h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .result-value {
+    flex: 0 0 auto;
+    font-size: 1.55rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .result-unit {
+    margin-left: 4px;
+    color: var(--sl-color-gray-3);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .result-interpretation {
+    margin: 12px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--sl-color-gray-6);
+    color: var(--sl-color-gray-2);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .breakdown-details {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--sl-color-gray-6);
+  }
+
+  .breakdown-details summary,
+  .incomplete-details summary {
+    cursor: pointer;
+    color: var(--sl-color-gray-2);
+    font-size: 0.86rem;
+    font-weight: 650;
+  }
+
+  .breakdown {
+    display: grid;
+    gap: 7px;
+    margin-top: 12px;
+  }
+
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 11px;
+    border-radius: 9px;
+    background: var(--sl-color-gray-6);
+    font-size: 0.82rem;
+  }
+
+  .breakdown-label {
+    color: var(--sl-color-gray-2);
+  }
+
+  .breakdown-data {
+    display: flex;
+    gap: 12px;
+    flex: 0 0 auto;
+  }
+
+  .breakdown-value {
+    color: var(--sl-color-gray-1);
+  }
+
+  .breakdown-points {
+    color: var(--sl-color-gray-3);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  .result-warnings {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-2);
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .result-warnings ul {
+    margin: 7px 0 0;
+    padding-left: 18px;
+  }
+
+  .empty-state,
+  .error-state {
+    display: grid;
+    gap: 5px;
+    padding: 18px;
+    border: 1px dashed var(--sl-color-gray-5);
+    border-radius: 14px;
+    color: var(--sl-color-gray-2);
+  }
+
+  .empty-state span,
+  .error-state span {
+    color: var(--sl-color-gray-3);
+    font-size: 0.88rem;
+  }
+
+  .incomplete-details {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--sl-color-gray-6);
+  }
+
+  .incomplete-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .incomplete-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--sl-color-gray-6);
+    font-size: 0.83rem;
+  }
+
+  .incomplete-item span {
+    color: var(--sl-color-gray-3);
+    text-align: right;
+  }
+
+  .disclaimer {
+    display: grid;
+    gap: 4px;
+    margin-top: 18px;
+    padding: 15px 17px;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 14px;
+    color: var(--sl-color-gray-2);
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 950px) {
+    .field-grid-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .systems-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .form-section,
+    .results-section {
+      padding: 18px;
+    }
+
+    .field-grid-3,
+    .field-grid-4 {
+      grid-template-columns: 1fr;
+    }
+
+    .field-wide {
+      grid-column: auto;
+    }
+
+    .results-header,
+    .result-main,
+    .breakdown-row,
+    .incomplete-item {
+      align-items: start;
+      flex-direction: column;
+    }
+
+    .result-count {
+      align-self: flex-start;
+    }
+
+    .breakdown-data {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .incomplete-item span {
+      text-align: left;
+    }
+  }
+</style>
