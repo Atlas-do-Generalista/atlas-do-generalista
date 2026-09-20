@@ -1117,7 +1117,9 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 <style>
   .calculator-page {
     width: 100%;
+    max-width: 100%;
     padding: 8px 0 28px;
+    overflow-x: hidden;
   }
 
   .back-link {
@@ -1162,11 +1164,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   .clinical-form {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
+    min-width: 0;
   }
 
   .form-section,
   .results-section {
+    min-width: 0;
     padding: 24px;
     border: 1px solid var(--sl-color-gray-5);
     border-radius: 18px;
@@ -1334,6 +1339,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   }
 
   .assessment-summary {
+    max-width: 100%;
     margin-bottom: 16px;
     padding: 13px 16px;
     border: 1px solid var(--sl-color-gray-5);
@@ -1345,6 +1351,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     line-height: 1.5;
     white-space: nowrap;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .results-list {
