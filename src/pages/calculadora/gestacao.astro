@@ -1,1 +1,693 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<StarlightPage
+  frontmatter={{
+    title: 'Gestação — pré-natal de rotina',
+    description:
+      'Datação, antropometria, pressão arterial, alerta obstétrico, cronograma do pré-natal, suplementação e vacinação.',
+    tableOfContents: false,
+  }}
+>
+  <main class="pregnancy-page">
+    <a class="back-link" href={`${base}/calculadora/`}>
+      ← Voltar ao Motor de Decisão Clínica
+    </a>
+
+    <header class="page-header">
+      <div class="eyebrow">MOTOR DE DECISÃO CLÍNICA · GESTAÇÃO</div>
+      <h1>Pré-natal de rotina</h1>
+      <p>
+        Datação da gestação, acompanhamento antropométrico, pressão arterial,
+        alerta precoce de deterioração, cronograma de cuidados, suplementação e vacinação.
+      </p>
+      <div class="intro-note">
+        <strong>Escopo:</strong> esta página é voltada ao pré-natal de rotina. Doenças e
+        situações obstétricas específicas devem ser avaliadas no módulo de <em>Quadro específico</em>.
+      </div>
+    </header>
+
+    <form id="pregnancy-form" class="pregnancy-form" autocomplete="off">
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">01</span>
+          <div>
+            <h2>Datação</h2>
+            <p>Calcule a idade gestacional pela DUM e, quando disponível, pela ultrassonografia.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-3">
+          <label class="field">
+            <span>DUM</span>
+            <input name="dum" type="date" />
+          </label>
+          <label class="field">
+            <span>DUM confiável?</span>
+            <select name="dum_confiavel">
+              <option value="">Não informado</option>
+              <option value="true">Sim</option>
+              <option value="false">Não / desconhecida</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Data da USG usada para datação</span>
+            <input name="usg_data" type="date" />
+          </label>
+          <label class="field">
+            <span>IG na USG — semanas</span>
+            <input name="usg_ig_sem" type="number" min="0" max="42" step="1" inputmode="numeric" placeholder="Ex.: 9" />
+          </label>
+          <label class="field">
+            <span>IG na USG — dias</span>
+            <input name="usg_ig_dias" type="number" min="0" max="6" step="1" inputmode="numeric" placeholder="Ex.: 2" />
+          </label>
+          <label class="field">
+            <span>IG adotada</span>
+            <select name="ig_preferencia">
+              <option value="auto">Sugestão automática</option>
+              <option value="dum">Usar DUM</option>
+              <option value="usg">Usar USG</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="dating-result" class="result-panel muted-panel" aria-live="polite">
+          Informe DUM e/ou USG para calcular a idade gestacional.
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">02</span>
+          <div>
+            <h2>Antropometria</h2>
+            <p>IMC pré-gestacional, IMC atual e classificação por semana gestacional.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-4">
+          <label class="field">
+            <span>Altura <small>(cm)</small></span>
+            <input name="altura" type="number" min="100" max="220" step="0.1" inputmode="decimal" placeholder="Ex.: 165" />
+          </label>
+          <label class="field">
+            <span>Peso pré-gestacional <small>(kg)</small></span>
+            <input name="peso_pre" type="number" min="20" max="300" step="0.1" inputmode="decimal" placeholder="Ex.: 62" />
+          </label>
+          <label class="field">
+            <span>Peso atual <small>(kg)</small></span>
+            <input name="peso_atual" type="number" min="20" max="300" step="0.1" inputmode="decimal" placeholder="Ex.: 68" />
+          </label>
+          <label class="field">
+            <span>Altura uterina <small>(cm, opcional)</small></span>
+            <input name="altura_uterina" type="number" min="10" max="50" step="0.5" inputmode="decimal" placeholder="Ex.: 24" />
+          </label>
+        </div>
+
+        <div id="anthro-result" class="result-panel muted-panel" aria-live="polite">
+          Informe altura e peso para calcular o IMC.
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">03</span>
+          <div>
+            <h2>Pressão arterial</h2>
+            <p>Rastreio de hipertensão e crise hipertensiva na gestação.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-3">
+          <label class="field">
+            <span>PAS <small>(mmHg)</small></span>
+            <input name="pas" type="number" min="50" max="280" step="1" inputmode="numeric" placeholder="Ex.: 120" />
+          </label>
+          <label class="field">
+            <span>PAD <small>(mmHg)</small></span>
+            <input name="pad" type="number" min="30" max="180" step="1" inputmode="numeric" placeholder="Ex.: 80" />
+          </label>
+          <div id="bp-result" class="result-panel compact-panel muted-panel" aria-live="polite">
+            Informe a PA atual.
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">04</span>
+          <div>
+            <h2>Alerta materno — MEOWS</h2>
+            <p>Instrumento de alerta precoce; não substitui avaliação clínica nem protocolo institucional.</p>
+          </div>
+        </div>
+
+        <div class="field-grid field-grid-4">
+          <label class="field">
+            <span>FC <small>(bpm)</small></span>
+            <input name="fc" type="number" min="20" max="250" step="1" inputmode="numeric" />
+          </label>
+          <label class="field">
+            <span>FR <small>(irpm)</small></span>
+            <input name="fr" type="number" min="4" max="80" step="1" inputmode="numeric" />
+          </label>
+          <label class="field">
+            <span>Temperatura <small>(°C)</small></span>
+            <input name="temperatura" type="number" min="25" max="43" step="0.1" inputmode="decimal" />
+          </label>
+          <label class="field">
+            <span>O₂ para atingir SatO₂ ≥96% <small>(L/min)</small></span>
+            <input name="o2_l_min" type="number" min="0" max="30" step="0.1" inputmode="decimal" placeholder="0 se ar ambiente" />
+          </label>
+          <label class="field">
+            <span>Nível de consciência</span>
+            <select name="meows_consciencia">
+              <option value="">Não informado</option>
+              <option value="alerta">Alerta</option>
+              <option value="rebaixado">Rebaixado</option>
+            </select>
+          </label>
+        </div>
+
+        <fieldset class="checklist-group">
+          <legend>Sinais de alerta clínico</legend>
+          <label><input type="checkbox" name="alerta_convulsao" /> Convulsão / eclâmpsia</label>
+          <label><input type="checkbox" name="alerta_sangramento" /> Sangramento vaginal</label>
+          <label><input type="checkbox" name="alerta_movimentos" /> Ausência/redução importante de movimentos fetais</label>
+          <label><input type="checkbox" name="alerta_liquido" /> Perda súbita de líquido vaginal</label>
+          <label><input type="checkbox" name="alerta_contracoes_preterm" /> Contrações dolorosas antes de 37 semanas</label>
+          <label><input type="checkbox" name="alerta_dispneia" /> Falta de ar nova/aguda</label>
+          <label><input type="checkbox" name="alerta_febre" /> Febre ≥38 °C com sintomas associados</label>
+          <label><input type="checkbox" name="alerta_vte" /> Panturrilha unilateral dolorosa/inchada</label>
+          <label><input type="checkbox" name="alerta_cefaleia" /> Cefaleia intensa/persistente ou alteração visual</label>
+          <label><input type="checkbox" name="alerta_epigastrio" /> Dor epigástrica/HCD persistente</label>
+          <label><input type="checkbox" name="alerta_vomitos" /> Vômitos incoercíveis</label>
+        </fieldset>
+
+        <div id="alert-result" class="result-panel muted-panel" aria-live="polite">
+          Preencha os sinais vitais e marque sinais de alerta quando presentes.
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title">
+          <span class="section-number">05</span>
+          <div>
+            <h2>Possível resolução da gestação</h2>
+            <p>Critérios que exigem avaliação obstétrica; não é um algoritmo automático de interrupção.</p>
+          </div>
+        </div>
+
+        <fieldset class="checklist-group">
+          <legend>Situações de gravidade já reconhecidas</legend>
+          <label><input type="checkbox" name="grave_eclampsia" /> Eclâmpsia / convulsão</label>
+          <label><input type="checkbox" name="grave_hellp" /> HELLP ou forte suspeita clínica/laboratorial</label>
+          <label><input type="checkbox" name="grave_pulmao" /> Edema pulmonar / insuficiência respiratória materna</label>
+          <label><input type="checkbox" name="grave_renal" /> Insuficiência renal aguda / deterioração materna grave</label>
+          <label><input type="checkbox" name="grave_coag" /> Coagulopatia / sangramento materno importante</label>
+          <label><input type="checkbox" name="grave_fetal" /> Comprometimento fetal importante / avaliação fetal não tranquilizadora</label>
+        </fieldset>
+
+        <div id="resolution-result" class="result-panel muted-panel" aria-live="polite">
+          Nenhum critério de resolução está sendo considerado até que haja informação suficiente.
+        </div>
+      </section>
+
+      <section class="results-section">
+        <div class="results-header">
+          <div>
+            <div class="eyebrow">PLANO DO PRÉ-NATAL</div>
+            <h2>O que fazer agora</h2>
+          </div>
+          <span id="ga-badge" class="result-count">IG não calculada</span>
+        </div>
+
+        <div id="plan-grid" class="plan-grid"></div>
+        <div id="medications" class="care-panel"></div>
+        <div id="vaccines" class="care-panel"></div>
+        <div id="routine-exams" class="care-panel"></div>
+      </section>
+
+      <section class="sources-section">
+        <div class="section-title">
+          <span class="section-number">REF</span>
+          <div>
+            <h2>Referências usadas</h2>
+            <p>Prioridade para documentos do Ministério da Saúde e referências brasileiras.</p>
+          </div>
+        </div>
+        <div class="source-list">
+          <a href="https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/saude-da-mulher/publicacoes/caderneta-brasileira-da-gestante.pdf/view" target="_blank" rel="noreferrer">Ministério da Saúde — Caderneta Brasileira da Gestante, edição revisada em 2026.</a>
+          <a href="https://linhasdecuidado.saude.gov.br/portal/pre-natal-baixo-risco/unidade-de-atencao-primaria/planejamento-terapeutico/" target="_blank" rel="noreferrer">Ministério da Saúde — Linha de Cuidado: Pré-natal de baixo risco.</a>
+          <a href="https://linhasdecuidado.saude.gov.br/portal/pre-natal-baixo-risco/unidade-de-atencao-primaria/situacoes-urgencia/" target="_blank" rel="noreferrer">Ministério da Saúde — Situações de urgência no pré-natal.</a>
+          <a href="https://www.gov.br/saude/pt-br/vacinacao/arquivos/calendario-nacional-de-vacinacao-gestante/view" target="_blank" rel="noreferrer">Ministério da Saúde — Calendário Nacional de Vacinação da Gestante 2026.</a>
+          <a href="https://www.gov.br/ans/pt-br/assuntos/noticias/sobre-ans/ans-divulga-relatorio-sobre-parto-adequado/Parto_Adequado_Estratgias_de_Qualificao_da_Jornada_da_Gestante_r14.pdf" target="_blank" rel="noreferrer">ANS — Anexo K: MEOWS.</a>
+          <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8106749/" target="_blank" rel="noreferrer">Kac G et al. Gestational weight gain charts: results from the Brazilian Maternal and Child Nutrition Consortium. AJCN. 2021.</a>
+        </div>
+      </section>
+    </form>
+
+    <aside class="disclaimer">
+      <strong>Apoio à decisão clínica.</strong>
+      <span>
+        A página foi desenhada para pré-natal de rotina e alerta precoce. Critérios de urgência,
+        indicação de internação, necessidade de resolução da gestação e prescrição medicamentosa
+        devem ser confirmados pelo profissional responsável, pelo serviço de referência e pelos
+        protocolos locais vigentes.
+      </span>
+    </aside>
+  </main>
+</StarlightPage>
+
+<script>
+  type Field = HTMLInputElement | HTMLSelectElement;
+
+  const form = document.querySelector<HTMLFormElement>('#pregnancy-form');
+  const datingResult = document.querySelector<HTMLElement>('#dating-result');
+  const anthroResult = document.querySelector<HTMLElement>('#anthro-result');
+  const bpResult = document.querySelector<HTMLElement>('#bp-result');
+  const alertResult = document.querySelector<HTMLElement>('#alert-result');
+  const resolutionResult = document.querySelector<HTMLElement>('#resolution-result');
+  const planGrid = document.querySelector<HTMLElement>('#plan-grid');
+  const medications = document.querySelector<HTMLElement>('#medications');
+  const vaccines = document.querySelector<HTMLElement>('#vaccines');
+  const routineExams = document.querySelector<HTMLElement>('#routine-exams');
+  const gaBadge = document.querySelector<HTMLElement>('#ga-badge');
+
+  if (!form || !datingResult || !anthroResult || !bpResult || !alertResult || !resolutionResult || !planGrid || !medications || !vaccines || !routineExams || !gaBadge) {
+    throw new Error('Elementos da seção de gestação não encontrados.');
+  }
+
+  const atalah = [
+    [6,19.9,24.9,30.0],[7,20.0,25.0,30.0],[8,20.1,25.0,30.1],[9,20.15,25.1,30.15],
+    [10,20.2,25.2,30.2],[11,20.3,25.3,30.3],[12,20.4,25.4,30.3],[13,20.6,25.6,30.4],
+    [14,20.7,25.7,30.5],[15,20.8,25.8,30.6],[16,21.0,25.9,30.7],[17,21.1,26.0,30.8],
+    [18,21.2,26.1,30.9],[19,21.4,26.2,30.9],[20,21.5,26.3,31.0],[21,21.7,26.4,31.1],
+    [22,21.8,26.6,31.2],[23,22.0,26.8,31.3],[24,22.2,26.9,31.5],[25,22.4,27.0,31.6],
+    [26,22.6,27.2,31.7],[27,22.7,27.3,31.8],[28,22.9,27.5,31.9],[29,23.1,27.6,32.0],
+    [30,23.3,27.8,32.1],[31,23.4,27.9,32.2],[32,23.6,28.0,32.3],[33,23.8,28.1,32.4],
+    [34,23.9,28.3,32.5],[35,24.1,28.4,32.6],[36,24.2,28.5,32.7],[37,24.4,28.7,32.8],
+    [38,24.5,28.8,32.9],[39,24.7,28.9,33.0],[40,24.9,29.1,33.1],[41,25.0,29.2,33.2],
+    [42,25.0,29.2,33.2],
+  ] as const;
+
+  function num(name: string): number | null {
+    const el = form.querySelector<HTMLInputElement>(`[name="${name}"]`);
+    if (!el || el.value.trim() === '') return null;
+    const n = Number(el.value.replace(',', '.'));
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function value(name: string): string {
+    const el = form.querySelector<Field>(`[name="${name}"]`);
+    return el?.value ?? '';
+  }
+
+  function checked(name: string): boolean {
+    return form.querySelector<HTMLInputElement>(`[name="${name}"]`)?.checked ?? false;
+  }
+
+  function parseDate(value: string): Date | null {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+    const [y, m, d] = value.split('-').map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return Number.isNaN(dt.getTime()) ? null : dt;
+  }
+
+  function addDays(date: Date, days: number): Date {
+    const out = new Date(date.getTime());
+    out.setUTCDate(out.getUTCDate() + days);
+    return out;
+  }
+
+  function diffDays(a: Date, b: Date): number {
+    return Math.round((a.getTime() - b.getTime()) / 86400000);
+  }
+
+  function todayUTC(): Date {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  }
+
+  function fmtDate(date: Date | null): string {
+    if (!date) return '—';
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(date);
+  }
+
+  function gaText(totalDays: number | null): string {
+    if (totalDays === null || !Number.isFinite(totalDays)) return '—';
+    const weeks = Math.floor(totalDays / 7);
+    const days = totalDays % 7;
+    return `${weeks}s + ${days}d`;
+  }
+
+  function clampGa(days: number): number {
+    return Math.max(0, Math.min(days, 294));
+  }
+
+  function getGA(): { days: number | null; dumDays: number | null; usgDays: number | null; dpp: Date | null; source: string; suggestion: string } {
+    const today = todayUTC();
+    const dum = parseDate(value('dum'));
+    const usgDate = parseDate(value('usg_data'));
+    const usgWeeks = num('usg_ig_sem');
+    const usgPartDays = num('usg_ig_dias');
+    const dumDays = dum ? clampGa(diffDays(today, dum)) : null;
+    let usgDays: number | null = null;
+    if (usgDate && usgWeeks !== null && usgPartDays !== null && usgPartDays >= 0 && usgPartDays <= 6) {
+      usgDays = clampGa(Math.round(usgWeeks * 7 + usgPartDays + diffDays(today, usgDate)));
+    }
+
+    const preferred = value('ig_preferencia');
+    let days: number | null = null;
+    let source = '—';
+    let suggestion = '';
+
+    if (preferred === 'dum') {
+      days = dumDays;
+      source = 'DUM';
+    } else if (preferred === 'usg') {
+      days = usgDays;
+      source = 'USG';
+    } else if (dumDays !== null && usgDays !== null) {
+      const discrepancy = Math.abs(dumDays - usgDays);
+      const usgEarly = usgDays <= 98;
+      const cutoff = usgEarly ? 5 : 10;
+      if (discrepancy >= cutoff) {
+        days = usgDays;
+        source = 'USG (sugestão)';
+        suggestion = `Há diferença de ${discrepancy} dia(s) entre DUM e USG; a USG foi sinalizada como referência de datação pela regra simplificada baseada no Manual do MS.`;
+      } else {
+        days = dumDays;
+        source = 'DUM (sugestão)';
+        suggestion = 'Diferença entre DUM e USG pequena; manter a referência selecionada no acompanhamento e evitar redatar sucessivamente com USGs tardias.';
+      }
+    } else if (usgDays !== null) {
+      days = usgDays;
+      source = 'USG';
+    } else if (dumDays !== null) {
+      days = dumDays;
+      source = 'DUM';
+    }
+
+    const dpp = days !== null ? addDays(today, 280 - days) : null;
+    return { days, dumDays, usgDays, dpp, source, suggestion };
+  }
+
+  function classifyAtalah(bmi: number, gaDays: number | null): string {
+    if (gaDays === null) return 'IMC pré-gestacional: use a classificação inicial (baixo peso/eutrofia/sobrepeso/obesidade).';
+    const week = Math.min(42, Math.max(6, Math.floor(gaDays / 7)));
+    const row = atalah.find(([w]) => w === week) ?? atalah[0];
+    const [, low, upperNormal, upperOverweight] = row;
+    if (bmi < low) return 'Baixo peso para a semana gestacional';
+    if (bmi <= upperNormal) return 'Adequado para a semana gestacional';
+    if (bmi <= upperOverweight) return 'Sobrepeso para a semana gestacional';
+    return 'Obesidade para a semana gestacional';
+  }
+
+  function prePregnancyClass(bmi: number): string {
+    if (bmi < 18.5) return 'baixo peso';
+    if (bmi < 25) return 'eutrofia';
+    if (bmi < 30) return 'sobrepeso';
+    return 'obesidade';
+  }
+
+  function updateDating() {
+    const ga = getGA();
+    if (ga.days === null) {
+      datingResult.className = 'result-panel muted-panel';
+      datingResult.innerHTML = 'Informe DUM e/ou USG para calcular a idade gestacional.';
+      gaBadge.textContent = 'IG não calculada';
+      return;
+    }
+    const discrepancy = ga.dumDays !== null && ga.usgDays !== null ? Math.abs(ga.dumDays - ga.usgDays) : null;
+    datingResult.className = 'result-panel';
+    datingResult.innerHTML = `
+      <div class="result-grid">
+        <div><span>IG pela DUM</span><strong>${gaText(ga.dumDays)}</strong></div>
+        <div><span>IG pela USG</span><strong>${gaText(ga.usgDays)}</strong></div>
+        <div><span>IG adotada</span><strong>${gaText(ga.days)}</strong></div>
+        <div><span>Fonte</span><strong>${ga.source}</strong></div>
+        <div><span>DPP</span><strong>${fmtDate(ga.dpp)}</strong></div>
+        <div><span>Diferença DUM × USG</span><strong>${discrepancy === null ? '—' : `${discrepancy} d`}</strong></div>
+      </div>
+      ${ga.suggestion ? `<p class="result-note">${ga.suggestion}</p>` : ''}
+    `;
+    gaBadge.textContent = `IG ${gaText(ga.days)}`;
+  }
+
+  function updateAnthro() {
+    const h = num('altura');
+    const pre = num('peso_pre');
+    const current = num('peso_atual');
+    const ga = getGA();
+    if (h === null || pre === null) {
+      anthroResult.className = 'result-panel muted-panel';
+      anthroResult.innerHTML = 'Informe altura e peso pré-gestacional para calcular o IMC.';
+      return;
+    }
+    const hm = h / 100;
+    if (hm <= 0) return;
+    const preBmi = pre / (hm * hm);
+    const currentBmi = current !== null ? current / (hm * hm) : null;
+    const gain = current !== null ? current - pre : null;
+    const classAtalah = currentBmi !== null ? classifyAtalah(currentBmi, ga.days) : '—';
+    anthroResult.className = 'result-panel';
+    anthroResult.innerHTML = `
+      <div class="result-grid">
+        <div><span>IMC pré-gestacional</span><strong>${preBmi.toFixed(1)} kg/m²</strong><small>${prePregnancyClass(preBmi)}</small></div>
+        <div><span>IMC atual</span><strong>${currentBmi === null ? '—' : `${currentBmi.toFixed(1)} kg/m²`}</strong><small>${currentBmi === null ? 'Informe o peso atual' : classAtalah}</small></div>
+        <div><span>Ganho ponderal</span><strong>${gain === null ? '—' : `${gain >= 0 ? '+' : ''}${gain.toFixed(1)} kg`}</strong><small>acompanhar pela curva brasileira</small></div>
+        <div><span>Altura uterina</span><strong>${num('altura_uterina') === null ? '—' : `${num('altura_uterina')!.toFixed(1)} cm`}</strong><small>comparar com a curva P10–P90 da Caderneta</small></div>
+      </div>
+      <p class="result-note">A curva brasileira de ganho de peso gestacional usa IMC pré-gestacional e idade gestacional para gerar percentis. A página preserva o cálculo de IMC e orienta o uso da curva oficial para o percentil de ganho ponderal.</p>
+    `;
+  }
+
+  function classifyBP(pas: number | null, pad: number | null): { text: string; cls: string } {
+    if (pas === null || pad === null) return { text: 'Informe a PA atual.', cls: 'muted-panel' };
+    if (pas >= 160 || pad >= 110) return { text: '🔴 Crise hipertensiva — encaminhamento imediato para emergência obstétrica.', cls: 'danger-panel' };
+    if (pas >= 140 || pad >= 90) return { text: '🟠 PA elevada na gestação — repetir/confirmar e avaliar sintomas e sinais de lesão de órgão-alvo.', cls: 'warning-panel' };
+    return { text: '🟢 Sem critério de hipertensão no valor informado.', cls: 'ok-panel' };
+  }
+
+  function updateBP() {
+    const pas = num('pas');
+    const pad = num('pad');
+    const out = classifyBP(pas, pad);
+    const pam = pas !== null && pad !== null ? (pas + 2 * pad) / 3 : null;
+    bpResult.className = `result-panel compact-panel ${out.cls}`;
+    bpResult.innerHTML = `<strong>${out.text}</strong>${pam === null ? '' : `<span>PAM: ${pam.toFixed(1)} mmHg</span>`}`;
+  }
+
+  function meowsPoints(name: string, v: number | null): number {
+    if (v === null) return 0;
+    if (name === 'pas') return v < 80 ? 3 : v < 90 ? 2 : v <= 139 ? 0 : v <= 149 ? 1 : v <= 159 ? 2 : 3;
+    if (name === 'pad') return v < 90 ? 0 : v <= 99 ? 1 : v <= 109 ? 2 : 3;
+    if (name === 'fr') return v < 10 ? 3 : v <= 17 ? 0 : v <= 24 ? 1 : v <= 29 ? 2 : 3;
+    if (name === 'fc') return v < 60 ? 3 : v <= 110 ? 0 : v <= 149 ? 2 : 3;
+    if (name === 'temp') return v < 34 ? 3 : v <= 35 ? 2 : v < 38 ? 0 : v < 39 ? 1 : 3;
+    if (name === 'o2') return v <= 0 ? 0 : v < 5 ? 1 : 3;
+    return 0;
+  }
+
+  function updateAlert() {
+    const pas = num('pas');
+    const pad = num('pad');
+    const fc = num('fc');
+    const fr = num('fr');
+    const temp = num('temperatura');
+    const o2 = num('o2_l_min');
+    const consciousness = value('meows_consciencia');
+    const points = meowsPoints('pas', pas) + meowsPoints('pad', pad) + meowsPoints('fc', fc) + meowsPoints('fr', fr) + meowsPoints('temp', temp) + meowsPoints('o2', o2) + (consciousness === 'rebaixado' ? 3 : 0);
+
+    const redZone = [
+      pas !== null && (pas < 80 || pas >= 160),
+      pad !== null && pad >= 110,
+      fr !== null && (fr < 10 || fr >= 30),
+      fc !== null && (fc < 60 || fc >= 150),
+      temp !== null && (temp < 34 || temp >= 39),
+      o2 !== null && o2 >= 5,
+      consciousness === 'rebaixado',
+    ].some(Boolean);
+
+    const directEmergency = [
+      checked('alerta_convulsao'), checked('alerta_sangramento'), checked('alerta_movimentos'), checked('alerta_liquido'),
+      checked('alerta_contracoes_preterm'), checked('alerta_dispneia'), checked('alerta_febre'), checked('alerta_vte'),
+      checked('alerta_cefaleia'), checked('alerta_epigastrio'), checked('alerta_vomitos'),
+      pas !== null && (pas >= 160), pad !== null && (pad >= 110),
+    ].some(Boolean);
+
+    let cls = 'ok-panel';
+    let title = '🟢 Sem gatilho importante identificado pelos dados informados.';
+    if (directEmergency || redZone) {
+      cls = 'danger-panel';
+      title = '🔴 Avaliação obstétrica urgente / encaminhamento para emergência.';
+    } else if (points >= 1) {
+      cls = 'warning-panel';
+      title = '🟠 MEOWS com alteração fisiológica — repetir avaliação e revisar clinicamente.';
+    }
+
+    alertResult.className = `result-panel ${cls}`;
+    alertResult.innerHTML = `
+      <div class="alert-score"><span>MEOWS</span><strong>${points}</strong></div>
+      <div><strong>${title}</strong></div>
+      <p class="result-note">Qualquer preocupação clínica relevante justifica escalonamento mesmo que o escore não esteja elevado. O MEOWS é um instrumento de alerta precoce e seus limiares devem ser interpretados segundo o protocolo obstétrico do serviço.</p>
+    `;
+  }
+
+  function updateResolution() {
+    const severe = ['grave_eclampsia','grave_hellp','grave_pulmao','grave_renal','grave_coag','grave_fetal'].filter(checked);
+    const ga = getGA();
+    if (severe.length === 0) {
+      resolutionResult.className = 'result-panel muted-panel';
+      resolutionResult.innerHTML = 'Não há, pelos campos informados, um critério de gravidade para discutir resolução imediata. Isso não exclui outras indicações obstétricas.';
+      return;
+    }
+    const names: Record<string, string> = {
+      grave_eclampsia: 'eclâmpsia/convulsão', grave_hellp: 'HELLP', grave_pulmao: 'edema pulmonar/insuficiência respiratória',
+      grave_renal: 'insuficiência renal aguda', grave_coag: 'coagulopatia/sangramento importante', grave_fetal: 'comprometimento fetal importante'
+    };
+    const list = severe.map((x) => names[x]);
+    resolutionResult.className = 'result-panel danger-panel';
+    resolutionResult.innerHTML = `
+      <strong>🔴 Necessita avaliação obstétrica imediata para estabilização materna e avaliação fetal.</strong>
+      <p>Critérios informados: ${list.map((x) => `<b>${x}</b>`).join(', ')}.</p>
+      <p>IG atual: <b>${gaText(ga.days)}</b>. A necessidade e o momento da resolução da gestação dependem da causa, estabilidade materna/fetal, idade gestacional e avaliação obstétrica. Em eclâmpsia, após estabilização, o Manual de Gestação de Alto Risco orienta antecipação do parto em qualquer idade gestacional.</p>
+    `;
+  }
+
+  function renderPlan() {
+    const ga = getGA().days;
+    if (ga === null) {
+      planGrid.innerHTML = '<div class="empty-state"><strong>Calcule a IG para gerar o cronograma.</strong><span>Informe DUM ou USG.</span></div>';
+      medications.innerHTML = '';
+      vaccines.innerHTML = '';
+      routineExams.innerHTML = '';
+      return;
+    }
+    const week = Math.floor(ga / 7);
+    const cards: Array<{ title: string; text: string; tone?: string }> = [];
+
+    if (week < 12) cards.push({ title: 'Agora — 1º trimestre', text: 'Captação precoce; primeira consulta preferencialmente até 12 semanas; classificar risco; solicitar exames iniciais; atualizar caderneta; ácido fólico; vacinação.' });
+    if (week >= 12 && week < 20) cards.push({ title: '2º trimestre inicial', text: 'Consultas regulares, PA e peso em todas as consultas; acompanhamento do ganho ponderal; altura uterina/BCF conforme IG.' });
+    if (week >= 20 && week < 24) cards.push({ title: '20–24 semanas', text: 'Iniciar sulfato ferroso profilático de 40 mg/dia de ferro elementar no baixo risco, conforme Linha de Cuidado do MS. Revisar dTpa a partir de 20 semanas.' });
+    if (week >= 24 && week <= 28) cards.push({ title: '24–28 semanas', text: 'Realizar TOTG 75 g preferencialmente entre 24–28 semanas quando indicado; reavaliar hemograma, crescimento uterino, PA, ganho ponderal e situação vacinal.' });
+    if (week > 28 && week < 36) cards.push({ title: '28–36 semanas', text: 'Consultas quinzenais. Repetir exames do 3º trimestre conforme protocolo; atenção a sífilis/HIV e urocultura/urina. dTpa já deve estar programada; VSR a partir de 28 semanas.' });
+    if (week >= 35 && week <= 37) cards.push({ title: '35–37 semanas', text: 'Considerar pesquisa para estreptococo do grupo B conforme rotina municipal; revisar plano de parto, referência e sinais de trabalho de parto.' });
+    if (week >= 36 && week <= 40) cards.push({ title: '36–40 semanas', text: 'Consultas semanais. Revisar movimentos fetais, apresentação fetal a partir de ~36 semanas, PA, peso, altura uterina, BCF e sinais de trabalho de parto.' });
+    if (week >= 41) cards.push({ title: '≥41 semanas', text: 'Encaminhar para avaliação na unidade hospitalar de referência, conforme Linha de Cuidado do MS.' });
+
+    if (cards.length === 0) cards.push({ title: 'Acompanhamento atual', text: 'Manter acompanhamento e reclassificação de risco em todas as consultas.' });
+
+    planGrid.innerHTML = cards.map((c) => `<article class="plan-card"><h3>${c.title}</h3><p>${c.text}</p></article>`).join('');
+
+    const folic = week <= 12 ? '<div class="med-row"><b>Ácido fólico</b><span>0,4 mg/dia VO até o final do 1º trimestre. Em alto risco para defeito aberto do tubo neural, 4–5 mg/dia conforme indicação especializada.</span></div>' : '<div class="med-row done"><b>Ácido fólico</b><span>Janela de rotina até 12 semanas; manutenção posterior depende da indicação clínica.</span></div>';
+    const iron = week >= 20 ? '<div class="med-row"><b>Ferro profilático</b><span>40 mg/dia de ferro elementar no baixo risco, a partir da 20ª semana, até o 3º mês pós-parto/abortamento.</span></div>' : '<div class="med-row pending"><b>Ferro profilático</b><span>Programar 40 mg/dia de ferro elementar a partir da 20ª semana no baixo risco.</span></div>';
+    const aspirin = '<div class="med-row"><b>AAS — apenas se indicado</b><span>100 mg/dia para gestantes com indicação de profilaxia de pré-eclâmpsia; iniciar precocemente no protocolo de risco, geralmente a partir de 12 semanas.</span></div>';
+    const calcium = '<div class="med-row"><b>Cálcio — conforme ingestão/risco</b><span>Avaliar ingestão dietética. Quando indicada suplementação para prevenção de pré-eclâmpsia, o MS descreve 1,5–2 g/dia de cálcio elementar VO, fracionado.</span></div>';
+    const antiD = '<div class="med-row"><b>Imunoglobulina anti-D — se Rh negativo não sensibilizado</b><span>Planejar profilaxia conforme protocolo local; Manual de Gestação de Alto Risco descreve 300 µg na 28ª semana e até 72 h após parto Rh+ ou evento sensibilizante.</span></div>';
+    medications.innerHTML = `<h3>Suplementação e medicamentos essenciais</h3><div class="med-list">${folic}${iron}${aspirin}${calcium}${antiD}</div>`;
+
+    const vaccineRows = [
+      ['Influenza', '1 dose por temporada, em qualquer fase da gestação.'],
+      ['COVID-19', '1 dose em cada gestação, conforme calendário 2026.'],
+      ['dT / hepatite B', 'Atualizar de acordo com histórico vacinal.'],
+      ['dTpa', '1 dose a partir da 20ª semana, em cada gestação.'],
+      ['VSR', '1 dose a partir da 28ª semana, em cada gestação.'],
+      ['Febre amarela', 'Apenas em situações excepcionais, após avaliação de risco-benefício, conforme calendário.'],
+    ];
+    vaccines.innerHTML = `<h3>Vacinação 2026</h3><div class="table-wrap"><table><thead><tr><th>Vacina</th><th>Quando</th></tr></thead><tbody>${vaccineRows.map(([a,b]) => `<tr><td><b>${a}</b></td><td>${b}</td></tr>`).join('')}</tbody></table></div>`;
+
+    const exams1 = ['Hemograma', 'ABO/Rh + Coombs indireto se Rh−', 'Glicemia de jejum / TOTG conforme IG', 'Sífilis', 'HIV', 'Hepatite B e C', 'Toxoplasmose', 'Urina tipo I + urocultura', 'Ultrassonografia obstétrica', 'Outros conforme território/risco'];
+    const exams2 = ['TOTG 75 g preferencialmente 24–28 semanas, quando indicado', 'Coombs indireto se Rh− e não sensibilizada', 'Repetir hemograma, sífilis, HIV, urina/urocultura conforme cronograma do MS', 'Toxoplasmose se suscetível'];
+    const examList = week < 14 ? exams1 : exams2;
+    routineExams.innerHTML = `<h3>Exames e cuidados desta fase</h3><ul>${examList.map((x) => `<li>${x}</li>`).join('')}</ul><p class="result-note">A solicitação deve seguir a Linha de Cuidado do MS e particularidades epidemiológicas/locais.</p>`;
+  }
+
+  function update() {
+    updateDating();
+    updateAnthro();
+    updateBP();
+    updateAlert();
+    updateResolution();
+    renderPlan();
+  }
+
+  form.addEventListener('input', update);
+  form.addEventListener('change', update);
+  update();
+</script>
+
+<style>
+  .pregnancy-page { width: 100%; max-width: 100%; padding: 8px 0 32px; overflow-x: hidden; }
+  .back-link { display: inline-flex; margin-bottom: 28px; color: var(--sl-color-gray-2); font-size: .9rem; text-decoration: none; }
+  .page-header { max-width: 900px; margin-bottom: 34px; }
+  .eyebrow { margin-bottom: 9px; color: var(--sl-color-accent-high); font-size: .75rem; font-weight: 800; letter-spacing: .08em; }
+  .page-header h1 { margin: 0; font-size: clamp(2.2rem,5vw,3.5rem); line-height: 1.05; letter-spacing: -.03em; }
+  .page-header p { max-width: 780px; margin: 16px 0 0; color: var(--sl-color-gray-2); font-size: 1.05rem; line-height: 1.7; }
+  .intro-note { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--sl-color-gray-5); border-radius: 12px; color: var(--sl-color-gray-2); font-size: .9rem; line-height: 1.55; background: var(--sl-color-gray-6); }
+  .pregnancy-form { display: grid; gap: 18px; }
+  .form-section,.results-section,.sources-section { min-width: 0; padding: 24px; border: 1px solid var(--sl-color-gray-5); border-radius: 18px; background: var(--sl-color-bg-nav); }
+  .section-title,.results-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+  .section-title { display: grid; grid-template-columns: auto 1fr; }
+  .section-number { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 10px; background: var(--sl-color-gray-6); color: var(--sl-color-accent-high); font-size: .72rem; font-weight: 800; letter-spacing: .04em; }
+  .section-title h2,.results-header h2 { margin: 0; font-size: 1.35rem; }
+  .section-title p { margin: 5px 0 0; color: var(--sl-color-gray-3); font-size: .9rem; line-height: 1.5; }
+  .field-grid { display: grid; gap: 14px; }
+  .field-grid-3 { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .field-grid-4 { grid-template-columns: repeat(4,minmax(0,1fr)); }
+  .field { display: grid; gap: 7px; min-width: 0; }
+  .field span { font-size: .86rem; font-weight: 650; color: var(--sl-color-gray-2); }
+  .field small { color: var(--sl-color-gray-3); font-weight: 500; }
+  input,select { box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--sl-color-gray-5); border-radius: 10px; background: var(--sl-color-bg); color: var(--sl-color-text); font: inherit; }
+  input:focus,select:focus { outline: 2px solid color-mix(in srgb,var(--sl-color-accent) 45%,transparent); outline-offset: 1px; }
+  .result-panel { margin-top: 16px; padding: 16px; border: 1px solid var(--sl-color-gray-5); border-radius: 14px; background: var(--sl-color-bg); line-height: 1.55; }
+  .muted-panel { color: var(--sl-color-gray-3); }
+  .ok-panel { border-color: color-mix(in srgb,#3f8f5a 35%,var(--sl-color-gray-5)); }
+  .warning-panel { border-color: color-mix(in srgb,#c78b2b 45%,var(--sl-color-gray-5)); }
+  .danger-panel { border-color: color-mix(in srgb,#bd4a4a 55%,var(--sl-color-gray-5)); }
+  .compact-panel { margin-top: 0; min-height: 44px; display: grid; align-content: center; }
+  .compact-panel span { color: var(--sl-color-gray-3); font-size: .85rem; }
+  .result-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+  .result-grid div { min-width: 0; }
+  .result-grid span,.result-grid small { display: block; color: var(--sl-color-gray-3); font-size: .78rem; }
+  .result-grid strong { display: block; margin-top: 2px; font-size: 1rem; overflow-wrap: anywhere; }
+  .result-note { margin: 12px 0 0; color: var(--sl-color-gray-3); font-size: .84rem; line-height: 1.55; }
+  .checklist-group { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 18px; margin: 0; padding: 16px; border: 1px solid var(--sl-color-gray-5); border-radius: 14px; }
+  .checklist-group legend { padding: 0 6px; font-size: .86rem; font-weight: 750; color: var(--sl-color-gray-2); }
+  .checklist-group label { display: flex; gap: 10px; align-items: flex-start; color: var(--sl-color-gray-2); font-size: .86rem; line-height: 1.4; }
+  .checklist-group input[type='checkbox'] { width: 18px; min-width: 18px; height: 18px; min-height: 18px; margin-top: 1px; }
+  .alert-score { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .alert-score span { color: var(--sl-color-gray-3); font-size: .8rem; font-weight: 750; letter-spacing: .08em; }
+  .alert-score strong { font-size: 1.8rem; line-height: 1; }
+  .result-count { align-self: center; padding: 6px 10px; border: 1px solid var(--sl-color-gray-5); border-radius: 999px; color: var(--sl-color-gray-2); font-size: .8rem; white-space: nowrap; }
+  .plan-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+  .plan-card { padding: 17px; border: 1px solid var(--sl-color-gray-5); border-radius: 14px; background: var(--sl-color-bg); }
+  .plan-card h3 { margin: 0 0 7px; font-size: .98rem; }
+  .plan-card p { margin: 0; color: var(--sl-color-gray-2); font-size: .84rem; line-height: 1.55; }
+  .care-panel { margin-top: 16px; padding-top: 17px; border-top: 1px solid var(--sl-color-gray-6); }
+  .care-panel h3 { margin: 0 0 12px; font-size: 1rem; }
+  .med-list { display: grid; gap: 10px; }
+  .med-row { display: grid; grid-template-columns: 230px minmax(0,1fr); gap: 14px; padding: 12px 13px; border: 1px solid var(--sl-color-gray-6); border-radius: 10px; background: var(--sl-color-bg); }
+  .med-row span { color: var(--sl-color-gray-2); font-size: .84rem; line-height: 1.5; }
+  .med-row.pending { border-left: 3px solid var(--sl-color-accent-high); }
+  .med-row.done { opacity: .78; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+  th,td { padding: 10px 9px; border-bottom: 1px solid var(--sl-color-gray-6); text-align: left; vertical-align: top; }
+  th { color: var(--sl-color-gray-2); font-size: .78rem; }
+  td { color: var(--sl-color-gray-2); }
+  .care-panel ul { margin: 0; padding-left: 20px; color: var(--sl-color-gray-2); }
+  .care-panel li { margin: 6px 0; font-size: .86rem; line-height: 1.45; }
+  .source-list { display: grid; gap: 10px; }
+  .source-list a { color: var(--sl-color-accent-high); font-size: .84rem; line-height: 1.45; text-decoration: none; }
+  .source-list a:hover { text-decoration: underline; }
+  .disclaimer { display: grid; gap: 5px; margin-top: 18px; padding: 15px 17px; border: 1px solid var(--sl-color-gray-5); border-radius: 14px; color: var(--sl-color-gray-2); font-size: .83rem; line-height: 1.55; }
+  .empty-state { padding: 18px; border: 1px dashed var(--sl-color-gray-5); border-radius: 14px; color: var(--sl-color-gray-2); }
+  .empty-state span { display: block; margin-top: 4px; color: var(--sl-color-gray-3); font-size: .84rem; }
+  @media (max-width: 980px) { .field-grid-4,.plan-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .result-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+  @media (max-width: 760px) { .form-section,.results-section,.sources-section { padding: 18px; } .field-grid-3,.field-grid-4,.result-grid,.checklist-group,.plan-grid { grid-template-columns: 1fr; } .med-row { grid-template-columns: 1fr; gap: 6px; } .results-header { flex-direction: column; } .result-count { align-self: flex-start; } }
+</style>

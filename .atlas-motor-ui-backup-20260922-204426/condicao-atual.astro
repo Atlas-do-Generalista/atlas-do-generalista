@@ -664,16 +664,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
           <span id="result-count" class="result-count">Aguardando dados</span>
         </div>
 
-        <div class="results-summaries">
+        <div id="assessment-summary" class="assessment-summary" hidden aria-live="polite"></div>
 
-
-          <div id="assessment-summary" class="assessment-summary" hidden aria-live="polite"></div>
-
-
-          <div id="clinical-summary" class="clinical-summary" hidden aria-live="polite"></div>
-
-
-        </div>
         <div id="results" class="results-list">
           <div class="empty-state">
             <strong>Comece preenchendo os dados do paciente.</strong>
@@ -791,6 +783,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </aside>
   </main>
 </StarlightPage>
+
+    <div id="clinical-summary" class="clinical-summary" hidden aria-live="polite"></div>
+
+
+
 <style>
   .subsection-block {
     margin-top: 1.25rem;
@@ -1862,34 +1859,5 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     .incomplete-item span {
       text-align: left;
     }
-  }
-
-  .results-summaries {
-    display: grid;
-    gap: 10px;
-    width: 100%;
-    min-width: 0;
-    margin-bottom: 16px;
-  }
-
-  .results-summaries .assessment-summary,
-  .results-summaries .clinical-summary {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    margin: 0;
-    overflow: visible;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: normal;
-  }
-
-  .results-summaries .clinical-summary p {
-    margin: 0;
-  }
-
-  .results-summaries .clinical-summary .field-help {
-    margin-bottom: 8px;
   }
 </style>

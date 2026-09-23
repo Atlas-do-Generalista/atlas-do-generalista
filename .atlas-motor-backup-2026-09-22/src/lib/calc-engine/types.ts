@@ -48,7 +48,6 @@ export interface ContextoPaciente {
   creatinina?: number;
   glicemia?: number;
   sodio?: number;
-  cloro?: number;
   potassio?: number;
   bilirrubina?: number;
   albumina?: number;
@@ -94,63 +93,10 @@ export interface ContextoPaciente {
   // Renal
   diurese_ml?: number;
   diurese_horas?: number;
-  sodio_urinario?: number;
-  creatinina_urinaria?: number;
-  ureia_urinaria?: number;
   ira_atual?: boolean;
   terapia_renal_substitutiva?: boolean;
   indicacao_trs_sem_trs?: boolean;
   meld_dialise_semana?: boolean;
-
-  // RCRI / avaliação perioperatória
-  rcri_cirurgia_alto_risco?: boolean;
-  rcri_doenca_isquemica?: boolean;
-  rcri_insuficiencia_cardiaca?: boolean;
-  rcri_doenca_cerebrovascular?: boolean;
-  rcri_diabetes_insulina?: boolean;
-
-  // Pádua / risco de TEV em paciente clínico internado
-  padua_cancer_ativo?: boolean;
-  padua_teve_vte?: boolean;
-  padua_mobilidade_reduzida?: boolean;
-  padua_trombofilia?: boolean;
-  padua_trauma_cirurgia?: boolean;
-  padua_insuficiencia_cardio_respiratoria?: boolean;
-  padua_iam_avc?: boolean;
-  padua_infeccao_reumatologica?: boolean;
-  padua_terapia_hormonal?: boolean;
-
-  // CIWA-Ar
-  ciwa_nausea?: number;
-  ciwa_tremor?: number;
-  ciwa_sudorese?: number;
-  ciwa_ansiedade?: number;
-  ciwa_agitacao?: number;
-  ciwa_tatil?: number;
-  ciwa_auditiva?: number;
-  ciwa_visual?: number;
-  ciwa_cefaleia?: number;
-  ciwa_orientacao?: number;
-
-  // COWS
-  cows_pulso?: number;
-  cows_sudorese?: number;
-  cows_inquietacao?: number;
-  cows_pupilas?: number;
-  cows_mialgia?: number;
-  cows_rinorreia?: number;
-  cows_gastro?: number;
-  cows_tremor?: number;
-  cows_yawning?: number;
-  cows_ansiedade?: number;
-  cows_piloerecao?: number;
-
-  // HISS (Head Injury Severity Scale)
-  hiss_gcs_inicial?: number;
-  hiss_perda_consciencia_minutos?: number;
-  hiss_amnesia?: boolean;
-  hiss_reacao_lenta?: boolean;
-  hiss_deficit_focal?: boolean;
 
   // Hepático / cirrose
   doenca_hepatica_cronica?: boolean;

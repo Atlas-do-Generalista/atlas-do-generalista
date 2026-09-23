@@ -285,11 +285,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
             <input name="sodio" type="number" min="80" max="220" step="1" inputmode="numeric" placeholder="Ex.: 138" />
           </label>
 
-                    <label class="field">
-            <span>Cloro <small>(mEq/L)</small></span>
-            <input name="cloro" type="number" min="0" max="250" step="0.1" inputmode="decimal" placeholder="Ex.: 102" />
-          </label>
-<label class="field">
+          <label class="field">
             <span>Potássio <small>(mEq/L)</small></span>
             <input name="potassio" type="number" min="1" max="10" step="0.1" inputmode="decimal" placeholder="Ex.: 4,2" />
           </label>
@@ -664,16 +660,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
           <span id="result-count" class="result-count">Aguardando dados</span>
         </div>
 
-        <div class="results-summaries">
+        <div id="assessment-summary" class="assessment-summary" hidden aria-live="polite"></div>
 
-
-          <div id="assessment-summary" class="assessment-summary" hidden aria-live="polite"></div>
-
-
-          <div id="clinical-summary" class="clinical-summary" hidden aria-live="polite"></div>
-
-
-        </div>
         <div id="results" class="results-list">
           <div class="empty-state">
             <strong>Comece preenchendo os dados do paciente.</strong>
@@ -683,102 +671,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
           </div>
         </div>
       </section>
-
-      <section class="form-section">
-        <div class="section-title">
-          <span class="section-number">09</span>
-          <div>
-            <h2>Avaliações adicionais</h2>
-            <p>Ferramentas complementares para risco, profilaxia, alterações metabólicas e síndromes específicas.</p>
-          </div>
-        </div>
-
-        <div class="subsection-block">
-          <h3>RCRI — Índice Cardíaco Revisado</h3>
-          <p class="field-help">Use em avaliação perioperatória de cirurgia não cardíaca. Cirurgia de alto risco refere-se às categorias utilizadas no RCRI original.</p>
-          <div class="field-grid field-grid-3">
-            <label class="field"><span>Cirurgia de alto risco</span><select name="rcri_cirurgia_alto_risco"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Doença cardíaca isquêmica</span><select name="rcri_doenca_isquemica"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Insuficiência cardíaca</span><select name="rcri_insuficiencia_cardiaca"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Doença cerebrovascular</span><select name="rcri_doenca_cerebrovascular"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Diabetes em uso de insulina</span><select name="rcri_diabetes_insulina"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-          </div>
-        </div>
-
-        <div class="subsection-block">
-          <h3>Pádua — risco de TEV</h3>
-          <p class="field-help">Aplicável a pacientes clínicos hospitalizados. A decisão de tromboprofilaxia deve considerar risco de sangramento e contraindicações.</p>
-          <div class="field-grid field-grid-3">
-            <label class="field"><span>Câncer ativo</span><select name="padua_cancer_ativo"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>TEV prévio</span><select name="padua_teve_vte"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Mobilidade reduzida ≥3 dias</span><select name="padua_mobilidade_reduzida"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Trombofilia conhecida</span><select name="padua_trombofilia"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Trauma/cirurgia ≤1 mês</span><select name="padua_trauma_cirurgia"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Insuficiência cardíaca/respiratória</span><select name="padua_insuficiencia_cardio_respiratoria"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>IAM agudo ou AVC isquêmico</span><select name="padua_iam_avc"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Infecção aguda/doença reumatológica</span><select name="padua_infeccao_reumatologica"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Terapia hormonal em curso</span><select name="padua_terapia_hormonal"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-          </div>
-        </div>
-
-        <div class="subsection-block">
-          <h3>CIWA-Ar</h3>
-          <p class="field-help">Pontue cada domínio conforme a escala original; todos os 10 itens devem ser preenchidos para cálculo.</p>
-          <div class="field-grid field-grid-4">
-            <label class="field"><span>Náuseas/vômitos <small>0–7</small></span><input name="ciwa_nausea" type="number" min="0" max="7" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Tremor <small>0–7</small></span><input name="ciwa_tremor" type="number" min="0" max="7" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Sudorese paroxística <small>0–7</small></span><input name="ciwa_sudorese" type="number" min="0" max="7" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Ansiedade <small>0–7</small></span><input name="ciwa_ansiedade" type="number" min="0" max="7" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Agitação <small>0–7</small></span><input name="ciwa_agitacao" type="number" min="0" max="7" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Alterações táteis <small>0–7</small></span><input name="ciwa_tatil" type="number" min="0" max="7" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Alterações auditivas <small>0–7</small></span><input name="ciwa_auditiva" type="number" min="0" max="7" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Alterações visuais <small>0–7</small></span><input name="ciwa_visual" type="number" min="0" max="7" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Cefaleia/pressão cefálica <small>0–7</small></span><input name="ciwa_cefaleia" type="number" min="0" max="7" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Orientação/obnubilação <small>0–4</small></span><input name="ciwa_orientacao" type="number" min="0" max="4" step="1" inputmode="numeric" /></label>
-          </div>
-        </div>
-
-        <div class="subsection-block">
-          <h3>COWS</h3>
-          <p class="field-help">Pontue cada domínio conforme a escala original; todos os 11 itens devem ser preenchidos para cálculo.</p>
-          <div class="field-grid field-grid-4">
-            <label class="field"><span>Pulso em repouso <small>0–4</small></span><input name="cows_pulso" type="number" min="0" max="4" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Sudorese <small>0–4</small></span><input name="cows_sudorese" type="number" min="0" max="4" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Inquietação <small>0–5</small></span><input name="cows_inquietacao" type="number" min="0" max="5" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Pupilas <small>0–5</small></span><input name="cows_pupilas" type="number" min="0" max="5" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Mialgia/dor óssea-articular <small>0–4</small></span><input name="cows_mialgia" type="number" min="0" max="4" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Coriza/lacrimejamento <small>0–4</small></span><input name="cows_rinorreia" type="number" min="0" max="4" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Desconforto gastrointestinal <small>0–5</small></span><input name="cows_gastro" type="number" min="0" max="5" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Tremor <small>0–4</small></span><input name="cows_tremor" type="number" min="0" max="4" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Bocejos <small>0–4</small></span><input name="cows_yawning" type="number" min="0" max="4" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Ansiedade/irritabilidade <small>0–4</small></span><input name="cows_ansiedade" type="number" min="0" max="4" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Piloereção <small>0–5</small></span><input name="cows_piloerecao" type="number" min="0" max="5" step="1" inputmode="numeric" /></label>
-          </div>
-        </div>
-
-        <div class="subsection-block">
-          <h3>HISS — Head Injury Severity Scale</h3>
-          <p class="field-help">Classificação de gravidade do TCE baseada no GCS inicial pós-ressuscitação e modificadores clínicos. O campo de GCS da HISS é separado do Glasgow atual.</p>
-          <div class="field-grid field-grid-4">
-            <label class="field"><span>GCS inicial pós-ressuscitação <small>3–15</small></span><input name="hiss_gcs_inicial" type="number" min="3" max="15" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Perda de consciência <small>(minutos)</small></span><input name="hiss_perda_consciencia_minutos" type="number" min="0" max="10080" step="1" inputmode="numeric" /></label>
-            <label class="field"><span>Amnésia</span><select name="hiss_amnesia"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Resposta/alerta lentificados</span><select name="hiss_reacao_lenta"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-            <label class="field"><span>Déficit neurológico focal</span><select name="hiss_deficit_focal"><option value="">Não informado</option><option value="false">Não</option><option value="true">Sim</option></select></label>
-          </div>
-        </div>
-
-        <div class="subsection-block">
-          <h3>Coleta urinária para função renal</h3>
-          <p class="field-help">Use amostras sérica e urinária pareadas. Para FeNa, informe sódio e creatinina urinários; para FeUreia, informe ureia e creatinina urinárias.</p>
-          <div class="field-grid field-grid-4">
-            <label class="field"><span>Sódio urinário <small>(mEq/L)</small></span><input name="sodio_urinario" type="number" min="0" max="500" step="0.1" inputmode="decimal" placeholder="Ex.: 35" /></label>
-            <label class="field"><span>Creatinina urinária <small>(mg/dL)</small></span><input name="creatinina_urinaria" type="number" min="0" max="1000" step="0.1" inputmode="decimal" placeholder="Ex.: 80" /></label>
-            <label class="field"><span>Ureia urinária <small>(mg/dL)</small></span><input name="ureia_urinaria" type="number" min="0" max="5000" step="0.1" inputmode="decimal" placeholder="Ex.: 900" /></label>
-          </div>
-        </div>
-      </section>
-
     </form>
 
     <aside class="disclaimer">
@@ -791,24 +683,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </aside>
   </main>
 </StarlightPage>
-<style>
-  .subsection-block {
-    margin-top: 1.25rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--sl-color-gray-5);
-  }
-  .subsection-block:first-of-type { border-top: 0; padding-top: 0; }
-  .subsection-block h3 { margin: 0 0 0.4rem; font-size: 1rem; }
-  .clinical-summary {
-    margin-top: 1.25rem;
-    padding: 1rem 1.1rem;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 0.75rem;
-    background: var(--sl-color-gray-7, transparent);
-    line-height: 1.7;
-  }
-  .clinical-summary strong { font-weight: 700; }
-</style>
+
 <script>
   import type { ContextoPaciente, ValorClinico } from '../../lib/calc-engine/types';
 
@@ -947,158 +822,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       maximumFractionDigits: digits,
     }).format(value);
   }
-    const assessmentDisplayOrder = [
-      'imc', 'superficie-corporal', 'peso-ideal', 'peso-ajustado',
-      'pam', 'shock-index', 'news2', 'sofa-2', 'apache-ii',
-      'ckd-epi-2021', 'cockcroft-gault', 'fena', 'fe-ureia',
-      'child-pugh', 'meld-3', 'albi',
-      'osmolaridade-plasmatica', 'osmolaridade-efetiva', 'anion-gap', 'anion-gap-albumina', 'delta-gap', 'sodio-corrigido-glicemia',
-      'rcri', 'padua', 'hiss', 'ciwa-ar', 'cows',
-    ];
-
-    function summaryValue(results, id, decimals = 2) {
-      const item = results.find((entry) => entry.calc.id === id && entry.status === 'ok');
-      if (!item || item.status !== 'ok') return null;
-      const value = item.resultado.valor;
-      return typeof value === 'number'
-        ? (Number.isInteger(value) ? String(value) : value.toFixed(decimals).replace('.', ','))
-        : String(value);
-    }
-
-    function summaryText(value, decimals = 2) {
-      if (value === undefined || value === null || value === '') return '—';
-      if (typeof value === 'number') {
-        return Number.isInteger(value) ? String(value) : value.toFixed(decimals).replace('.', ',');
-      }
-      return String(value);
-    }
-
-    function summaryBool(value) {
-      if (value === true) return 'Sim';
-      if (value === false) return 'Não';
-      return 'não informado';
-    }
-
-    function summarySex(value) {
-      if (value === 'feminino') return 'Feminino';
-      if (value === 'masculino') return 'Masculino';
-      if (value === 'outro') return 'Outro/não aplicável';
-      return 'não informado';
-    }
-
-    function summaryAdmission(value) {
-      if (value === 'clinica') return 'Clínica';
-      if (value === 'pos_operatorio_eletivo') return 'Pós-op eletivo';
-      if (value === 'pos_operatorio_nao_eletivo') return 'Pós-op não eletivo';
-      return 'não informado';
-    }
-
-    function summaryRespiratory(value) {
-      if (value === 'nenhum') return 'Nenhum';
-      if (value === 'alto_fluxo') return 'Alto fluxo';
-      if (value === 'cpap') return 'CPAP';
-      if (value === 'bipap_niv') return 'BiPAP / VNI';
-      if (value === 'ventilacao_mecanica_invasiva') return 'Ventilação mecânica invasiva';
-      if (value === 'ventilacao_domestica') return 'Ventilação domiciliar';
-      return 'não informado';
-    }
-
-    function escapeSummary(value) {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function strongSummary(value) {
-      return `<strong>${escapeSummary(value)}</strong>`;
-    }
-
-    function orderedAssessmentSummary(resultados) {
-      return assessmentDisplayOrder
-        .map((id) => {
-          const item = resultados.find((entry) => entry.calc.id === id && entry.status === 'ok');
-          if (!item || item.status !== 'ok') return null;
-          const value = summaryValue(resultados, id, 2);
-          const labels = {
-            'imc': 'IMC',
-            'superficie-corporal': 'SC',
-            'peso-ideal': 'Peso ideal',
-            'peso-ajustado': 'Peso ajustado',
-            'pam': 'PAM',
-            'shock-index': 'IC',
-            'news2': 'NEWS2',
-            'sofa-2': 'SOFA',
-            'apache-ii': 'APACHE II',
-            'ckd-epi-2021': 'TFGe-EPI',
-            'cockcroft-gault': 'ClCr-CG',
-            'fena': 'FeNa',
-            'fe-ureia': 'FeUreia',
-            'child-pugh': 'Child',
-            'meld-3': 'MELD',
-            'albi': 'ALBI',
-            'osmolaridade-plasmatica': 'Osm plasmática',
-            'osmolaridade-efetiva': 'Osm efetiva',
-            'anion-gap': 'AG',
-            'anion-gap-albumina': 'AGc',
-            'delta-gap': 'Delta gap',
-            'sodio-corrigido-glicemia': 'Na corrigido',
-            'rcri': 'RCRI',
-            'padua': 'Pádua',
-            'hiss': 'HISS',
-            'ciwa-ar': 'CIWA-Ar',
-            'cows': 'COWS',
-          };
-          return `${labels[id] ?? id} ${value}`;
-        })
-        .filter(Boolean)
-        .join(' | ');
-    }
-    function renderAssessmentSummaryPlaceholder(data, resultados) {
-      const ordered = orderedAssessmentSummary(resultados);
-      if (typeof assessmentSummary !== 'undefined' && assessmentSummary) {
-        assessmentSummary.innerHTML = ordered ? `Avaliação: ${escapeSummary(ordered)}` : 'Avaliação: —';
-      }
-      renderClinicalSummary(data, resultados);
-    }
-
-
-    function renderClinicalSummary(data, resultados) {
-      const target = document.querySelector('#clinical-summary');
-      if (!target) return;
-
-      const fio2 = data.fio2_percent ?? (typeof data.fio2 === 'number' ? data.fio2 * 100 : null);
-      const gcs = data.gcs;
-      const o = data.glasgow_ocular;
-      const v = data.glasgow_verbal;
-      const m = data.glasgow_motor;
-      const healthStatus = data.insuficiencia_organica_grave_imunossupressao === true
-        ? 'imunossuprimido'
-        : data.insuficiencia_organica_grave_imunossupressao === false
-          ? 'hígido'
-          : 'não informado';
-      const ascite = data.ascite && data.ascite !== 'nenhuma' ? 'Sim' : data.ascite === 'nenhuma' ? 'Não' : 'não informado';
-
-      const paragraphs = [
-        `Paciente ${strongSummary(summaryText(data.idade, 0))}a, ${strongSummary(summarySex(data.sexo))}, ${strongSummary(summaryText(data.peso, 1))}kg, ${strongSummary(summaryText(data.altura, 0))}cm. Admissão ${strongSummary(summaryAdmission(data.tipo_admissao))}; ${strongSummary(healthStatus)}.`,
-        `SSVV: PA ${strongSummary(`${summaryText(data.pas, 0)}x${summaryText(data.pad, 0)}`)}, FC ${strongSummary(summaryText(data.fc, 0))}, FR ${strongSummary(summaryText(data.fr, 0))}, T ${strongSummary(summaryText(data.temperatura, 1))}°C, SpO2 ${strongSummary(summaryText(data.spo2, 0))}% (FiO2 ${strongSummary(summaryText(fio2, 0))}%).`,
-        `GCS ${strongSummary(summaryText(gcs, 0))} (O${strongSummary(summaryText(o, 0))} V${strongSummary(summaryText(v, 0))} M${strongSummary(summaryText(m, 0))}); ${strongSummary(summaryText(data.consciencia))}.`,
-        `Sup. Resp: ${strongSummary(summaryRespiratory(data.suporte_ventilatorio_tipo))}. DVA: ${strongSummary(summaryBool(data.vasoativos_em_uso))}.`,
-        `Diurese ${strongSummary(summaryText(data.diurese_ml, 0))}mL/${strongSummary(summaryText(data.diurese_horas, 0))}h; IRA ${strongSummary(summaryBool(data.ira_atual))}; TRS ${strongSummary(summaryBool(data.terapia_renal_substitutiva))}.`,
-        `Cirrose ${strongSummary(summaryBool(data.cirrose))}; Ascite ${strongSummary(ascite)}.`,
-        `LAB: Hb ${strongSummary(summaryText(data.hemoglobina, 1))}, Leuc ${strongSummary(summaryText(data.leucocitos, 1))}, Plaq ${strongSummary(summaryText(data.plaquetas, 0))}, Ur ${strongSummary(summaryText(data.ureia, 1))}, Cr ${strongSummary(summaryText(data.creatinina, 2))}, Na ${strongSummary(summaryText(data.sodio, 1))}, K ${strongSummary(summaryText(data.potassio, 1))}, Glic ${strongSummary(summaryText(data.glicemia, 1))}, BT ${strongSummary(summaryText(data.bilirrubina, 2))}, Alb ${strongSummary(summaryText(data.albumina, 2))}, INR ${strongSummary(summaryText(data.inr, 2))}.`,
-        `GASO: pH ${strongSummary(summaryText(data.ph, 2))}, pO2 ${strongSummary(summaryText(data.pao2, 1))}, pCO2 ${strongSummary(summaryText(data.paco2, 1))}, HCO3 ${strongSummary(summaryText(data.hco3, 1))}, BE ${strongSummary(summaryText(data.excesso_base, 1))}, Lactato ${strongSummary(summaryText(data.lactato, 1))}.`,
-        `SCORES: IMC ${strongSummary(summaryValue(resultados, 'imc', 1))}, PAM ${strongSummary(summaryValue(resultados, 'pam', 0))}, NEWS2 ${strongSummary(summaryValue(resultados, 'news2', 0))}, SOFA ${strongSummary(summaryValue(resultados, 'sofa-2', 0))}, APACHE II ${strongSummary(summaryValue(resultados, 'apache-ii', 0))}, CKD-EPI ${strongSummary(summaryValue(resultados, 'ckd-epi-2021', 0))}, Child ${strongSummary(summaryValue(resultados, 'child-pugh', 0))}, MELD ${strongSummary(summaryValue(resultados, 'meld-3', 0))}.`,
-      ];
-
-      const tokens = orderedAssessmentSummary(resultados);
-      target.innerHTML = `${tokens ? `<div class="field-help"><strong>Resumo dos resultados:</strong> ${escapeSummary(tokens)}</div>` : ''}<p>${paragraphs.join(' ')}</p>`;
-      target.hidden = false;
-    }
-
-
 
   function summaryToken(id: string, resultado: { valor: number; resumo?: string }): string {
     const value = formatNumber(resultado.valor, ['news2', 'apache-ii', 'sofa-2', 'child-pugh', 'meld-3'].includes(id) ? 0 : 1);
@@ -1202,7 +925,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
       if (summaryTokens.length > 0) {
         assessmentSummary.hidden = false;
-        renderAssessmentSummaryPlaceholder(data, complete);
+        assessmentSummary.innerHTML = `Avaliação: ${summaryTokens.map((token) => escapeHtml(token)).join(' | ')}.`;
       } else {
         assessmentSummary.hidden = true;
         assessmentSummary.textContent = '';
@@ -1862,34 +1585,5 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     .incomplete-item span {
       text-align: left;
     }
-  }
-
-  .results-summaries {
-    display: grid;
-    gap: 10px;
-    width: 100%;
-    min-width: 0;
-    margin-bottom: 16px;
-  }
-
-  .results-summaries .assessment-summary,
-  .results-summaries .clinical-summary {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    margin: 0;
-    overflow: visible;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: normal;
-  }
-
-  .results-summaries .clinical-summary p {
-    margin: 0;
-  }
-
-  .results-summaries .clinical-summary .field-help {
-    margin-bottom: 8px;
   }
 </style>
