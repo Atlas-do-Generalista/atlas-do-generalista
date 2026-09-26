@@ -3,8 +3,8 @@ title: "Rastreamento e Diagnóstico Precoce do Câncer na Atenção Primária: M
 autores:
   - nome: "João Pedro Lelis Ferreira"
     orcid: "0009-0007-1619-3096"
-draft: true
 date: "2026-09-26T21:51:08.941Z"
+doi: 10.5281/zenodo.22983444
 ---
 
 # Rastreamento e Diagnóstico Precoce do Câncer na Atenção Primária: Mama
