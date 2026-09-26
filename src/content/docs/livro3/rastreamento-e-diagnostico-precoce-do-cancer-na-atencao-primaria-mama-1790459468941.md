@@ -7,8 +7,6 @@ date: "2026-09-26T21:51:08.941Z"
 doi: 10.5281/zenodo.22983444
 ---
 
-# Rastreamento e Diagnóstico Precoce do Câncer na Atenção Primária: Mama
-
 ​	O rastreamento do câncer de mama é uma medida de saúde pública que se justifica por ser o mais incidente na população feminina mundial e brasileira, depois do câncer de pele não melanoma. Atualmente o controle do câncer de mama é uma das prioridades da agenda de saúde do país. Desde a década de 1980, o controle do câncer de mama consolidou-se no SUS por meio de sucessivas políticas públicas, sistemas de informação e planos estratégicos estruturados pelo Ministério da Saúde e pelo INCA. Ao longo das décadas, essas ações focaram na constante atualização técnica das diretrizes de rastreamento e diagnóstico precoce para estruturar a rede assistencial, ampliar o acesso ao tratamento e reduzir a mortalidade feminina no país.
 
 ​	O controle do câncer de mama na Atenção Primária apoia-se em duas estratégias estruturais distintas, cujas indicações e fluxos de atendimento não devem ser confundidos na prática clínica: o rastreamento em pacientes assintomáticas e o diagnóstico precoce em pacientes com queixas clínicas.
@@ -23,8 +21,6 @@ doi: 10.5281/zenodo.22983444
 ​	A estratégia de diagnóstico precoce é acionada assim que uma paciente (ou paciente do sexo masculino) identifica uma alteração suspeita e busca a unidade de saúde. Diferente do rastreamento, o diagnóstico precoce independe de idade ou faixa etária alvo. A premissa fundamental para o generalista é que **pacientes com sinais ou sintomas suspeitos devem ser encaminhadas para investigação diagnóstica, independentemente da idade ou de estarem dentro da faixa etária de rastreamento**. O sistema de saúde deve estar estruturado para acolher essa demanda espontânea e garantir a realização de exames diagnósticos em tempo oportuno. Esta estratégia é especialmente crítica em regiões e contextos onde os tumores tendem a ser diagnosticados em estágios clinicamente avançados.
 
 ## Mapa de Decisão
-
-## Mapa de decisão
 
 ```mermaid
 flowchart TD
