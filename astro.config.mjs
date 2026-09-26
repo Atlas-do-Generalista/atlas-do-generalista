@@ -1,10 +1,14 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import mermaid from 'astro-mermaid';
 
 export default defineConfig({
   site: 'https://atlas-do-generalista.github.io',
   base: '/atlas-do-generalista',
   integrations: [
+    mermaid({
+      autoTheme: true,
+    }),
     starlight({
       title: 'Atlas do Generalista: Manual Aberto de Medicina para o Generalista',
       customCss: ['./src/assets/custom.css'],
