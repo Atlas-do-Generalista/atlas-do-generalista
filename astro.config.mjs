@@ -1,20 +1,26 @@
+
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import mermaid from 'astro-mermaid';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://atlas-do-generalista.github.io',
   base: '/atlas-do-generalista',
+
   integrations: [
     mermaid({
       autoTheme: true,
     }),
+
     starlight({
       title: 'Atlas do Generalista: Manual Aberto de Medicina para o Generalista',
       customCss: ['./src/assets/custom.css'],
+
       components: {
         PageTitle: './src/components/CustomTitle.astro',
       },
+
       head: [
         {
           tag: 'script',
@@ -37,54 +43,39 @@ export default defineConfig({
           },
         },
       ],
+
       sidebar: [
         {
           label: 'Livro I: Raciocínio Clínico e Tomada de Decisão',
-          items: [
-            { autogenerate: { directory: 'livro1' } },
-          ],
+          items: [{ autogenerate: { directory: 'livro1' } }],
         },
         {
           label: 'Livro II: Procedimentos Médicos, Habilidades Invasivas & Trauma',
-          items: [
-            { autogenerate: { directory: 'livro2' } },
-          ],
+          items: [{ autogenerate: { directory: 'livro2' } }],
         },
         {
           label: 'Livro III: Oncologia Prática, Emergências Oncológicas & Paliativismo',
-          items: [
-            { autogenerate: { directory: 'livro3' } },
-          ],
+          items: [{ autogenerate: { directory: 'livro3' } }],
         },
         {
           label: 'Livro IV: Pediatria e Emergências Pediátricas para o Generalista',
-          items: [
-            { autogenerate: { directory: 'livro4' } },
-          ],
+          items: [{ autogenerate: { directory: 'livro4' } }],
         },
         {
           label: 'Livro V: Ginecologia, Obstetrícia & Urgências Gineco-Obstétricas',
-          items: [
-            { autogenerate: { directory: 'livro5' } },
-          ],
+          items: [{ autogenerate: { directory: 'livro5' } }],
         },
         {
           label: 'Livro VI: Toxicologia Clínica e Envenenamentos',
-          items: [
-            { autogenerate: { directory: 'livro6' } },
-          ],
+          items: [{ autogenerate: { directory: 'livro6' } }],
         },
         {
           label: 'Livro VII: Medicina Legal, Atestados, Documentação & Deontologia',
-          items: [
-            { autogenerate: { directory: 'livro7' } },
-          ],
+          items: [{ autogenerate: { directory: 'livro7' } }],
         },
         {
           label: 'Livro VIII: Gestão do Plantão, Carreira, Prescrição & Ferramentas de Suporte',
-          items: [
-            { autogenerate: { directory: 'livro8' } },
-          ],
+          items: [{ autogenerate: { directory: 'livro8' } }],
         },
         {
           label: '🧮 Motor de Decisão Clínica',
@@ -92,5 +83,8 @@ export default defineConfig({
         },
       ],
     }),
+
+    sitemap(),
   ],
 });
+
