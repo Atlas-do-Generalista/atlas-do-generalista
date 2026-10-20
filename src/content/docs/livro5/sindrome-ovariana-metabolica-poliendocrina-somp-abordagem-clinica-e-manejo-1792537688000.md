@@ -19,8 +19,6 @@ Em maio de 2026, a **Síndrome dos Ovários Policísticos (SOP/PCOS)** foi renom
 
 ---
 
-## Visão geral e pontos de atenção
-
 A SOMP é crônica, heterogênea e multifatorial. Afeta cerca de 10% das mulheres em idade reprodutiva e é a principal causa de hiperandrogenismo e de infertilidade anovulatória.
 
 O raciocínio clínico deve integrar **quatro eixos**:
