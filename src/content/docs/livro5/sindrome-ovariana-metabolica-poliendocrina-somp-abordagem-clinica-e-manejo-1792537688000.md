@@ -6,7 +6,6 @@ autores:
 date: "2026-10-20T23:08:08.000Z"
 ---
 
-# Síndrome Ovariana Metabólica Poliendócrina (SOMP)
 
 Em maio de 2026, a **Síndrome dos Ovários Policísticos (SOP/PCOS)** foi renomeada por consenso global para **Síndrome Ovariana Metabólica Poliendócrina (SOMP/PMOS)**.
 
