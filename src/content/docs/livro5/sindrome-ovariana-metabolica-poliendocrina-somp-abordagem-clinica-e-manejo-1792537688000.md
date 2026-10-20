@@ -3,7 +3,6 @@ title: "Síndrome Ovariana Metabólica Poliendócrina (SOMP): abordagem clínica
 autores:
   - nome: "João Pedro Lelis Ferreira"
     orcid: "0009-0007-1619-3096"
-draft: true
 date: "2026-10-20T23:08:08.000Z"
 ---
 
