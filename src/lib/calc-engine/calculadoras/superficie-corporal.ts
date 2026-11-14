@@ -4,6 +4,8 @@ export const superficieCorporal: Calculadora = {
   id: 'superficie-corporal',
   nome: 'Superfície corporal (Mosteller)',
   categoria: 'antropometria',
+  tipoMetrica: 'medida_calculada',
+  dominioClinico: 'antropometria',
   entradas: ['peso', 'altura'],
   calcular: (dados: ContextoPaciente): ResultadoCalculadora => {
     const peso = dados.peso as number;

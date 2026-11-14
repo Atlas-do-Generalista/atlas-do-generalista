@@ -4,24 +4,40 @@ export const deltaGap: Calculadora = {
   id: 'delta-gap',
   nome: 'Delta gap',
   categoria: 'laboratorio metabolico',
+  tipoMetrica: 'medida_calculada',
+  dominioClinico: 'gasometria',
   entradas: ['sodio', 'cloro', 'hco3', 'albumina'],
   calcular: (dados: ContextoPaciente): ResultadoCalculadora => {
     const ag = (dados.sodio as number) - ((dados.cloro as number) + (dados.hco3 as number));
     const agCorrigido = ag + 2.5 * (4 - (dados.albumina as number));
     const deltaAg = agCorrigido - 12;
     const deltaHco3 = 24 - (dados.hco3 as number);
-    const valor = deltaAg - deltaHco3;
+    const valor = Number((deltaAg - deltaHco3).toFixed(1));
+
+    let interpretacaoBreve = 'Compatível com acidose de AG elevado pura';
+    let nivelGravidade: 'normal' | 'atencao' | 'alerta' = 'normal';
+    if (valor > 6) {
+      interpretacaoBreve = 'Sugere alcalose metabólica associada';
+      nivelGravidade = 'atencao';
+    } else if (valor < -6) {
+      interpretacaoBreve = 'Sugere acidose hiperclorêmica associada';
+      nivelGravidade = 'atencao';
+    }
 
     return {
-      valor: Number(valor.toFixed(1)),
+      valor,
       unidade: 'mEq/L',
+      resumo: `Delta gap ${valor} mEq/L (${interpretacaoBreve})`,
+      nivelGravidade,
       detalhamento: [
         { campo: 'ag_corrigido', valor: Number(agCorrigido.toFixed(1)), descricao: 'Ânion gap corrigido por albumina' },
         { campo: 'delta_ag', valor: Number(deltaAg.toFixed(1)), descricao: 'ΔÂnion gap (AGc − 12)' },
         { campo: 'delta_hco3', valor: Number(deltaHco3.toFixed(1)), descricao: 'ΔHCO₃⁻ (24 − HCO₃⁻)' },
       ],
       avisos: [
-        'O delta gap é uma ferramenta de apoio para reconhecer distúrbios metabólicos mistos; a interpretação depende do contexto e das premissas sobre AG e HCO₃⁻ normais.',
+        'O delta gap (ΔAG − ΔHCO₃⁻) é uma ferramenta para desmascarar distúrbios metabólicos mistos quando há acidose com ânion gap aumentado.',
+        'Valor > +6 mEq/L sugere alcalose metabólica concomitante (o bicarbonato não caiu na proporção esperada do aumento de ânions orgânicos).',
+        'Valor < −6 mEq/L sugere acidose metabólica hiperclorêmica concomitante (o bicarbonato caiu mais do que o aumento do ânion gap).',
       ],
     };
   },

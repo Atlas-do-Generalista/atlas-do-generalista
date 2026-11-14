@@ -4,6 +4,8 @@ export const rcri: Calculadora = {
   id: 'rcri',
   nome: 'RCRI (Índice Cardíaco Revisado de Lee)',
   categoria: 'risco e profilaxia',
+  tipoMetrica: 'escore',
+  dominioClinico: 'especificas',
   entradas: [
     'rcri_cirurgia_alto_risco',
     'rcri_doenca_isquemica',
@@ -25,10 +27,14 @@ export const rcri: Calculadora = {
     const valor = criterios.reduce((total, [, , presente]) => total + (presente === true ? 1 : 0), 0);
     const classe = valor === 0 ? 'I' : valor === 1 ? 'II' : valor === 2 ? 'III' : 'IV';
 
+    const nivelGravidade: 'normal' | 'atencao' | 'alerta' | 'critico' =
+      valor === 0 ? 'normal' : valor === 1 ? 'atencao' : valor === 2 ? 'alerta' : 'critico';
+
     return {
       valor,
       unidade: 'pontos',
       resumo: `RCRI ${valor} pontos — classe histórica ${classe}`,
+      nivelGravidade,
       detalhamento: criterios.map(([campo, descricao, presente]) => ({
         campo,
         valor: presente,
@@ -41,7 +47,13 @@ export const rcri: Calculadora = {
       ],
     };
   },
-  interpretar: (resultado) => resultado.resumo ?? `RCRI: ${resultado.valor} pontos.`,
+  interpretar: (resultado) => {
+    const v = Number(resultado.valor);
+    if (v === 0) return `RCRI: 0 pontos (Classe I — Risco de complicação cardíaca maior perioperatória estimado em ~0,4–0,5%).`;
+    if (v === 1) return `RCRI: 1 ponto (Classe II — Risco de complicação cardíaca maior estimado em ~0,9–1,0%).`;
+    if (v === 2) return `RCRI: 2 pontos (Classe III — Risco elevado de complicação cardíaca maior estimado em ~6,6–7,0%).`;
+    return `RCRI: ${v} pontos (Classe IV — Alto risco cardiovascular perioperatório estimado em ~11,0% a 15,0%; considerar investigação adicional e cardiologia).`;
+  },
   populacaoAlvo: 'Adultos em avaliação pré-operatória de cirurgia não cardíaca.',
   limitacoes: [
     'As classes históricas I–IV vêm do RCRI original e não representam necessariamente o risco observado em todas as populações contemporâneas.',

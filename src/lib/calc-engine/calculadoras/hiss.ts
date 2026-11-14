@@ -4,6 +4,8 @@ export const hiss: Calculadora = {
   id: 'hiss',
   nome: 'HISS (Head Injury Severity Scale)',
   categoria: 'avaliacoes neurologicas e especificas',
+  tipoMetrica: 'classificacao',
+  dominioClinico: 'especificas',
   entradas: ['hiss_gcs_inicial', 'hiss_perda_consciencia_minutos', 'hiss_amnesia', 'hiss_reacao_lenta', 'hiss_deficit_focal'],
   calcular: (dados: ContextoPaciente): ResultadoCalculadora => {
     const gcs = dados.hiss_gcs_inicial as number;
@@ -25,10 +27,16 @@ export const hiss: Calculadora = {
       categoria = 'mínima';
     }
 
+    let nivelGravidade: 'normal' | 'atencao' | 'alerta' | 'critico' = 'normal';
+    if (categoria === 'crítica' || categoria === 'grave') nivelGravidade = 'critico';
+    else if (categoria === 'moderada') nivelGravidade = 'alerta';
+    else if (categoria === 'leve') nivelGravidade = 'atencao';
+
     return {
       valor: gcs,
       unidade: 'GCS',
       resumo: `HISS: lesão craniana ${categoria}`,
+      nivelGravidade,
       detalhamento: [
         { campo: 'hiss_gcs_inicial', valor: gcs, descricao: 'GCS inicial pós-ressuscitação' },
         { campo: 'hiss_perda_consciencia_minutos', valor: locMin, descricao: 'Perda de consciência (minutos)' },
@@ -42,7 +50,8 @@ export const hiss: Calculadora = {
       ],
     };
   },
-  interpretar: (resultado) => resultado.resumo ?? `HISS: GCS inicial ${resultado.valor}.`,
+  interpretar: (resultado) =>
+    `${resultado.resumo} (GCS inicial ${resultado.valor}). Indicação de tomografia computadorizada de crânio e conduta neurocirúrgica conforme diretrizes contemporâneas de TCE.`,
   populacaoAlvo: 'Adultos com traumatismo cranioencefálico/lesão craniana aguda.',
   limitacoes: [
     'HISS não deve substituir protocolos contemporâneos de manejo do TCE, seleção de TC ou avaliação neurocirúrgica.',

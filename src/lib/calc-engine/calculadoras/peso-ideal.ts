@@ -4,6 +4,8 @@ export const pesoIdeal: Calculadora = {
   id: 'peso-ideal',
   nome: 'Peso ideal (Devine)',
   categoria: 'antropometria',
+  tipoMetrica: 'medida_calculada',
+  dominioClinico: 'antropometria',
   entradas: ['sexo', 'altura'],
   calcular: (dados: ContextoPaciente): ResultadoCalculadora => {
     const altura = dados.altura as number;

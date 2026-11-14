@@ -64,14 +64,45 @@ function calcularNews2(dados: ContextoPaciente): ResultadoCalculadora {
   ];
 
   const valor = detalhes.reduce((total, item) => total + (item.pontos ?? 0), 0);
+  const temGatilho3 = detalhes.some((d) => d.pontos === 3);
+
+  let resumoTexto = '';
+  let nivelGravidade: 'normal' | 'atencao' | 'alerta' | 'critico' = 'normal';
+
+  if (valor >= 7) {
+    resumoTexto = 'Risco alto de deterioração clínica';
+    nivelGravidade = 'critico';
+  } else if (valor >= 5) {
+    resumoTexto = 'Risco moderado de deterioração clínica';
+    nivelGravidade = 'alerta';
+  } else if (temGatilho3) {
+    resumoTexto = 'Risco moderado (alerta por parâmetro extremo isolado de 3 pts)';
+    nivelGravidade = 'alerta';
+  } else if (valor >= 1) {
+    resumoTexto = 'Risco baixo de deterioração clínica';
+    nivelGravidade = 'atencao';
+  } else {
+    resumoTexto = 'Risco baixo (estabilidade clínica)';
+    nivelGravidade = 'normal';
+  }
+
+  const avisos = [
+    'Esta implementação utiliza a SpO₂ Scale 1 do NEWS2. A Scale 2 para pacientes com insuficiência respiratória hipercápnica conhecida não é selecionada automaticamente.',
+  ];
+
+  if (temGatilho3 && valor < 5) {
+    avisos.push(
+      'ALERTA DE PARÂMETRO EXTREMO: Embora o escore total seja menor que 5 pontos, a presença de uma pontuação máxima individual (3 pontos em um único parâmetro vital) configura gatilho clínico vermelho e exige revisão médica urgente.',
+    );
+  }
 
   return {
     valor,
     unidade: 'pontos',
+    resumo: `NEWS2 ${valor} pontos (${resumoTexto})`,
+    nivelGravidade,
     detalhamento: detalhes,
-    avisos: [
-      'Esta implementação utiliza a SpO₂ Scale 1 do NEWS2. A Scale 2 para pacientes com insuficiência respiratória hipercápnica não é selecionada automaticamente.',
-    ],
+    avisos,
   };
 }
 
@@ -79,9 +110,25 @@ export const news2: Calculadora = {
   id: 'news2',
   nome: 'NEWS2',
   categoria: 'gravidade',
+  tipoMetrica: 'escore',
+  dominioClinico: 'gravidade',
   entradas: ['fr', 'spo2', 'pas', 'fc', 'temperatura', 'consciencia', 'o2_suplementar'],
   calcular: calcularNews2,
-  interpretar: (resultado) => `NEWS2 total: ${resultado.valor} pontos. Consulte a tabela NEWS2 e o protocolo institucional para a resposta clínica correspondente.`,
+  interpretar: (resultado) => {
+    const val = Number(resultado.valor);
+    const temGatilho3 = resultado.detalhamento?.some((d) => d.pontos === 3);
+
+    if (val >= 7) {
+      return `NEWS2: ${val} pontos (Risco alto de deterioração clínica, necessitando de equipe com competência em cuidados críticos).`;
+    }
+    if (val >= 5) {
+      return `NEWS2: ${val} pontos (Risco moderado de deterioração clínica, necessitando de revisão médica urgente).`;
+    }
+    if (temGatilho3) {
+      return `NEWS2: ${val} pontos (Risco moderado por parâmetro individual extremo [3 pontos], necessitando de revisão médica urgente).`;
+    }
+    return `NEWS2: ${val} pontos (Risco baixo de deterioração clínica, manter reavaliação periódica).`;
+  },
   populacaoAlvo: 'Adultos com doença aguda; a aplicabilidade deve considerar o contexto clínico e as populações excluídas/adaptadas pelo protocolo local.',
   limitacoes: [
     'A implementação utiliza a SpO₂ Scale 1; a Scale 2 exige identificação clínica específica de insuficiência respiratória hipercápnica.',
@@ -98,14 +145,14 @@ export const news2: Calculadora = {
     },
   ],
   versao: '2',
-  ultimaRevisao: '2026-09-19',
+  ultimaRevisao: '2026-11-14',
   validar: (dados) => {
     const erros: string[] = [];
-
-    if (typeof dados.spo2 === 'number' && (dados.spo2 < 0 || dados.spo2 > 100)) {
-      erros.push('SpO₂ deve estar entre 0 e 100%.');
-    }
-
+    if (typeof dados.fr !== 'number' || dados.fr < 0) erros.push('FR não pode ser negativa.');
+    if (typeof dados.spo2 !== 'number' || dados.spo2 < 0 || dados.spo2 > 100) erros.push('SpO₂ deve estar entre 0% e 100%.');
+    if (typeof dados.pas !== 'number' || dados.pas <= 0) erros.push('PAS deve ser maior que zero.');
+    if (typeof dados.fc !== 'number' || dados.fc < 0) erros.push('FC não pode ser negativa.');
+    if (typeof dados.temperatura !== 'number' || dados.temperatura < 25 || dados.temperatura > 45) erros.push('Temperatura fora do intervalo plausível.');
     return erros;
   },
 };

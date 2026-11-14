@@ -50,6 +50,7 @@ export interface ContextoPaciente {
   sodio?: number;
   cloro?: number;
   potassio?: number;
+  calcio?: number; // Cálcio sérico total em mg/dL
   bilirrubina?: number;
   albumina?: number;
   inr?: number;
@@ -76,7 +77,7 @@ export interface ContextoPaciente {
   norepinefrina?: number;
   epinefrina?: number;
   dopamina?: number;
-  vasopressina?: number;
+  vasopressina?: number; // Doses em infusão contínua em U/min (faixa usual: 0,01 a 0,04 U/min)
   dobutamina?: number;
   milrinona?: number;
   nitroprussiato?: number;
@@ -181,6 +182,26 @@ export interface ContextoPaciente {
   [campo: string]: ValorClinico;
 }
 
+export type TipoMetrica =
+  | 'escore'
+  | 'medida_calculada'
+  | 'indice'
+  | 'classificacao'
+  | 'regra_decisao'
+  | 'criterio_diagnostico';
+
+export type NivelGravidade = 'normal' | 'atencao' | 'alerta' | 'critico';
+
+export type DominioClinico =
+  | 'gravidade'
+  | 'cardiovascular'
+  | 'renal'
+  | 'hepatica'
+  | 'gasometria'
+  | 'metabolismo'
+  | 'antropometria'
+  | 'especificas';
+
 export interface DetalheCalculo {
   campo: string;
   valor: ValorClinico;
@@ -194,6 +215,7 @@ export interface ResultadoCalculadora {
   resumo?: string;
   detalhamento?: DetalheCalculo[];
   avisos?: string[];
+  nivelGravidade?: NivelGravidade;
 }
 
 export interface Referencia {
@@ -206,6 +228,8 @@ export interface Calculadora {
   id: string;
   nome: string;
   categoria: string;
+  tipoMetrica?: TipoMetrica;
+  dominioClinico?: DominioClinico;
   entradas: readonly string[];
   calcular: (dados: ContextoPaciente) => ResultadoCalculadora;
   interpretar?: (resultado: ResultadoCalculadora) => string;

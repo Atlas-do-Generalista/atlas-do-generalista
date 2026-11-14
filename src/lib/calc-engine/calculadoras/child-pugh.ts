@@ -8,8 +8,10 @@ function scoreEncefalopatia(v: ContextoPaciente['encefalopatia_hepatica']): numb
 
 export const childPugh: Calculadora = {
   id: 'child-pugh',
-  nome: 'Child-Pugh',
+  nome: 'Child-Pugh (CTP)',
   categoria: 'funcao hepatica',
+  tipoMetrica: 'classificacao',
+  dominioClinico: 'hepatica',
   entradas: ['bilirrubina', 'albumina', 'inr', 'ascite', 'encefalopatia_hepatica'],
   calcular: (d): ResultadoCalculadora => {
     const b = scoreBili(d.bilirrubina as number);
@@ -19,27 +21,65 @@ export const childPugh: Calculadora = {
     const e = scoreEncefalopatia(d.encefalopatia_hepatica);
     const valor = b + a + i + as + e;
     const classe = valor <= 6 ? 'A' : valor <= 9 ? 'B' : 'C';
+
+    let nivelGravidade: 'normal' | 'atencao' | 'alerta' | 'critico' = 'normal';
+    let descricaoPrognostica = '';
+
+    if (classe === 'A') {
+      nivelGravidade = 'normal';
+      descricaoPrognostica = 'Cirrose compensada (mortalidade perioperatória ~10%)';
+    } else if (classe === 'B') {
+      nivelGravidade = 'alerta';
+      descricaoPrognostica = 'Comprometimento funcional moderado (mortalidade perioperatória ~30%)';
+    } else {
+      nivelGravidade = 'critico';
+      descricaoPrognostica = 'Descompensação avançada (mortalidade perioperatória >50–80%)';
+    }
+
     const detalhes: DetalheCalculo[] = [
-      { campo: 'bilirrubina', valor: d.bilirrubina, pontos: b, descricao: 'Bilirrubina total' },
-      { campo: 'albumina', valor: d.albumina, pontos: a, descricao: 'Albumina' },
-      { campo: 'inr', valor: d.inr, pontos: i, descricao: 'INR' },
-      { campo: 'ascite', valor: d.ascite, pontos: as, descricao: 'Ascite' },
-      { campo: 'encefalopatia', valor: d.encefalopatia_hepatica, pontos: e, descricao: 'Encefalopatia hepática' },
+      { campo: 'bilirrubina', valor: d.bilirrubina, pontos: b, descricao: `Bilirrubina total (${d.bilirrubina} mg/dL)` },
+      { campo: 'albumina', valor: d.albumina, pontos: a, descricao: `Albumina sérica (${d.albumina} g/dL)` },
+      { campo: 'inr', valor: d.inr, pontos: i, descricao: `INR (${d.inr})` },
+      { campo: 'ascite', valor: d.ascite, pontos: as, descricao: `Ascite (${d.ascite})` },
+      { campo: 'encefalopatia', valor: d.encefalopatia_hepatica, pontos: e, descricao: `Encefalopatia hepática (${d.encefalopatia_hepatica})` },
     ];
+
     return {
       valor,
       unidade: 'pontos',
       resumo: `CTP ${valor}${classe}`,
+      nivelGravidade,
       detalhamento: detalhes,
-      avisos: ['O Child-Pugh é um escore prognóstico de gravidade de cirrose e inclui dois componentes clínicos subjetivos: ascite e encefalopatia.'],
+      avisos: [
+        'O escore de Child-Turcotte-Pugh estratifica a gravidade funcional da cirrose hepática crônica e a sobrevida em 1 a 2 anos, além de orientar risco cirúrgico.',
+        'Dois dos cinco critérios (ascite e encefalopatia) possuem avaliação semiológica e podem ser mascarados pelo uso de diuréticos e lactulose.',
+      ],
     };
   },
-  interpretar: (r) => `Child-Pugh: ${r.valor} pontos (${r.resumo?.slice(-1) ?? 'classe não informada'}).`,
-  populacaoAlvo: 'Adultos com cirrose/doença hepática crônica em que se deseja estimar gravidade.',
-  limitacoes: ['Não é um escore específico de insuficiência hepática aguda.', 'Ascite e encefalopatia têm componente subjetivo.'],
-  referencias: [{ titulo: 'VA Viral Hepatitis and Liver Disease — Child-Turcotte-Pugh Calculator', url: 'https://www.hepatitis.va.gov/provider/tools/child-pugh-calculator.asp' }],
-  versao: '5 componentes',
-  ultimaRevisao: '2026-09-19',
+  interpretar: (r) => {
+    const v = Number(r.valor);
+    const classe = v <= 6 ? 'Classe A' : v <= 9 ? 'Classe B' : 'Classe C';
+    if (v <= 6) {
+      return `Child-Pugh: ${v} pontos (${classe} — Cirrose hepática compensada; bom prognóstico com sobrevida em 1 ano de ~100% e mortalidade cirúrgica ~10%).`;
+    }
+    if (v <= 9) {
+      return `Child-Pugh: ${v} pontos (${classe} — Comprometimento funcional hepático moderado; sobrevida em 1 ano de ~80% e mortalidade cirúrgica ~30%).`;
+    }
+    return `Child-Pugh: ${v} pontos (${classe} — Doença hepática crônica gravemente descompensada; sobrevida em 1 ano de ~45% e elevado risco cirúrgico [mortalidade >50–80%]).`;
+  },
+  populacaoAlvo: 'Adultos com cirrose ou doença hepática crônica para estimativa de gravidade funcional e risco cirúrgico.',
+  limitacoes: [
+    'Não é um escore aplicável para insuficiência hepática aguda sem cirrose preexistente.',
+    'Apresenta efeito teto e depende de componentes semiológicos com potencial variabilidade interobservador.',
+  ],
+  referencias: [
+    {
+      titulo: 'Pugh RN et al. Transection of the oesophagus for bleeding oesophageal varices. Br J Surg. 1973;60(8):646-649.',
+      url: 'https://doi.org/10.1002/bjs.1800600817',
+    },
+  ],
+  versao: 'Pugh 1973',
+  ultimaRevisao: '2026-11-14',
   validar: (d) => {
     const e: string[] = [];
     if ((d.bilirrubina as number) < 0) e.push('Bilirrubina não pode ser negativa.');

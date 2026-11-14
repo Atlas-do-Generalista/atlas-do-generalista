@@ -16,8 +16,10 @@ const itens = [
 
 export const cows: Calculadora = {
   id: 'cows',
-  nome: 'COWS',
+  nome: 'COWS (Clinical Opiate Withdrawal Scale)',
   categoria: 'avaliacoes neurologicas e especificas',
+  tipoMetrica: 'escore',
+  dominioClinico: 'especificas',
   entradas: itens.map(([campo]) => campo),
   calcular: (dados: ContextoPaciente): ResultadoCalculadora => {
     const detalhes = itens.map(([campo, descricao]) => ({
@@ -28,15 +30,27 @@ export const cows: Calculadora = {
     }));
     const valor = detalhes.reduce((total, item) => total + (item.pontos ?? 0), 0);
     let gravidade = 'ausente/mínima';
-    if (valor >= 37) gravidade = 'grave';
-    else if (valor >= 25) gravidade = 'moderadamente grave';
-    else if (valor >= 13) gravidade = 'moderada';
-    else if (valor >= 5) gravidade = 'leve';
+    let nivelGravidade: 'normal' | 'atencao' | 'alerta' | 'critico' = 'normal';
+
+    if (valor >= 37) {
+      gravidade = 'grave';
+      nivelGravidade = 'critico';
+    } else if (valor >= 25) {
+      gravidade = 'moderadamente grave';
+      nivelGravidade = 'alerta';
+    } else if (valor >= 13) {
+      gravidade = 'moderada';
+      nivelGravidade = 'alerta';
+    } else if (valor >= 5) {
+      gravidade = 'leve';
+      nivelGravidade = 'atencao';
+    }
 
     return {
       valor,
       unidade: 'pontos',
       resumo: `COWS ${valor} — abstinência ${gravidade}`,
+      nivelGravidade,
       detalhamento: detalhes,
       avisos: [
         'COWS é uma escala clínica para quantificação de sinais e sintomas de abstinência de opioides.',
@@ -44,7 +58,14 @@ export const cows: Calculadora = {
       ],
     };
   },
-  interpretar: (resultado) => resultado.resumo ?? `COWS: ${resultado.valor} pontos.`,
+  interpretar: (resultado) => {
+    const v = Number(resultado.valor);
+    if (v >= 37) return `COWS: ${v} pontos (Abstinência de opioides grave — sintomas intensos e disautonomia exuberante; suporte intensivo e terapia farmacológica imediata).`;
+    if (v >= 25) return `COWS: ${v} pontos (Abstinência de opioides moderadamente grave — sintomas pronunciados; excelente janela clínica para indução de buprenorfina quando indicada).`;
+    if (v >= 13) return `COWS: ${v} pontos (Abstinência de opioides moderada — faixa clássica e segura para início/indução de buprenorfina).`;
+    if (v >= 5) return `COWS: ${v} pontos (Abstinência de opioides leve — monitorização clínica seriada).`;
+    return `COWS: ${v} pontos (Abstinência de opioides ausente/mínima [<5 pontos]).`;
+  },
   populacaoAlvo: 'Adultos com suspeita ou monitorização de abstinência de opioides.',
   limitacoes: [
     'Os itens possuem componentes objetivos e subjetivos; alterações por outras doenças podem influenciar a pontuação.',

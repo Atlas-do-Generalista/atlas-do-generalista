@@ -4,6 +4,8 @@ export const padua: Calculadora = {
   id: 'padua',
   nome: 'Pádua (risco de TEV em pacientes clínicos internados)',
   categoria: 'risco e profilaxia',
+  tipoMetrica: 'escore',
+  dominioClinico: 'especificas',
   entradas: [
     'idade',
     'altura',
@@ -43,6 +45,7 @@ export const padua: Calculadora = {
       valor,
       unidade: 'pontos',
       resumo: `Pádua ${valor} pontos — ${valor >= 4 ? 'alto risco de TEV' : 'baixo risco de TEV'}`,
+      nivelGravidade: valor >= 4 ? 'alerta' : 'normal',
       detalhamento: criterios.map(([campo, descricao, pontos, presente]) => ({
         campo,
         valor: presente,
@@ -55,7 +58,13 @@ export const padua: Calculadora = {
       ],
     };
   },
-  interpretar: (resultado) => resultado.resumo ?? `Pádua: ${resultado.valor} pontos.`,
+  interpretar: (resultado) => {
+    const v = Number(resultado.valor);
+    if (v >= 4) {
+      return `Pádua: ${v} pontos (Alto risco de TEV [incidência estimada ~11%]. Indicada tromboprofilaxia farmacológica se não houver contraindicação ativa por risco de sangramento).`;
+    }
+    return `Pádua: ${v} pontos (Baixo risco de TEV [incidência estimada <1%]. Tromboprofilaxia farmacológica de rotina não indicada; incentivar deambulação precoce).`;
+  },
   populacaoAlvo: 'Pacientes adultos clinicamente enfermos e hospitalizados, para avaliação de risco de TEV.',
   limitacoes: [
     'Aplicabilidade depende da população em que o modelo foi estudado e do protocolo de tromboprofilaxia local.',

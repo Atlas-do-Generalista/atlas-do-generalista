@@ -17,6 +17,8 @@ export const ciwaAr: Calculadora = {
   id: 'ciwa-ar',
   nome: 'CIWA-Ar',
   categoria: 'avaliacoes neurologicas e especificas',
+  tipoMetrica: 'escore',
+  dominioClinico: 'especificas',
   entradas: itens.map(([campo]) => campo),
   calcular: (dados: ContextoPaciente): ResultadoCalculadora => {
     const detalhes = itens.map(([campo, descricao]) => ({
@@ -27,14 +29,24 @@ export const ciwaAr: Calculadora = {
     }));
     const valor = detalhes.reduce((total, item) => total + (item.pontos ?? 0), 0);
     let gravidade = 'muito leve';
-    if (valor >= 21) gravidade = 'grave';
-    else if (valor >= 16) gravidade = 'moderada';
-    else if (valor >= 10) gravidade = 'leve';
+    let nivelGravidade: 'normal' | 'atencao' | 'alerta' | 'critico' = 'normal';
+
+    if (valor >= 21) {
+      gravidade = 'grave';
+      nivelGravidade = 'critico';
+    } else if (valor >= 16) {
+      gravidade = 'moderada';
+      nivelGravidade = 'alerta';
+    } else if (valor >= 10) {
+      gravidade = 'leve';
+      nivelGravidade = 'atencao';
+    }
 
     return {
       valor,
       unidade: 'pontos',
       resumo: `CIWA-Ar ${valor} — abstinência ${gravidade}`,
+      nivelGravidade,
       detalhamento: detalhes,
       avisos: [
         'CIWA-Ar é uma escala de monitorização da síndrome de abstinência alcoólica e deve ser interpretada junto do exame clínico.',
@@ -42,7 +54,19 @@ export const ciwaAr: Calculadora = {
       ],
     };
   },
-  interpretar: (resultado) => resultado.resumo ?? `CIWA-Ar: ${resultado.valor} pontos.`,
+  interpretar: (resultado) => {
+    const v = Number(resultado.valor);
+    if (v >= 21) {
+      return `CIWA-Ar: ${v} pontos (Abstinência alcoólica grave — alto risco de complicações graves [delirium tremens e convulsões]; indicado tratamento farmacológico intensivo com benzodiazepínicos e vigilância contínua).`;
+    }
+    if (v >= 16) {
+      return `CIWA-Ar: ${v} pontos (Abstinência alcoólica moderada — indicação clássica de início de terapia farmacológica com benzodiazepínicos guiada por sintomas).`;
+    }
+    if (v >= 10) {
+      return `CIWA-Ar: ${v} pontos (Abstinência alcoólica leve — monitorização frequente dos sinais vitais e sintomas; considerar suporte conforme protocolo local).`;
+    }
+    return `CIWA-Ar: ${v} pontos (Abstinência alcoólica muito leve / ausente — manter reavaliação periódica).`;
+  },
   populacaoAlvo: 'Adultos com suspeita ou monitorização de síndrome de abstinência alcoólica.',
   limitacoes: [
     'A escala não deve ser usada isoladamente para diagnosticar abstinência alcoólica.',

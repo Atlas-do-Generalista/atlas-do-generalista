@@ -4,6 +4,8 @@ export const anionGapAlbumina: Calculadora = {
   id: 'anion-gap-albumina',
   nome: 'Ânion gap corrigido por albumina',
   categoria: 'laboratorio metabolico',
+  tipoMetrica: 'medida_calculada',
+  dominioClinico: 'gasometria',
   entradas: ['sodio', 'cloro', 'hco3', 'albumina'],
   calcular: (dados: ContextoPaciente): ResultadoCalculadora => {
     const na = dados.sodio as number;
@@ -12,21 +14,34 @@ export const anionGapAlbumina: Calculadora = {
     const albumina = dados.albumina as number;
     const ag = na - (cl + hco3);
     const valor = ag + 2.5 * (4 - albumina);
+    const valorArredondado = Number(valor.toFixed(1));
+
+    let nivelGravidade: 'normal' | 'atencao' | 'alerta' = 'normal';
+    if (valorArredondado > 20) nivelGravidade = 'alerta';
+    else if (valorArredondado > 12) nivelGravidade = 'atencao';
 
     return {
-      valor: Number(valor.toFixed(1)),
+      valor: valorArredondado,
       unidade: 'mEq/L',
+      resumo: `AGc ${valorArredondado} mEq/L (${valorArredondado > 12 ? 'Elevado' : 'Normal'})`,
+      nivelGravidade,
       detalhamento: [
         { campo: 'anion_gap', valor: Number(ag.toFixed(1)), descricao: 'Ânion gap não corrigido' },
         { campo: 'albumina', valor: albumina, descricao: 'Albumina (g/dL)' },
-        { campo: 'valor_referencia_albumina', valor: 4, descricao: 'Albumina de referência (g/dL)' },
+        { campo: 'valor_referencia_albumina', valor: 4, descricao: 'Albumina de referência (4,0 g/dL)' },
       ],
       avisos: [
         'A correção utiliza +2,5 mEq/L para cada 1 g/dL de albumina abaixo de 4 g/dL.',
       ],
     };
   },
-  interpretar: (resultado) => `Ânion gap corrigido por albumina: ${resultado.valor} mEq/L.`,
+  interpretar: (resultado) => {
+    const v = Number(resultado.valor);
+    if (v > 12) {
+      return `Ânion gap corrigido por albumina: ${v} mEq/L (Elevado [referência: 8 a 12 mEq/L] — desmascara acidose metabólica com ânion gap elevado que estaria oculta pela hipoalbuminemia).`;
+    }
+    return `Ânion gap corrigido por albumina: ${v} mEq/L (Dentro da faixa normal corrigida de 8 a 12 mEq/L).`;
+  },
   populacaoAlvo: 'Adultos com eletrólitos, bicarbonato e albumina séricos.',
   limitacoes: [
     'A correção é uma estimativa e depende da convenção utilizada para o valor normal de albumina.',

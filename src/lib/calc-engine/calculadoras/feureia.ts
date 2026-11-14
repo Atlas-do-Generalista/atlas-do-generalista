@@ -4,6 +4,8 @@ export const feureia: Calculadora = {
   id: 'fe-ureia',
   nome: 'Fração de excreção de ureia (FeUreia)',
   categoria: 'funcao renal',
+  tipoMetrica: 'indice',
+  dominioClinico: 'renal',
   entradas: ['ureia', 'creatinina', 'ureia_urinaria', 'creatinina_urinaria'],
   calcular: (dados: ContextoPaciente): ResultadoCalculadora => {
     const ureia = dados.ureia as number;
@@ -12,9 +14,13 @@ export const feureia: Calculadora = {
     const uCr = dados.creatinina_urinaria as number;
     const valor = ((uUreia * cr) / (ureia * uCr)) * 100;
 
+    const nivelGravidade: 'normal' | 'atencao' | 'alerta' = valor > 50.0 ? 'alerta' : valor < 35.0 ? 'atencao' : 'normal';
+
     return {
       valor: Number(valor.toFixed(2)),
       unidade: '%',
+      resumo: `FeUreia ${valor.toFixed(2)}% (${valor < 35.0 ? 'Padrão pré-renal' : valor > 50.0 ? 'Padrão NTA / intrínseco' : 'Indeterminado'})`,
+      nivelGravidade,
       detalhamento: [
         { campo: 'ureia', valor: ureia, descricao: 'Ureia sérica (mg/dL)' },
         { campo: 'creatinina', valor: cr, descricao: 'Creatinina sérica (mg/dL)' },
@@ -22,11 +28,20 @@ export const feureia: Calculadora = {
         { campo: 'creatinina_urinaria', valor: uCr, descricao: 'Creatinina urinária (mg/dL)' },
       ],
       avisos: [
-        'Use o mesmo analito de ureia nas amostras sérica e urinária. A FeUreia tem utilidade limitada para separar lesão renal pré-renal de intrínseca, inclusive em pacientes em uso de diuréticos.',
+        'A fração de excreção de ureia é especialmente útil quando o paciente está em uso de diuréticos (ex.: furosemida), pois a ureia é reabsorvida no túbulo proximal e sofre menos interferência direta de diuréticos de alça do que a excreção de sódio.',
       ],
     };
   },
-  interpretar: (resultado) => `FeUreia: ${resultado.valor}%. Interprete em conjunto com a história, exame físico, sedimento urinário e demais dados de função renal.`,
+  interpretar: (resultado) => {
+    const v = Number(resultado.valor);
+    if (v < 35.0) {
+      return `FeUreia: ${v}% (<35,0% — Padrão pré-renal / retenção prerenal. Especialmente útil quando o paciente está em uso recente de diuréticos de alça, situação em que a FeNa pode estar falsamente elevada).`;
+    }
+    if (v > 50.0) {
+      return `FeUreia: ${v}% (>50,0% — Padrão renal intrínseco / necrose tubular aguda [NTA]).`;
+    }
+    return `FeUreia: ${v}% (Faixa intermediária [35,0% a 50,0%] — interpretar com o contexto volêmico e sedimento urinário).`;
+  },
   populacaoAlvo: 'Adultos com dados séricos e urinários pareados para avaliação de lesão renal.',
   limitacoes: [
     'A FeUreia não substitui a avaliação clínica e não tem desempenho perfeito para diferenciar etiologias de lesão renal aguda.',
