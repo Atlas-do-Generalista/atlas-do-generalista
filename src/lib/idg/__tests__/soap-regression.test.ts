@@ -63,7 +63,7 @@ describe('IDG — Cenário de Regressão e Síntese SOAP Integrada (Seção 4)',
     expect(gaps).toContain('eliminação de flatos');
     expect(gaps).toContain('distensão abdominal');
     expect(gaps).toContain('presença de vômitos');
-    expect(gaps).toContain('toque retal (fecaloma)');
+    expect(gaps).toContain('toque retal (quando indicado)');
     expect(gaps).toContain('função renal');
     expect(gaps).toContain('débito urinário');
     expect(gaps).toContain('estado mental / sensório');
