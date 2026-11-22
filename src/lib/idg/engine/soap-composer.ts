@@ -223,7 +223,7 @@ export function composeSOAPSummary(
   // 4. P — Plano / Conduta: deriva de alertas e exames realmente cadastrados.
   const planImmediate = alerts.map((alert) => `${alert.title}: ${alert.immediateActionRequired}`);
 
-  const planInvestigation = tests.slice(0, 6).map((test) => {
+  const planInvestigation = suggestedTests.slice(0, 6).map((test) => {
     const targets = test.targetHypothesisIds.join(', ');
     return `${test.name} — investiga: ${targets}. Limitações: ${test.limitations} Risco de falso negativo: ${test.falseNegativeRisk}`;
   });
