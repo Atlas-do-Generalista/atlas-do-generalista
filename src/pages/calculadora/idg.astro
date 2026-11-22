@@ -88,7 +88,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
                 ))
               }
             </div>
-            <p id="presentation-feedback" class="import-status-text" role="status" aria-live="polite"></p>
+            <p id="presentation-feedback" class="import-status-text" role="status" aria-live="polite">Inicializando interação das apresentações…</p>
           </div>
 
           <div class="field-block">
@@ -301,6 +301,12 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
   // ou a página seja restaurada por navegação parcial do Starlight.
   const presentationsContainer = document.querySelector('.presentations-chips');
   const presentationFeedback = document.getElementById('presentation-feedback');
+
+  if (presentationFeedback) {
+    presentationFeedback.textContent = presentationsContainer
+      ? 'Interação pronta: selecione uma ou mais apresentações.'
+      : 'Erro: contêiner de apresentações não encontrado na página.';
+  }
 
   presentationsContainer?.addEventListener('click', (event: MouseEvent) => {
     const target = event.target;
