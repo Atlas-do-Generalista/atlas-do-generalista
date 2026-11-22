@@ -37,7 +37,7 @@ describe('IDG — Cenário de Regressão e Síntese SOAP Integrada (Seção 4)',
     expect(evaluation.problemIntegration?.problemA).toContain('Síndrome febril');
     expect(evaluation.problemIntegration?.problemB).toContain('Obstipação prolongada');
     expect(evaluation.problemIntegration?.problemB).toContain('14 dias sem evacuar');
-    expect(evaluation.problemIntegration?.problemCUnifier).toContain('Problema C (Etiologia Unificadora)');
+    expect(evaluation.problemIntegration?.problemCUnifier).toContain('Problema C (hipótese integradora)');
 
     const topDiffNames = soap.assessment.priorityDifferentials.map((d) => d.name.toLowerCase());
     const allAxis1Names = evaluation.axis1Probable.map((h) => h.def.name.toLowerCase());
