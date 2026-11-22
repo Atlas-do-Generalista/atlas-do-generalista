@@ -106,6 +106,22 @@ export class InMemoryIDGStore {
     this.notify();
   }
 
+  setPatientDemographics(patch: { sexo?: string; idade?: number }): void {
+    const context = { ...(this.state.importedPatientContext || {}) };
+    if (patch.sexo !== undefined) {
+      if (patch.sexo) context.sexo = patch.sexo;
+      else delete context.sexo;
+    }
+    if (patch.idade !== undefined) {
+      if (Number.isFinite(patch.idade) && patch.idade >= 0) context.idade = patch.idade;
+      else delete context.idade;
+    }
+    this.state.importedPatientContext = context;
+    this.state.currentTag = this.hasInteracted ? '[Atualizado]' : '[Inicial]';
+    this.hasInteracted = true;
+    this.notify();
+  }
+
   setFinding(findingId: string, status: FindingStatus): void {
     this.state.findings = {
       ...this.state.findings,
@@ -127,11 +143,12 @@ export class InMemoryIDGStore {
   }
 
   setTestResult(testId: string, result: string): void {
-    this.state.testResults = {
-      ...this.state.testResults,
-      [testId]: result,
-    };
-    this.state.currentTag = '[Resultado]';
+    const nextResults = { ...this.state.testResults };
+    const normalizedResult = result.trim();
+    if (normalizedResult) nextResults[testId] = normalizedResult;
+    else delete nextResults[testId];
+    this.state.testResults = nextResults;
+    this.state.currentTag = normalizedResult ? '[Resultado]' : '[Atualizado]';
     this.hasInteracted = true;
     this.notify();
   }
