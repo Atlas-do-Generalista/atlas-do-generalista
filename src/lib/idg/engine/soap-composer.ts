@@ -216,7 +216,7 @@ export function composeSOAPSummary(
     if (!general.creatinina) criticalGaps.push('função renal');
     if (!general.diurese_ml && !textLower.includes('diurese')) criticalGaps.push('débito urinário');
     if (!general.glasgow_ocular && !textLower.includes('orientad') && !textLower.includes('sensório')) criticalGaps.push('estado mental / sensório');
-    if (!general.plaquetas) criticalGaps.push('plaquetas');
+    if (!general.plaquetas) criticalGaps.push('plaquetas / coagulograma');
     if (!general.lactato) criticalGaps.push('lactato sérico, se indicado pelo contexto');
   }
 
