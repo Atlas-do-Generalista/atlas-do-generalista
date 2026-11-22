@@ -11,6 +11,29 @@ import { IDGKnowledgeRegistry } from '../knowledge/registry';
 import { calculatePostTest, combineLikelihoodRatios } from '../bayesian/calculator';
 import { analyzeProblemGroups } from './cross-synthesis';
 
+/**
+ * Identifica o sexo informado no contexto estruturado ou explicitamente descrito.
+ * Não infere sexo a partir de pronomes, nome ou aparência; dado ausente permanece desconhecido.
+ */
+export function inferPatientSex(state: IDGState): 'masculino' | 'feminino' | 'outro' | 'desconhecido' {
+  const normalize = (value: unknown) =>
+    String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+  const structured = normalize(state.importedPatientContext?.sexo);
+  if (/^(masculino|m|male)$/.test(structured)) return 'masculino';
+  if (/^(feminino|f|female)$/.test(structured)) return 'feminino';
+  if (/^(outro|intersexo|nao aplicavel)$/.test(structured)) return 'outro';
+
+  const description = normalize(state.freeTextDescription);
+  if (/\bsexo\s*(?:biologico\s*)?masculin[oa]\b|\bpaciente\s+masculin[oa]\b|\bhomem\b/.test(description)) {
+    return 'masculino';
+  }
+  if (/\bsexo\s*(?:biologico\s*)?feminin[oa]\b|\bpaciente\s+feminin[oa]\b|\bmulher\b/.test(description)) {
+    return 'feminino';
+  }
+  return 'desconhecido';
+}
+
 export function evaluateHypotheses(state: IDGState): {
   axis1Probable: EvaluatedHypothesis[];
   axis2Critical: EvaluatedHypothesis[];
@@ -26,8 +49,12 @@ export function evaluateHypotheses(state: IDGState): {
     extraSharedIds,
     state.userInitialHypotheses || [],
   );
+  const patientSex = inferPatientSex(state);
+  const clinicallyApplicableDefs = patientSex === 'masculino'
+    ? candidateDefs.filter((def) => def.id !== 'gravidez_ectopica_rota')
+    : candidateDefs;
 
-  const evaluated: EvaluatedHypothesis[] = candidateDefs.map((def) => {
+  const evaluated: EvaluatedHypothesis[] = clinicallyApplicableDefs.map((def) => {
     return evaluateSingleHypothesis(def, state, problemIntegration);
   });
 
