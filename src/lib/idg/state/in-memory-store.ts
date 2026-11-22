@@ -106,14 +106,14 @@ export class InMemoryIDGStore {
     this.notify();
   }
 
-  setPatientDemographics(patch: { sexo?: string; idade?: number }): void {
+  setPatientDemographics(patch: { sexo?: string; idade?: number | null }): void {
     const context = { ...(this.state.importedPatientContext || {}) };
     if (patch.sexo !== undefined) {
       if (patch.sexo) context.sexo = patch.sexo;
       else delete context.sexo;
     }
     if (patch.idade !== undefined) {
-      if (Number.isFinite(patch.idade) && patch.idade >= 0) context.idade = patch.idade;
+      if (patch.idade !== null && Number.isFinite(patch.idade) && patch.idade >= 0) context.idade = patch.idade;
       else delete context.idade;
     }
     this.state.importedPatientContext = context;
