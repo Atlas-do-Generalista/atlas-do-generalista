@@ -168,12 +168,33 @@ export function composeSOAPSummary(
     lactato: 'Lactato',
     inr: 'INR',
   };
+  const initialLabUnits: Record<string, string> = {
+    hemoglobina: 'g/dL',
+    hematocrito: '%',
+    leucocitos: '/mm³',
+    plaquetas: '/mm³',
+    creatinina: 'mg/dL',
+    ureia: 'mg/dL',
+    tgo: 'U/L',
+    tgp: 'U/L',
+    bilirrubina_total: 'mg/dL',
+    fosfatase_alcalina: 'U/L',
+    ggt: 'U/L',
+    albumina: 'g/dL',
+    sodio: 'mEq/L',
+    potassio: 'mEq/L',
+    lactato: 'mmol/L',
+  };
   if (general.lactato !== undefined && state.testResults.lactato === undefined) labParts.push(`Lactato: ${general.lactato} mmol/L`);
   if (general.leucocitos !== undefined && state.testResults.leucocitos === undefined) labParts.push(`Leucócitos: ${general.leucocitos}/mm³`);
   if (general.creatinina !== undefined && state.testResults.creatinina === undefined) labParts.push(`Creatinina: ${general.creatinina} mg/dL`);
   if (general.plaquetas !== undefined && state.testResults.plaquetas === undefined) labParts.push(`Plaquetas: ${general.plaquetas}/mm³`);
   Object.entries(state.testResults).forEach(([testId, result]) => {
-    if (result.trim()) labParts.push(`${initialLabLabels[testId] || testId}: ${result}`);
+    if (result.trim()) {
+      const label = initialLabLabels[testId] || testId;
+      const unit = initialLabUnits[testId];
+      labParts.push(`${label}: ${result}${unit ? ` ${unit}` : ''}`);
+    }
   });
   const testsStr = labParts.length > 0 ? labParts.join(', ') : 'Nenhum exame laboratorial ou de imagem disponível no momento';
 
