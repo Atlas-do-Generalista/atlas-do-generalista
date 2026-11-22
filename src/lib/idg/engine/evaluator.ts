@@ -1,12 +1,11 @@
 import type { IDGState, IDGEvaluation, SOAPTag } from '../types';
-import { evaluateHypotheses } from './differentials';
+import { evaluateHypotheses, inferPatientSex } from './differentials';
 import { evaluateSafetyAlerts } from './safety';
 import { selectAdaptiveQuestions } from './adaptive-questions';
 import { recommendDiagnosticTests } from './test-recommender';
 import { evaluateIntegratedScores } from './calc-adapters';
 import { generateSynthesis } from './synthesis';
 import { analyzeProblemGroups } from './cross-synthesis';
-import { inferPatientSex } from './differentials';
 
 export function evaluateIDGState(state: IDGState): IDGEvaluation {
   // 1. Agrupamento de problemas e etiologia unificadora (Problema A + B -> C)
