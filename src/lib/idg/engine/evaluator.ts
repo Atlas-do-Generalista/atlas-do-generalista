@@ -6,6 +6,7 @@ import { recommendDiagnosticTests } from './test-recommender';
 import { evaluateIntegratedScores } from './calc-adapters';
 import { generateSynthesis } from './synthesis';
 import { analyzeProblemGroups } from './cross-synthesis';
+import { inferPatientSex } from './differentials';
 
 export function evaluateIDGState(state: IDGState): IDGEvaluation {
   // 1. Agrupamento de problemas e etiologia unificadora (Problema A + B -> C)
@@ -15,7 +16,10 @@ export function evaluateIDGState(state: IDGState): IDGEvaluation {
   const { axis1Probable, axis2Critical, unconsideredDangerous } = evaluateHypotheses(state);
 
   // 3. Avalia alertas críticos de segurança imediatos
-  const activeSafetyAlerts = evaluateSafetyAlerts(state);
+  const patientSex = inferPatientSex(state);
+  const activeSafetyAlerts = evaluateSafetyAlerts(state).filter((alert) =>
+    !(patientSex === 'masculino' && alert.relatedHypothesisId === 'gravidez_ectopica_rota'),
+  );
 
   // 4. Seleciona perguntas adaptativas discriminatórias
   const suggestedQuestions = selectAdaptiveQuestions(state, axis1Probable, axis2Critical);
