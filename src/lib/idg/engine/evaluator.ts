@@ -21,7 +21,9 @@ export function evaluateIDGState(state: IDGState): IDGEvaluation {
   );
 
   // 4. Seleciona perguntas adaptativas discriminatórias
-  const suggestedQuestions = selectAdaptiveQuestions(state, axis1Probable, axis2Critical);
+  const suggestedQuestions = selectAdaptiveQuestions(state, axis1Probable, axis2Critical).filter((question) =>
+    !(patientSex === 'masculino' && question.targetFindingId === 'sangramento_vaginal_com_dor_pelvica'),
+  );
 
   // 5. Recomenda exames com limitações e especificidades
   const suggestedTests = recommendDiagnosticTests(state, axis1Probable, axis2Critical);
