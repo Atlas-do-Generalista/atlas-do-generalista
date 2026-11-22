@@ -2,6 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { InMemoryIDGStore } from '../state/in-memory-store';
 
 describe('IDG — Geração e Atualização de Diagnósticos Diferenciais', () => {
+  it('incorpora hipóteses manuais quando há correspondência na base de conhecimento', () => {
+    const store = new InMemoryIDGStore(['febre']);
+    store.setUserInitialHypotheses(['Fecaloma / Impactação Fecal Grave']);
+
+    const evaluation = store.getEvaluation();
+    expect(evaluation.axis1Probable.some((h) => h.def.id === 'fecaloma_impactacao_fecal')).toBe(true);
+  });
+
   it('gera hipóteses automaticamente a partir da apresentação sem depender de hipótese do médico', () => {
     // Médico abre tela apenas com "Dor torácica", sem sugerir nenhuma doença
     const store = new InMemoryIDGStore(['dor_toracica']);
