@@ -158,6 +158,8 @@ export class InMemoryIDGStore {
       }
 
       this.state.importedPatientContext = { ...session.general };
+      this.state.currentTag = this.hasInteracted ? '[Atualizado]' : '[Inicial]';
+      this.hasInteracted = true;
 
       // Se houver dados vitais ou laboratoriais, converte para achados da IDG em memória
       const general = session.general as Record<string, any>;
