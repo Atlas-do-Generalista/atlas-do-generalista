@@ -427,8 +427,8 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
   });
 
   patientAgeInput?.addEventListener('input', () => {
-    const age = patientAgeInput.value.trim() ? Number(patientAgeInput.value) : undefined;
-    store.setPatientDemographics({ idade: Number.isFinite(age) ? age : undefined });
+    const age = patientAgeInput.value.trim() ? Number(patientAgeInput.value) : null;
+    store.setPatientDemographics({ idade: age !== null && Number.isFinite(age) ? age : null });
   });
 
   // Exames iniciais: valores preenchidos são anexados à mesma ficha temporária.
