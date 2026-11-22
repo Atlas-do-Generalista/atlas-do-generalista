@@ -30,14 +30,24 @@ export function composeSOAPSummary(
 
   // 1. S — Subjetivo
   // Demografia, QP e HDA concisas, antecedentes
-  let demografia = 'Paciente adulto';
-  if (general.idade) {
-    demografia = `${general.idade} anos, ${general.sexo || 'sexo não informado'}`;
-  } else if (textLower.includes('homem')) {
-    demografia = 'Homem adulto (idade a confirmar)';
-  } else if (textLower.includes('mulher')) {
-    demografia = 'Mulher adulta (idade a confirmar)';
-  }
+  const normalizedText = textLower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const sexFromText = /\bsexo\s*(?:biologico\s*)?masculin[oa]\b|\bpaciente\s+masculin[oa]\b|\bhomem\b/.test(normalizedText)
+    ? 'masculino'
+    : /\bsexo\s*(?:biologico\s*)?feminin[oa]\b|\bpaciente\s+feminin[oa]\b|\bmulher\b/.test(normalizedText)
+      ? 'feminino'
+      : '';
+  const sexValue = String(general.sexo || sexFromText).toLowerCase();
+  const sexLabel = sexValue.includes('mascul') ? 'sexo masculino'
+    : sexValue.includes('feminin') ? 'sexo feminino'
+      : sexValue === 'outro' ? 'sexo registrado como outro/não aplicável'
+        : sexValue ? 'sexo não informado' : '';
+  const ageFromText = textDesc.match(/\b(\d{1,3})\s*anos?\b/i)?.[1];
+  const age = general.idade ?? (ageFromText ? Number(ageFromText) : undefined);
+  const demografia = age !== undefined
+    ? `${age} anos${sexLabel ? `, ${sexLabel}` : ''}`
+    : sexLabel === 'sexo masculino' ? 'Homem adulto (idade não informada)'
+      : sexLabel === 'sexo feminino' ? 'Mulher adulta (idade não informada)'
+        : 'Paciente adulto';
 
   let qp = '';
   if (problemIntegration) {
@@ -140,13 +150,52 @@ export function composeSOAPSummary(
 
   // Exames laboratoriais/imagem disponíveis
   const labParts: string[] = [];
-  if (general.lactato !== undefined) labParts.push(`Lactato: ${general.lactato} mmol/L`);
-  if (general.leucocitos !== undefined) labParts.push(`Leucócitos: ${general.leucocitos}/mm³`);
-  if (general.creatinina !== undefined) labParts.push(`Creatinina: ${general.creatinina} mg/dL`);
-  if (general.plaquetas !== undefined) labParts.push(`Plaquetas: ${general.plaquetas}/mm³`);
-  if (Object.keys(state.testResults).length > 0) {
-    Object.entries(state.testResults).forEach(([tId, res]) => labParts.push(`${tId}: ${res}`));
-  }
+  const initialLabLabels: Record<string, string> = {
+    hemoglobina: 'Hb',
+    hematocrito: 'Ht',
+    leucocitos: 'Leucócitos',
+    plaquetas: 'Plaquetas',
+    creatinina: 'Creatinina',
+    ureia: 'Ureia',
+    tgo: 'TGO/AST',
+    tgp: 'TGP/ALT',
+    bilirrubina_total: 'Bilirrubina total',
+    fosfatase_alcalina: 'FA',
+    ggt: 'GGT',
+    albumina: 'Albumina',
+    sodio: 'Na',
+    potassio: 'K',
+    lactato: 'Lactato',
+    inr: 'INR',
+  };
+  const initialLabUnits: Record<string, string> = {
+    hemoglobina: 'g/dL',
+    hematocrito: '%',
+    leucocitos: '/mm³',
+    plaquetas: '/mm³',
+    creatinina: 'mg/dL',
+    ureia: 'mg/dL',
+    tgo: 'U/L',
+    tgp: 'U/L',
+    bilirrubina_total: 'mg/dL',
+    fosfatase_alcalina: 'U/L',
+    ggt: 'U/L',
+    albumina: 'g/dL',
+    sodio: 'mEq/L',
+    potassio: 'mEq/L',
+    lactato: 'mmol/L',
+  };
+  if (general.lactato !== undefined && state.testResults.lactato === undefined) labParts.push(`Lactato: ${general.lactato} mmol/L`);
+  if (general.leucocitos !== undefined && state.testResults.leucocitos === undefined) labParts.push(`Leucócitos: ${general.leucocitos}/mm³`);
+  if (general.creatinina !== undefined && state.testResults.creatinina === undefined) labParts.push(`Creatinina: ${general.creatinina} mg/dL`);
+  if (general.plaquetas !== undefined && state.testResults.plaquetas === undefined) labParts.push(`Plaquetas: ${general.plaquetas}/mm³`);
+  Object.entries(state.testResults).forEach(([testId, result]) => {
+    if (result.trim()) {
+      const label = initialLabLabels[testId] || testId;
+      const unit = initialLabUnits[testId];
+      labParts.push(`${label}: ${result}${unit ? ` ${unit}` : ''}`);
+    }
+  });
   const testsStr = labParts.length > 0 ? labParts.join(', ') : 'Nenhum exame laboratorial ou de imagem disponível no momento';
 
   // 3. A — Avaliação
@@ -191,7 +240,9 @@ export function composeSOAPSummary(
       const criteriaStr = h.def.exclusionCriteria.map((c) => c.description).join(' OU ');
       return {
         name: h.def.name,
-        whatIsMissingToExclude: criteriaStr || 'Avaliação dirigida e propedêutica complementar para descarte formal.',
+        whatIsMissingToExclude: criteriaStr
+          ? `Para afastar formalmente: ${criteriaStr}`
+          : 'Necessária avaliação dirigida e propedêutica complementar.',
       };
     });
 
@@ -213,33 +264,37 @@ export function composeSOAPSummary(
     if (normalizeFindingStatus(findings['toque_retal_massa_fecal']) === 'not_assessed') criticalGaps.push('toque retal (quando indicado)');
   }
   if (infectionOrShockContext) {
-    if (!general.creatinina) criticalGaps.push('função renal');
+    if (!general.creatinina && !state.testResults.creatinina) criticalGaps.push('função renal');
     if (!general.diurese_ml && !textLower.includes('diurese')) criticalGaps.push('débito urinário');
     if (!general.glasgow_ocular && !textLower.includes('orientad') && !textLower.includes('sensório')) criticalGaps.push('estado mental / sensório');
-    if (!general.plaquetas) criticalGaps.push('plaquetas / coagulograma');
-    if (!general.lactato) criticalGaps.push('lactato sérico, se indicado pelo contexto');
+    if (!general.plaquetas && !state.testResults.plaquetas) criticalGaps.push('plaquetas / coagulograma');
+    if (!general.lactato && !state.testResults.lactato) criticalGaps.push('lactato sérico, se indicado pelo contexto');
   }
 
   // 4. P — Plano / Conduta: deriva de alertas e exames realmente cadastrados.
-  const planImmediate = alerts.map((alert) => `${alert.title}: ${alert.immediateActionRequired}`);
-
-  const planInvestigation = suggestedTests.slice(0, 6).map((test) => {
-    const targets = test.targetHypothesisIds.join(', ');
-    return `${test.name} — investiga: ${targets}. Limitações: ${test.limitations} Risco de falso negativo: ${test.falseNegativeRisk}`;
+  const planImmediate = alerts.map((alert) => {
+    const firstAction = alert.immediateActionRequired.split(/[.;]/)[0].trim();
+    const shortTitle = alert.title.replace(/^ALERTA[^:]*:\s*/i, '');
+    return firstAction ? `${shortTitle}: ${firstAction}` : shortTitle;
   });
+
+  // No plano, listar apenas os exames. Indicações e limitações permanecem no painel de exames.
+  const planInvestigation = suggestedTests.slice(0, 6).map((test) => test.name);
 
   // Não prescrever terapêutica sem uma recomendação específica e validada na base de conhecimento.
   const planTherapeutics: string[] = [];
 
   const planReassessment: string[] = [
-    'Reavaliar sinais vitais, perfusão e estado clínico após intervenções e resultados relevantes.',
-    'Revisar as hipóteses e a necessidade de investigação adicional sempre que surgirem novos achados.',
+    'Reavaliar após os resultados e diante de piora ou mudança clínica.',
   ];
-  if (criticalGaps.length > 0) {
-    planReassessment.push(`Completar avaliação dos seguintes pontos pertinentes: ${criticalGaps.join(', ')}.`);
-  }
 
-  // Montagem do texto em Markdown conforme template estrutural da seção 3.4
+  // Montagem do texto em Markdown com plano telegráfico.
+  const planLines = [
+    ...(planImmediate.length ? [`- **Imediato:** ${planImmediate.join('; ')}.`] : []),
+    `- **Investigação:** ${planInvestigation.length ? planInvestigation.join('; ') : 'Definir conforme avaliação clínica'}.`,
+    `- **Reavaliação:** ${planReassessment[0]}`,
+  ].join(String.fromCharCode(10));
+
   const formattedMarkdown = `### Síntese Clínica Integrada ${effectiveTag}
 
 **S — Subjetivo**  
@@ -262,11 +317,8 @@ ${unruledOutDangerous.length > 0 ? unruledOutDangerous.map((d) => `- **${d.name}
 *Grau de incerteza:* **${uncertaintyDegree}** (${uncertaintyReason})  
 *Lacunas críticas:* ${criticalGaps.length > 0 ? criticalGaps.join(', ') : 'Nenhuma lacuna crítica pendente'}.
 
-**P — Plano / Conduta** *(Sugestões da IDG — diferenciar de condutas já executadas)*  
-- **Imediato:** ${planImmediate.join('; ')}.  
-- **Investigação:** ${planInvestigation.length ? planInvestigation.join('; ') : 'Nenhum exame adicional priorizado pela base de conhecimento para os dados atuais'}.  
-${planTherapeutics.length ? `- **Terapêutica a considerar:** ${planTherapeutics.join('; ')}.  ` : ''}
-- **Reavaliação e Alerta:** ${planReassessment.join('; ')}.
+**P — Plano / Conduta** *(Sugestões da IDG — confirme antes de executar)*  
+${planLines}
 `;
 
   return {

@@ -43,9 +43,8 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
         <em>"Medicina não é sobre estar certo. É sobre minimizar a chance de estar errado e, por consequência, acertar mais."</em>
       </p>
       <p class="lead-desc">
-        Apoio estruturado à investigação beira-leito para o emergencista. Confronta suas hipóteses,
-        rastreia condições potencialmente fatais esquecidas e orienta próximos passos discriminatórios
-        sem viés de fechamento prematuro.
+        Apoio ao raciocínio clínico na urgência. Ajuda a considerar diagnósticos importantes,
+        identificar sinais de gravidade e organizar os próximos passos da investigação.
       </p>
     </header>
 
@@ -72,8 +71,25 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
             </div>
           </div>
 
+          <div class="patient-demographics-grid">
+            <label class="initial-lab-field" for="idg-patient-sex">
+              <span>Sexo</span>
+              <select id="idg-patient-sex" class="clinical-input">
+                <option value="">Não informado</option>
+                <option value="feminino">Feminino</option>
+                <option value="masculino">Masculino</option>
+                <option value="outro">Outro / não aplicável</option>
+              </select>
+            </label>
+            <label class="initial-lab-field" for="idg-patient-age">
+              <span>Idade (anos)</span>
+              <input id="idg-patient-age" class="clinical-input" type="number" min="0" max="120" inputmode="numeric" placeholder="Não informada" />
+            </label>
+          </div>
+          <p class="field-help">O sexo ajuda a evitar hipóteses incompatíveis. Quando não informado, a IDG não presume nem exclui essa possibilidade.</p>
+
           <div class="field-block">
-            <label class="field-label">Apresentações clínicas observadas:</label>
+            <label class="field-label">Apresentações clínicas:</label>
             <div class="presentations-chips">
               {
                 presentations.map((p) => (
@@ -92,7 +108,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
           </div>
 
           <div class="field-block">
-            <label for="txt-free-description" class="field-label">Descrição livre do caso (anamnese resumida / impressão inicial):</label>
+            <label for="txt-free-description" class="field-label">Resumo do caso:</label>
             <textarea
               id="txt-free-description"
               class="clinical-textarea"
@@ -105,7 +121,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
 
           <div class="field-block">
             <label for="txt-initial-hypotheses" class="field-label">
-              Suas hipóteses diagnósticas iniciais (separadas por vírgula):
+              Hipóteses iniciais (separadas por vírgula):
               <small class="field-help">Hipóteses cadastradas serão incorporadas à avaliação; termos sem correspondência na base não recebem pontuação nem avaliação automatizada.</small>
             </label>
             <input
@@ -118,10 +134,88 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
 
           <div class="integration-toolbar">
             <button type="button" id="btn-import-context" class="btn-secondary" title="Lê em memória dados já digitados no formulário de Condição Atual">
-              📥 Importar dados do ContextoPaciente
+              📥 Importar dados do paciente
             </button>
             <span id="import-status-msg" class="import-status-text"></span>
           </div>
+        </section>
+
+        <!-- EXAMES INICIAIS: REGISTRO NA MESMA TELA DA AVALIAÇÃO -->
+        <section class="card-section initial-labs-section">
+          <div class="section-title">
+            <span class="section-number">LAB</span>
+            <div>
+              <h2>Exames iniciais</h2>
+              <p>Registre aqui os resultados já disponíveis, sem sair da investigação.</p>
+            </div>
+          </div>
+          <div class="initial-labs-grid">
+            <label class="initial-lab-field" for="idg-lab-hemoglobina">
+              <span>Hemoglobina <small>g/dL</small></span>
+              <input id="idg-lab-hemoglobina" class="clinical-input" data-initial-lab="hemoglobina" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-hematocrito">
+              <span>Hematócrito <small>%</small></span>
+              <input id="idg-lab-hematocrito" class="clinical-input" data-initial-lab="hematocrito" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-leucocitos">
+              <span>Leucócitos <small>/mm³</small></span>
+              <input id="idg-lab-leucocitos" class="clinical-input" data-initial-lab="leucocitos" type="text" inputmode="numeric" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-plaquetas">
+              <span>Plaquetas <small>/mm³</small></span>
+              <input id="idg-lab-plaquetas" class="clinical-input" data-initial-lab="plaquetas" type="text" inputmode="numeric" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-creatinina">
+              <span>Creatinina <small>mg/dL</small></span>
+              <input id="idg-lab-creatinina" class="clinical-input" data-initial-lab="creatinina" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-ureia">
+              <span>Ureia <small>mg/dL</small></span>
+              <input id="idg-lab-ureia" class="clinical-input" data-initial-lab="ureia" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-tgo">
+              <span>TGO / AST <small>U/L</small></span>
+              <input id="idg-lab-tgo" class="clinical-input" data-initial-lab="tgo" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-tgp">
+              <span>TGP / ALT <small>U/L</small></span>
+              <input id="idg-lab-tgp" class="clinical-input" data-initial-lab="tgp" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-bilirrubina">
+              <span>Bilirrubina total <small>mg/dL</small></span>
+              <input id="idg-lab-bilirrubina" class="clinical-input" data-initial-lab="bilirrubina_total" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-fosfatase">
+              <span>Fosfatase alcalina <small>U/L</small></span>
+              <input id="idg-lab-fosfatase" class="clinical-input" data-initial-lab="fosfatase_alcalina" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-ggt">
+              <span>GGT <small>U/L</small></span>
+              <input id="idg-lab-ggt" class="clinical-input" data-initial-lab="ggt" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-albumina">
+              <span>Albumina <small>g/dL</small></span>
+              <input id="idg-lab-albumina" class="clinical-input" data-initial-lab="albumina" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-sodio">
+              <span>Sódio <small>mEq/L</small></span>
+              <input id="idg-lab-sodio" class="clinical-input" data-initial-lab="sodio" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-potassio">
+              <span>Potássio <small>mEq/L</small></span>
+              <input id="idg-lab-potassio" class="clinical-input" data-initial-lab="potassio" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-lactato">
+              <span>Lactato <small>mmol/L</small></span>
+              <input id="idg-lab-lactato" class="clinical-input" data-initial-lab="lactato" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+            <label class="initial-lab-field" for="idg-lab-inr">
+              <span>INR</span>
+              <input id="idg-lab-inr" class="clinical-input" data-initial-lab="inr" type="text" inputmode="decimal" placeholder="—" />
+            </label>
+          </div>
+          <p class="field-help">Preencha apenas resultados já obtidos. Campo vazio significa exame não informado; não equivale a resultado normal.</p>
         </section>
 
         <!-- ÁREA 3: INVESTIGAÇÃO ADAPTATIVA (PERGUNTAS DISCRIMINATÓRIAS) -->
@@ -129,8 +223,8 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
           <div class="section-title">
             <span class="section-number">03</span>
             <div>
-              <h2>Investigação Guiada Adaptativa</h2>
-              <p>Perguntas priorizadas pelo poder de discriminar entre as hipóteses ativas.</p>
+              <h2>Perguntas para completar a avaliação</h2>
+              <p>Responda aos pontos que ajudam a diferenciar as hipóteses.</p>
             </div>
           </div>
 
@@ -144,8 +238,8 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
           <div class="section-title">
             <span class="section-number">3.1</span>
             <div>
-              <h2>Exames Recomendados & Risco de Falso Negativo</h2>
-              <p>Avaliação criteriosa de acurácia, limitações e potencial de exclusão.</p>
+              <h2>Exames sugeridos</h2>
+              <p>Veja o que cada exame pode esclarecer e suas limitações.</p>
             </div>
           </div>
 
@@ -159,8 +253,8 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
           <div class="section-title">
             <span class="section-number">3.2</span>
             <div>
-              <h2>Critérios e Escores Clínicos Integrados</h2>
-              <p>Cálculos objetivos alimentados transparentemente pelo Motor de Decisão Clínica.</p>
+              <h2>Escores clínicos</h2>
+              <p>Cálculos aplicáveis aos dados registrados.</p>
             </div>
           </div>
 
@@ -187,7 +281,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
             <span class="section-number">02</span>
             <div>
               <h2>Diagnóstico Diferencial em Dois Eixos</h2>
-              <p>Segregação ortogonal: probabilidade estatística vs periculosidade iminente.</p>
+              <p>Separe o que parece mais provável do que é perigoso deixar passar.</p>
             </div>
           </div>
 
@@ -196,7 +290,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
             <div class="axis-header">
               <span class="axis-tag axis-tag-critical">EIXO 2</span>
               <h3>O que não posso deixar passar?</h3>
-              <small>Condições graves/tempo-dependentes mantidas até exclusão formal</small>
+              <small>Condições graves que ainda precisam ser avaliadas</small>
             </div>
             <div id="axis2-list" class="hypotheses-list">
               <div class="empty-hint">Nenhuma condição crítica detectada para a queixa selecionada.</div>
@@ -208,7 +302,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
             <div class="axis-header">
               <span class="axis-tag axis-tag-probable">EIXO 1</span>
               <h3>O que é mais provável?</h3>
-              <small>Hipóteses que melhor explicam o conjunto dos achados</small>
+              <small>Diagnósticos mais compatíveis com os dados atuais</small>
             </div>
             <div id="axis1-list" class="hypotheses-list">
               <div class="empty-hint">Aguardando achados para ordenar a plausibilidade clínica.</div>
@@ -271,6 +365,9 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
   const chips = document.querySelectorAll<HTMLButtonElement>('.chip-button');
   const txtFreeDescription = document.getElementById('txt-free-description') as HTMLTextAreaElement;
   const txtInitialHypotheses = document.getElementById('txt-initial-hypotheses') as HTMLInputElement;
+  const patientSexSelect = document.getElementById('idg-patient-sex') as HTMLSelectElement;
+  const patientAgeInput = document.getElementById('idg-patient-age') as HTMLInputElement;
+  const initialLabInputs = document.querySelectorAll<HTMLInputElement>('[data-initial-lab]');
   const btnReset = document.getElementById('btn-reset-investigation') as HTMLButtonElement;
   const btnImportContext = document.getElementById('btn-import-context') as HTMLButtonElement;
   const importStatusMsg = document.getElementById('import-status-msg') as HTMLSpanElement;
@@ -340,6 +437,24 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
     store.setFreeTextDescription(txtFreeDescription.value);
   });
 
+  // Dados demográficos explícitos; a descrição livre também é analisada pelo motor.
+  patientSexSelect?.addEventListener('change', () => {
+    store.setPatientDemographics({ sexo: patientSexSelect.value });
+  });
+
+  patientAgeInput?.addEventListener('input', () => {
+    const age = patientAgeInput.value.trim() ? Number(patientAgeInput.value) : null;
+    store.setPatientDemographics({ idade: age !== null && Number.isFinite(age) ? age : null });
+  });
+
+  // Exames iniciais: valores preenchidos são anexados à mesma ficha temporária.
+  initialLabInputs.forEach((input) => {
+    input.addEventListener('input', () => {
+      const key = input.dataset.initialLab;
+      if (key) store.setTestResult(key, input.value);
+    });
+  });
+
   // Atualização das hipóteses iniciais do médico
   txtInitialHypotheses?.addEventListener('input', () => {
     const raw = txtInitialHypotheses.value;
@@ -353,6 +468,9 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
       store.reset();
       if (txtFreeDescription) txtFreeDescription.value = '';
       if (txtInitialHypotheses) txtInitialHypotheses.value = '';
+      if (patientSexSelect) patientSexSelect.value = '';
+      if (patientAgeInput) patientAgeInput.value = '';
+      initialLabInputs.forEach((input) => { input.value = ''; });
       if (importStatusMsg) importStatusMsg.textContent = '';
       if (copyFeedback) copyFeedback.textContent = '';
     }
@@ -361,6 +479,9 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
   // Botão Importar ContextoPaciente (leitura em memória)
   btnImportContext?.addEventListener('click', () => {
     const res = store.importContextoPaciente();
+    const importedContext = store.getState().importedPatientContext;
+    if (patientSexSelect) patientSexSelect.value = String(importedContext.sexo || '');
+    if (patientAgeInput) patientAgeInput.value = importedContext.idade == null ? '' : String(importedContext.idade);
     if (importStatusMsg) {
       if (res.importedCount > 0) {
         importStatusMsg.textContent = `✓ ${res.importedCount} parâmetro(s) importado(s) para a memória.`;
@@ -684,7 +805,6 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
             </div>
             <div class="test-meta">
               ${canExcludeBadge}
-              <small>Investiga: <em>${t.targetHypothesisIds.join(', ')}</em></small>
             </div>
             <details class="progressive-details">
               <summary class="progressive-summary">Ver limitações e risco de falso negativo</summary>
@@ -1806,9 +1926,89 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
     text-align: center;
   }
 
+  /* Ajustes de leitura e formulários compactos */
+  .workspace-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 18px;
+  }
+  .card-section {
+    padding: 18px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+  }
+  .section-title h2 {
+    font-size: 1.02rem;
+  }
+  .section-title p {
+    line-height: 1.4;
+  }
+  .patient-demographics-grid,
+  .initial-labs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+    gap: 10px 12px;
+    margin: 4px 0 8px;
+  }
+  .patient-demographics-grid {
+    max-width: 480px;
+  }
+  .initial-lab-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    color: var(--sl-color-gray-2);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .initial-lab-field span small {
+    color: var(--sl-color-gray-4);
+    font-size: 0.7rem;
+    font-weight: 400;
+  }
+  .initial-lab-field .clinical-input {
+    min-height: 38px;
+    padding: 8px 10px;
+  }
+  .initial-labs-section .field-help {
+    margin-top: 12px;
+    line-height: 1.4;
+  }
+  .hypo-header {
+    align-items: flex-start;
+  }
+  .hypo-title {
+    font-size: 0.9rem;
+  }
+  .hypo-guidance,
+  .question-utility,
+  .test-details,
+  .score-desc {
+    line-height: 1.45;
+  }
+  .soap-content {
+    overflow-wrap: anywhere;
+  }
+
   @media (max-width: 1024px) {
     .workspace-grid {
       grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .card-section {
+      padding: 14px;
+    }
+    .initial-labs-grid,
+    .patient-demographics-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .synthesis-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .btn-copy {
+      justify-content: center;
     }
   }
 </style>

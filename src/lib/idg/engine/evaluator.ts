@@ -1,5 +1,5 @@
 import type { IDGState, IDGEvaluation, SOAPTag } from '../types';
-import { evaluateHypotheses } from './differentials';
+import { evaluateHypotheses, inferPatientSex } from './differentials';
 import { evaluateSafetyAlerts } from './safety';
 import { selectAdaptiveQuestions } from './adaptive-questions';
 import { recommendDiagnosticTests } from './test-recommender';
@@ -15,10 +15,15 @@ export function evaluateIDGState(state: IDGState): IDGEvaluation {
   const { axis1Probable, axis2Critical, unconsideredDangerous } = evaluateHypotheses(state);
 
   // 3. Avalia alertas críticos de segurança imediatos
-  const activeSafetyAlerts = evaluateSafetyAlerts(state);
+  const patientSex = inferPatientSex(state);
+  const activeSafetyAlerts = evaluateSafetyAlerts(state).filter((alert) =>
+    !(patientSex === 'masculino' && alert.relatedHypothesisId === 'gravidez_ectopica_rota'),
+  );
 
   // 4. Seleciona perguntas adaptativas discriminatórias
-  const suggestedQuestions = selectAdaptiveQuestions(state, axis1Probable, axis2Critical);
+  const suggestedQuestions = selectAdaptiveQuestions(state, axis1Probable, axis2Critical).filter((question) =>
+    !(patientSex === 'masculino' && question.targetFindingId === 'sangramento_vaginal_com_dor_pelvica'),
+  );
 
   // 5. Recomenda exames com limitações e especificidades
   const suggestedTests = recommendDiagnosticTests(state, axis1Probable, axis2Critical);
