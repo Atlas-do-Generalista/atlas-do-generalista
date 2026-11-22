@@ -39,7 +39,8 @@ export function composeSOAPSummary(
   const sexValue = String(general.sexo || sexFromText).toLowerCase();
   const sexLabel = sexValue.includes('mascul') ? 'sexo masculino'
     : sexValue.includes('feminin') ? 'sexo feminino'
-      : sexValue ? 'sexo não informado' : '';
+      : sexValue === 'outro' ? 'sexo registrado como outro/não aplicável'
+        : sexValue ? 'sexo não informado' : '';
   const ageFromText = textDesc.match(/\b(\d{1,3})\s*anos?\b/i)?.[1];
   const age = general.idade ?? (ageFromText ? Number(ageFromText) : undefined);
   const demografia = age !== undefined
