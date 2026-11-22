@@ -106,4 +106,13 @@ describe('IDG — Cenário de Regressão e Síntese SOAP Integrada (Seção 4)',
     expect(semDuracao.getEvaluation().problemIntegration?.problemB).toContain('duração não informada');
     expect(semDuracao.getEvaluation().problemIntegration?.problemB).not.toContain('14 dias');
   });
+  it('não injeta recomendações abdominais em uma investigação de dor torácica', () => {
+    const store = new InMemoryIDGStore(['dor_toracica']);
+    const soap = store.getEvaluation().soap;
+
+    expect(soap.formattedMarkdown.toLowerCase()).not.toContain('radiografia de abdome');
+    expect(soap.formattedMarkdown.toLowerCase()).not.toContain('toque retal');
+    expect(soap.formattedMarkdown.toLowerCase()).not.toContain('desimpactação digital');
+  });
+
 });
