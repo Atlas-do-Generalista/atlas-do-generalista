@@ -103,7 +103,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
           <div class="field-block">
             <label for="txt-initial-hypotheses" class="field-label">
               Suas hipóteses diagnósticas iniciais (separadas por vírgula):
-              <small class="field-help">Usado para identificar diagnósticos perigosos esquecidos (Cognitive Forcing)</small>
+              <small class="field-help">Hipóteses cadastradas serão incorporadas à avaliação; termos sem correspondência na base não recebem pontuação nem avaliação automatizada.</small>
             </label>
             <input
               id="txt-initial-hypotheses"
@@ -307,7 +307,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
   });
 
   // Atualização das hipóteses iniciais do médico
-  txtInitialHypotheses?.addEventListener('change', () => {
+  txtInitialHypotheses?.addEventListener('input', () => {
     const raw = txtInitialHypotheses.value;
     const items = raw.split(',').map((s) => s.trim()).filter(Boolean);
     store.setUserInitialHypotheses(items);
