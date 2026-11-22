@@ -34,14 +34,25 @@ export function analyzeProblemGroups(state: IDGState): ProblemGroupIntegration |
 
   // Integração Febre + Obstipação (Cenário de Regressão e Síndrome Compartilhada)
   if (hasFebrileSyndrome && hasObstipation) {
-    const daysMatch = textLower.match(/(\d+)\s*dias?\s*sem\s*evacuar/);
-    const daysStr = daysMatch ? `${daysMatch[1]} dias` : '14 dias';
+    const daysMatch = textLower.match(/(\d+)\s*dias?\s*sem\s*(?:evacuar|defecar)/);
+
+    const imported = (state.importedPatientContext || {}) as Record<string, unknown>;
+    const hasTachycardia =
+      textLower.includes('taquicard') ||
+      findings['taquicardia_fc_maior_100'] === 'present' ||
+      findings['taquicardia_fc_maior_100'] === 'presente' ||
+      (typeof imported.fc === 'number' && imported.fc > 100);
+    const daysLabel = daysMatch
+      ? `${daysMatch[1]} dias sem evacuar`
+      : 'duração não informada';
+    const isProlonged = Boolean(daysMatch && Number(daysMatch[1]) >= 7);
+    const problemBLabel = isProlonged ? 'Obstipação prolongada' : 'Obstipação / retenção fecal';
 
     return {
-      problemA: 'Problema A: Síndrome febril aguda e taquicardia (resposta inflamatória sistêmica / SIRS)',
-      problemB: `Problema B: Obstipação grave prolongada (${daysStr} sem evacuar / estase colônica extrema)`,
+      problemA: `Problema A: Síndrome febril aguda${hasTachycardia ? ' associada a taquicardia' : ''}`,
+      problemB: `Problema B: ${problemBLabel} (${daysLabel})`,
       problemCUnifier:
-        'Problema C (Etiologia Unificadora): Complicação intra-abdominal decorrente de fecaloma/impactação fecal prolongada com estase e translocação bacteriana, evoluindo com colite estercoral, perfuração iminente/bloqueada, obstrução intestinal mecânica ou sepse de foco abdominal.',
+        'Problema C (hipótese integradora): investigar possível complicação intra-abdominal associada à retenção fecal, incluindo fecaloma, colite estercoral, obstrução mecânica, perfuração e infecção de foco abdominal.',
       sharedHypotheses: [
         'fecaloma_impactacao_fecal',
         'colite_estercoral',
@@ -52,7 +63,7 @@ export function analyzeProblemGroups(state: IDGState): ProblemGroupIntegration |
         'neoplasia_colorretal_obstrutiva',
       ],
       clinicalRationale:
-        'A obstipação prolongada de 14 dias predispõe à impactação de fezes endurecidas com isquemia de pressão na parede colônica (colite estercoral), translocação bacteriana e sepse secundária, mesmo na ausência inicial de peritonite exuberante.',
+        'Febre associada à obstipação/retensão fecal exige investigar foco abdominal e possíveis complicações. A ausência de dor exuberante, isoladamente, não exclui complicação; a gravidade depende de avaliação clínica e propedêutica.',
     };
   }
 
