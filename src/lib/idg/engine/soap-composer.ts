@@ -219,7 +219,9 @@ export function composeSOAPSummary(
       const criteriaStr = h.def.exclusionCriteria.map((c) => c.description).join(' OU ');
       return {
         name: h.def.name,
-        whatIsMissingToExclude: criteriaStr || 'Avaliação dirigida e propedêutica complementar para descarte formal.',
+        whatIsMissingToExclude: criteriaStr
+          ? `Para afastar formalmente: ${criteriaStr}`
+          : 'Necessária avaliação dirigida e propedêutica complementar.',
       };
     });
 
