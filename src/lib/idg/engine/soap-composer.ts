@@ -265,7 +265,7 @@ export function composeSOAPSummary(
     ...(planImmediate.length ? [`- **Imediato:** ${planImmediate.join('; ')}.`] : []),
     `- **Investigação:** ${planInvestigation.length ? planInvestigation.join('; ') : 'Definir conforme avaliação clínica'}.`,
     `- **Reavaliação:** ${planReassessment[0]}`,
-  ].join('\\n');
+  ].join(String.fromCharCode(10));
 
   const formattedMarkdown = `### Síntese Clínica Integrada ${effectiveTag}
 
