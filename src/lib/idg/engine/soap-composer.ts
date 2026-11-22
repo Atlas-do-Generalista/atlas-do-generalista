@@ -72,49 +72,69 @@ export function composeSOAPSummary(
 
   const ssvvStr = ssvvParts.length > 0 ? ssvvParts.join(', ') : 'Não aferidos / não informados no momento';
 
-  // Exame físico telegráfico
+  // Exame físico: documenta apenas domínios pertinentes à apresentação / hipóteses ativas.
   const examParts: string[] = [];
+  const abdominalContext =
+    state.presentations.includes('dor_abdominal') ||
+    state.presentations.includes('obstipacao') ||
+    [...axis1, ...axis2].some((h) =>
+      h.def.presentationId === 'dor_abdominal' || h.def.presentationId === 'obstipacao',
+    );
+  const infectionOrShockContext =
+    state.presentations.includes('febre') ||
+    state.presentations.includes('choque') ||
+    axis1.some((h) => h.def.id === 'sepse_choque_septico') ||
+    axis2.some((h) => h.def.id === 'sepse_choque_septico');
 
-  // Exame abdominal
-  const dorPalpacao = normalizeFindingStatus(findings['dor_palpacao_abdominal']);
-  const distensao = normalizeFindingStatus(findings['distensao_abdominal_visivel']);
-  const flatos = normalizeFindingStatus(findings['parada_eliminacao_flatos']);
-  const vomitos = normalizeFindingStatus(findings['vomitos_presentes']);
-  const toqueRetal = normalizeFindingStatus(findings['toque_retal_massa_fecal']);
+  if (abdominalContext) {
+    const dorPalpacao = normalizeFindingStatus(findings['dor_palpacao_abdominal']);
+    const distensao = normalizeFindingStatus(findings['distensao_abdominal_visivel']);
+    const flatos = normalizeFindingStatus(findings['parada_eliminacao_flatos']);
+    const vomitos = normalizeFindingStatus(findings['vomitos_presentes']);
+    const toqueRetal = normalizeFindingStatus(findings['toque_retal_massa_fecal']);
 
-  if (textLower.includes('sem dor abdominal') || dorPalpacao === 'absent') {
-    examParts.push('Abdome: sem dor importante à palpação, sem sinais de peritonite documentados');
-  } else if (dorPalpacao === 'present') {
-    examParts.push('Abdome: doloroso à palpação');
-  } else {
-    examParts.push('Palpação abdominal / peritonite: não avaliada');
+    if (dorPalpacao === 'absent') examParts.push('Dor à palpação abdominal: ausente');
+    else if (dorPalpacao === 'present') examParts.push('Dor à palpação abdominal: presente');
+    else if (textLower.includes('sem dor abdominal')) examParts.push('Dor abdominal importante: negada no relato');
+    else examParts.push('Palpação abdominal: não avaliada');
+
+    if (distensao === 'present') examParts.push('Distensão abdominal: presente');
+    else if (distensao === 'absent') examParts.push('Distensão abdominal: ausente');
+    else examParts.push('Distensão abdominal: não avaliada');
+
+    if (flatos === 'present') examParts.push('Eliminação de flatos: parada');
+    else if (flatos === 'absent') examParts.push('Eliminação de flatos: preservada');
+    else examParts.push('Eliminação de flatos: não informada');
+
+    if (vomitos === 'present') examParts.push('Vômitos: presentes');
+    else if (vomitos === 'absent') examParts.push('Vômitos: ausentes');
+    else examParts.push('Vômitos: não informados');
+
+    if (toqueRetal === 'present') examParts.push('Toque retal: massa fecal palpável');
+    else if (toqueRetal === 'absent') examParts.push('Toque retal: ampola retal vazia');
+    else examParts.push('Toque retal: não realizado');
   }
 
-  if (distensao === 'present') examParts.push('Distensão abdominal: presente');
-  else if (distensao === 'absent') examParts.push('Distensão abdominal: ausente');
-  else examParts.push('Distensão abdominal: não avaliada');
+  if (infectionOrShockContext) {
+    const enchimentoCapilar = normalizeFindingStatus(findings['tempo_enchimento_capilar_aumentado']);
+    if (enchimentoCapilar === 'present') examParts.push('Perfusão: TEC lentificado');
+    else if (enchimentoCapilar === 'absent') examParts.push('Perfusão: TEC preservado');
+    else examParts.push('Perfusão periférica (TEC): não avaliada');
 
-  if (flatos === 'present') examParts.push('Eliminação de flatos: parada completa');
-  else if (flatos === 'absent') examParts.push('Eliminação de flatos: preservada');
-  else examParts.push('Eliminação de flatos: não informada');
+    if (!general.glasgow_ocular && !textLower.includes('orientad') && !textLower.includes('sensório')) {
+      examParts.push('Estado mental: não avaliado');
+    }
+  }
 
-  if (vomitos === 'present') examParts.push('Vômitos: presentes');
-  else if (vomitos === 'absent') examParts.push('Vômitos: ausentes');
-  else examParts.push('Vômitos: não informados');
-
-  if (toqueRetal === 'present') examParts.push('Toque retal: massa fecal endurecida (fecaloma)');
-  else if (toqueRetal === 'absent') examParts.push('Toque retal: ampola retal vazia');
-  else examParts.push('Toque retal: não realizado');
-
-  // Sinais neurológicos / perfusão
-  const enchimentoCapilar = normalizeFindingStatus(findings['tempo_enchimento_capilar_aumentado']);
-  if (enchimentoCapilar === 'present') examParts.push('Perfusão: TEC > 3s / lentificado');
-  else if (enchimentoCapilar === 'absent') examParts.push('Perfusão: TEC < 3s preservado');
-  else examParts.push('Perfusão periférica (TEC): não avaliada');
-
-  const rigidezNuca = normalizeFindingStatus(findings['rigidez_de_nuca_kernig_brudzinski']);
-  if (rigidezNuca === 'present') examParts.push('Sinais meníngeos: presentes');
-  else if (rigidezNuca === 'absent') examParts.push('Sinais meníngeos: ausentes');
+  if (
+    state.presentations.includes('cefaleia_aguda') ||
+    state.presentations.includes('alteracao_consciencia') ||
+    state.presentations.includes('febre')
+  ) {
+    const rigidezNuca = normalizeFindingStatus(findings['rigidez_de_nuca_kernig_brudzinski']);
+    if (rigidezNuca === 'present') examParts.push('Sinais meníngeos: presentes');
+    else if (rigidezNuca === 'absent') examParts.push('Sinais meníngeos: ausentes');
+  }
 
   const examStr = examParts.join(' | ');
 
@@ -183,42 +203,41 @@ export function composeSOAPSummary(
     uncertaintyReason = 'Dados fundamentais do exame físico e disfunção orgânica ainda não avaliados.';
   }
 
-  // Lacunas críticas
+  // Lacunas críticas: somente informações pertinentes ao contexto clínico.
   const criticalGaps: string[] = [];
-  if (flatos === 'not_assessed') criticalGaps.push('eliminação de flatos');
-  if (distensao === 'not_assessed') criticalGaps.push('distensão abdominal');
-  if (vomitos === 'not_assessed') criticalGaps.push('presença de vômitos');
-  if (dorPalpacao === 'not_assessed') criticalGaps.push('palpação abdominal / peritonite');
-  if (toqueRetal === 'not_assessed') criticalGaps.push('toque retal (fecaloma)');
-  if (!general.creatinina) criticalGaps.push('função renal');
-  if (!general.diurese_ml && !textLower.includes('diurese')) criticalGaps.push('débito urinário');
-  if (!general.glasgow_ocular && !textLower.includes('orientad') && !textLower.includes('sensório')) criticalGaps.push('estado mental / sensório');
-  if (!general.plaquetas) criticalGaps.push('plaquetas / coagulograma');
-  if (!general.lactato) criticalGaps.push('lactato sérico');
+  if (abdominalContext) {
+    if (normalizeFindingStatus(findings['parada_eliminacao_flatos']) === 'not_assessed') criticalGaps.push('eliminação de flatos');
+    if (normalizeFindingStatus(findings['distensao_abdominal_visivel']) === 'not_assessed') criticalGaps.push('distensão abdominal');
+    if (normalizeFindingStatus(findings['vomitos_presentes']) === 'not_assessed') criticalGaps.push('presença de vômitos');
+    if (normalizeFindingStatus(findings['dor_palpacao_abdominal']) === 'not_assessed') criticalGaps.push('palpação abdominal / peritonite');
+    if (normalizeFindingStatus(findings['toque_retal_massa_fecal']) === 'not_assessed') criticalGaps.push('toque retal (quando indicado)');
+  }
+  if (infectionOrShockContext) {
+    if (!general.creatinina) criticalGaps.push('função renal');
+    if (!general.diurese_ml && !textLower.includes('diurese')) criticalGaps.push('débito urinário');
+    if (!general.glasgow_ocular && !textLower.includes('orientad') && !textLower.includes('sensório')) criticalGaps.push('estado mental / sensório');
+    if (!general.plaquetas) criticalGaps.push('plaquetas');
+    if (!general.lactato) criticalGaps.push('lactato sérico, se indicado pelo contexto');
+  }
 
-  // 4. P — Plano / Conduta (Sugestões da IDG)
-  const planImmediate: string[] = [
-    'Avaliação imediata de perfusão periférica (tempo de enchimento capilar) e sinais vitais completos (NEWS2).',
-    'Exame físico dirigido: palpação abdominal minuciosa para descartar irritação peritoneal e realização de toque retal.',
-    'Rastrear disfunções orgânicas (Sepsis-3): verificar estado mental, padrão respiratório e diurese antes de afastar sepse.',
-  ];
+  // 4. P — Plano / Conduta: deriva de alertas e exames realmente cadastrados.
+  const planImmediate = alerts.map((alert) => `${alert.title}: ${alert.immediateActionRequired}`);
 
-  const planInvestigation: string[] = [
-    'Radiografia de abdome agudo (rotina de três posições) ou Tomografia Computadorizada de abdome e pelve com contraste se suspeita de colite estercoral / obstrução.',
-    'Hemograma completo, PCR, creatinina, ureia, eletrólitos (sódio, potássio, magnésio), gasometria e lactato sérico.',
-    'Coleta de 2 pares de hemoculturas antes de qualquer antimicrobiano se mantida suspeita de foco infeccioso sistêmico.',
-  ];
+  const planInvestigation = tests.slice(0, 6).map((test) => {
+    const targets = test.targetHypothesisIds.join(', ');
+    return `${test.name} — investiga: ${targets}. Limitações: ${test.limitations} Risco de falso negativo: ${test.falseNegativeRisk}`;
+  });
 
-  const planTherapeutics: string[] = [
-    'Se confirmado fecaloma não complicado ao toque retal: iniciar desimpactação digital cautelosa após analgesia, seguida de enemas laxativos glicerinados.',
-    'Se sinais de colite estercoral, peritonite ou sepse: jejum oral imediato, expansão volêmica e antibioticoterapia de amplo espectro na 1ª hora.',
-    'Suspender fármacos constipantes (opioides, anticolinérgicos).',
-  ];
+  // Não prescrever terapêutica sem uma recomendação específica e validada na base de conhecimento.
+  const planTherapeutics: string[] = [];
 
   const planReassessment: string[] = [
-    'Reavaliação seriada dos sinais vitais a cada 1-2 horas até estabilização e descarte de sepse.',
-    'Sinais de alarme para laparotomia / cirurgia urgente: rigidez abdominal em tábua, pneumoperitônio, piora súbita da taquicardia ou acidose láctica.',
+    'Reavaliar sinais vitais, perfusão e estado clínico após intervenções e resultados relevantes.',
+    'Revisar as hipóteses e a necessidade de investigação adicional sempre que surgirem novos achados.',
   ];
+  if (criticalGaps.length > 0) {
+    planReassessment.push(`Completar avaliação dos seguintes pontos pertinentes: ${criticalGaps.join(', ')}.`);
+  }
 
   // Montagem do texto em Markdown conforme template estrutural da seção 3.4
   const formattedMarkdown = `### Síntese Clínica Integrada ${effectiveTag}
@@ -245,8 +264,8 @@ ${unruledOutDangerous.length > 0 ? unruledOutDangerous.map((d) => `- **${d.name}
 
 **P — Plano / Conduta** *(Sugestões da IDG — diferenciar de condutas já executadas)*  
 - **Imediato:** ${planImmediate.join('; ')}.  
-- **Investigação:** ${planInvestigation.join('; ')}.  
-- **Terapêutica a considerar:** ${planTherapeutics.join('; ')}.  
+- **Investigação:** ${planInvestigation.length ? planInvestigation.join('; ') : 'Nenhum exame adicional priorizado pela base de conhecimento para os dados atuais'}.  
+${planTherapeutics.length ? `- **Terapêutica a considerar:** ${planTherapeutics.join('; ')}.  ` : ''}
 - **Reavaliação e Alerta:** ${planReassessment.join('; ')}.
 `;
 
