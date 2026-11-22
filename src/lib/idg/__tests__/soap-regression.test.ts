@@ -86,7 +86,7 @@ describe('IDG — Cenário de Regressão e Síntese SOAP Integrada (Seção 4)',
     store.setFinding('toque_retal_massa_fecal', 'present');
     const evalAtualizado = store.getEvaluation();
     expect(evalAtualizado.soap.versionTag).toBe('[Atualizado]');
-    expect(evalAtualizado.soap.objective.physicalExam).toContain('Toque retal: massa fecal endurecida (fecaloma)');
+    expect(evalAtualizado.soap.objective.physicalExam).toContain('Toque retal: massa fecal palpável');
 
     // Simula registro de exame complementar
     store.setTestResult('tc_abdomen', 'Fecaloma impactado em sigmoide sem perfuração livre');
