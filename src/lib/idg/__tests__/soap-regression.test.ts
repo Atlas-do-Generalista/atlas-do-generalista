@@ -35,8 +35,9 @@ describe('IDG — Cenário de Regressão e Síntese SOAP Integrada (Seção 4)',
     // Critério 2: Integra febre + obstipação 14d (Problema C), gerando fecaloma, obstrução, colite estercoral e sepse
     expect(evaluation.problemIntegration).toBeDefined();
     expect(evaluation.problemIntegration?.problemA).toContain('Síndrome febril');
-    expect(evaluation.problemIntegration?.problemB).toContain('Obstipação grave prolongada');
-    expect(evaluation.problemIntegration?.problemCUnifier).toContain('Problema C (Etiologia Unificadora)');
+    expect(evaluation.problemIntegration?.problemB).toContain('Obstipação prolongada');
+    expect(evaluation.problemIntegration?.problemB).toContain('14 dias sem evacuar');
+    expect(evaluation.problemIntegration?.problemCUnifier).toContain('Problema C (hipótese integradora)');
 
     const topDiffNames = soap.assessment.priorityDifferentials.map((d) => d.name.toLowerCase());
     const allAxis1Names = evaluation.axis1Probable.map((h) => h.def.name.toLowerCase());
@@ -96,5 +97,22 @@ describe('IDG — Cenário de Regressão e Síntese SOAP Integrada (Seção 4)',
     // Reavaliação explícita
     const evalReavaliacao = store.recordReassessment('18:00');
     expect(evalReavaliacao.soap.versionTag).toBe('[Reavaliação - 18:00]');
+    // Sem duração explícita, o motor não deve presumir 14 dias.
+    const semDuracao = new InMemoryIDGStore();
+    semDuracao.initializeCase({
+      presentations: ['febre', 'obstipacao'],
+      freeTextDescription: 'Paciente com febre e obstipação, sem duração especificada.',
+    });
+    expect(semDuracao.getEvaluation().problemIntegration?.problemB).toContain('duração não informada');
+    expect(semDuracao.getEvaluation().problemIntegration?.problemB).not.toContain('14 dias');
   });
+  it('não injeta recomendações abdominais em uma investigação de dor torácica', () => {
+    const store = new InMemoryIDGStore(['dor_toracica']);
+    const soap = store.getEvaluation().soap;
+
+    expect(soap.formattedMarkdown.toLowerCase()).not.toContain('radiografia de abdome');
+    expect(soap.formattedMarkdown.toLowerCase()).not.toContain('toque retal');
+    expect(soap.formattedMarkdown.toLowerCase()).not.toContain('desimpactação digital');
+  });
+
 });

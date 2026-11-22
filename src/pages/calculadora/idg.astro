@@ -97,13 +97,15 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
               class="clinical-textarea"
               rows="3"
               placeholder="Ex.: Paciente masculino 62 anos, hipertenso, com dor torácica retroesternal de início súbito após esforço moderado, irradiando para dorso..."
+              aria-describedby="free-description-help"
             ></textarea>
+            <small id="free-description-help" class="field-help">O texto livre complementa a história e aciona regras locais específicas quando reconhecidas; registre também os achados discriminatórios nos campos estruturados. Não há interpretação generativa de linguagem natural.</small>
           </div>
 
           <div class="field-block">
             <label for="txt-initial-hypotheses" class="field-label">
               Suas hipóteses diagnósticas iniciais (separadas por vírgula):
-              <small class="field-help">Usado para identificar diagnósticos perigosos esquecidos (Cognitive Forcing)</small>
+              <small class="field-help">Hipóteses cadastradas serão incorporadas à avaliação; termos sem correspondência na base não recebem pontuação nem avaliação automatizada.</small>
             </label>
             <input
               id="txt-initial-hypotheses"
@@ -307,7 +309,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
   });
 
   // Atualização das hipóteses iniciais do médico
-  txtInitialHypotheses?.addEventListener('change', () => {
+  txtInitialHypotheses?.addEventListener('input', () => {
     const raw = txtInitialHypotheses.value;
     const items = raw.split(',').map((s) => s.trim()).filter(Boolean);
     store.setUserInitialHypotheses(items);
@@ -366,17 +368,39 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
     }
   });
 
-  // Subscrição reativa ao store
+  // Isola as renderizações: uma falha visual não deve interromper os demais painéis.
+  function safeRender(
+    section: string,
+    targetId: string | null,
+    render: () => void,
+  ): void {
+    const target = targetId ? document.getElementById(targetId) : null;
+    target?.querySelector('.idg-render-error')?.remove();
+    try {
+      render();
+    } catch (error) {
+      console.error(`[IDG] Falha ao renderizar ${section}:`, error);
+      if (target) {
+        const notice = document.createElement('p');
+        notice.className = 'idg-render-error';
+        notice.setAttribute('role', 'alert');
+        notice.textContent = `Não foi possível atualizar esta seção (${section}). Consulte o console para detalhes.`;
+        target.prepend(notice);
+      }
+    }
+  }
+
+  // Subscrição reativa ao store: cada subsistema é renderizado isoladamente.
   store.subscribe((evaluation, state) => {
-    renderPresentationsState(state.presentations);
-    renderAlerts(evaluation.activeSafetyAlerts);
-    renderCognitiveForcing(evaluation.unconsideredDangerous);
-    renderAxis2(evaluation.axis2Critical, state);
-    renderAxis1(evaluation.axis1Probable, state);
-    renderQuestions(evaluation.suggestedQuestions, state);
-    renderTests(evaluation.suggestedTests);
-    renderScores(evaluation.integratedScores);
-    renderSynthesis(evaluation, state);
+    safeRender('apresentações', null, () => renderPresentationsState(state.presentations));
+    safeRender('alertas', 'alerts-list', () => renderAlerts(evaluation.activeSafetyAlerts));
+    safeRender('alertas cognitivos', 'cf-message', () => renderCognitiveForcing(evaluation.unconsideredDangerous));
+    safeRender('eixo de condições críticas', 'axis2-list', () => renderAxis2(evaluation.axis2Critical, state));
+    safeRender('eixo de hipóteses prováveis', 'axis1-list', () => renderAxis1(evaluation.axis1Probable, state));
+    safeRender('perguntas adaptativas', 'questions-container', () => renderQuestions(evaluation.suggestedQuestions, state));
+    safeRender('exames recomendados', 'tests-container', () => renderTests(evaluation.suggestedTests));
+    safeRender('escores', 'scores-container', () => renderScores(evaluation.integratedScores));
+    safeRender('síntese SOAP', 'synthesis-output', () => renderSynthesis(evaluation, state));
   });
 
   function renderPresentationsState(selected: ClinicalPresentationId[]) {
@@ -484,9 +508,9 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
 
             <!-- Barra de priorização multidimensional -->
             <div class="matrix-scores-bar">
-              <span class="matrix-pill">Compatibilidade: ${h.priorityMatrix.compatibility}%</span>
-              <span class="matrix-pill matrix-pill-severity">Gravidade: ${h.priorityMatrix.severity}/10</span>
-              <span class="matrix-pill matrix-pill-urgency">Urgência: ${h.priorityMatrix.urgency}/10</span>
+              <span class="matrix-pill">Compatibilidade: ${h.multidimensional.compatibility}%</span>
+              <span class="matrix-pill matrix-pill-severity">Gravidade: ${h.multidimensional.severity}/10</span>
+              <span class="matrix-pill matrix-pill-urgency">Urgência: ${h.multidimensional.urgency}/10</span>
             </div>
 
             <div class="hypo-guidance">
@@ -544,8 +568,8 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
             </div>
 
             <div class="matrix-scores-bar">
-              <span class="matrix-pill">Compatibilidade: ${h.priorityMatrix.compatibility}%</span>
-              <span class="matrix-pill">Prioridade Composta: ${h.priorityMatrix.compositePriority}</span>
+              <span class="matrix-pill">Compatibilidade: ${h.multidimensional.compatibility}%</span>
+              <span class="matrix-pill">Prioridade Composta: ${h.multidimensional.compositePriority}</span>
             </div>
 
             ${exclusionTag}
@@ -680,108 +704,101 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
       .join('');
   }
 
+  function escapeHtml(value: unknown): string {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => {
+      const entities: Record<string, string> = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      };
+      return entities[char];
+    });
+  }
+
   function renderSynthesis(evaluation: IDGEvaluation, state: IDGState) {
     if (!synthesisOutput) return;
+
     const soap = evaluation.soap;
-    latestSoapMarkdown = soap.formattedMarkdown;
+    latestSoapMarkdown = soap.formattedMarkdown || '';
 
     if (soapTagBadge) {
-      soapTagBadge.textContent = soap.currentTag;
-      const cleanCls = soap.currentTag.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+      soapTagBadge.textContent = soap.versionTag;
+      const cleanCls = soap.versionTag.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
       soapTagBadge.className = `soap-tag-badge soap-tag-${cleanCls}`;
     }
 
-    if (state.presentations.length === 0 && !state.freeTextDescription) {
-      synthesisOutput.innerHTML = '<p class="empty-hint">A síntese SOAP será formulada dinamicamente com estilo telegráfico à medida que você registrar os dados do paciente.</p>';
+    const hasClinicalData =
+      state.presentations.length > 0 ||
+      Boolean(state.freeTextDescription.trim()) ||
+      Object.keys(state.findings).length > 0 ||
+      Object.keys(state.testResults).length > 0;
+
+    if (!hasClinicalData) {
+      synthesisOutput.innerHTML = '<p class="empty-hint">A síntese SOAP será formulada à medida que você registrar os dados clínicos.</p>';
       return;
     }
 
+    const list = (items: string[], emptyLabel: string) =>
+      items.length
+        ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')
+        : `<li>${escapeHtml(emptyLabel)}</li>`;
+
     synthesisOutput.innerHTML = `
       <div class="soap-block soap-block-s">
-        <div class="soap-block-header">
-          <span class="soap-letter">S</span>
-          <h4>Subjetivo</h4>
-        </div>
-        <div class="soap-content">
-          <p><strong>Apresentação:</strong> ${soap.subjective.chiefComplaint || 'Não informada'}</p>
-          <p><strong>Histórico / Sintomas:</strong> ${soap.subjective.hpiSummary || 'Sem descrição adicional'}</p>
-          ${soap.subjective.pertinentPositives.length > 0 ? `<p><strong>Sintomas relatados:</strong> ${soap.subjective.pertinentPositives.join('; ')}</p>` : ''}
-          ${soap.subjective.pertinentNegatives.length > 0 ? `<p><strong>Sintomas negados:</strong> ${soap.subjective.pertinentNegatives.join('; ')}</p>` : ''}
-        </div>
+        <div class="soap-block-header"><span class="soap-letter">S</span><h4>Subjetivo</h4></div>
+        <div class="soap-content"><p>${escapeHtml(soap.subjective || 'Dados subjetivos não informados.')}</p></div>
       </div>
 
       <div class="soap-block soap-block-o">
-        <div class="soap-block-header">
-          <span class="soap-letter">O</span>
-          <h4>Objetivo</h4>
-        </div>
+        <div class="soap-block-header"><span class="soap-letter">O</span><h4>Objetivo</h4></div>
         <div class="soap-content">
-          <p><strong>Sinais Vitais:</strong> ${soap.objective.vitalsSummary || 'Não registrados'}</p>
-          <p><strong>Exame Físico:</strong> ${soap.objective.physicalExamSummary || 'Não avaliado'}</p>
-          <p><strong>Exames Complementares:</strong> ${soap.objective.diagnosticTestsSummary || 'Nenhum resultado disponível'}</p>
-          ${soap.objective.missingVitalOrExamGaps.length > 0 ? `<p class="soap-missing-highlight"><strong>Lacunas Críticas (Não Avaliadas):</strong> ${soap.objective.missingVitalOrExamGaps.join('; ')}</p>` : ''}
+          <p><strong>Sinais vitais:</strong> ${escapeHtml(soap.objective.vitalSigns)}</p>
+          <p><strong>Exame físico:</strong> ${escapeHtml(soap.objective.physicalExam)}</p>
+          <p><strong>Exames disponíveis:</strong> ${escapeHtml(soap.objective.availableTests)}</p>
         </div>
       </div>
 
       <div class="soap-block soap-block-a">
-        <div class="soap-block-header">
-          <span class="soap-letter">A</span>
-          <h4>Avaliação (Raciocínio Clínico)</h4>
-        </div>
+        <div class="soap-block-header"><span class="soap-letter">A</span><h4>Avaliação</h4></div>
         <div class="soap-content">
-          <p><strong>Síntese Sindrômica:</strong> ${soap.assessment.syndromicImpression}</p>
+          <p><strong>Síntese:</strong> ${escapeHtml(soap.assessment.unifyingSynthesis)}</p>
           <div class="soap-axis-subblock">
-            <strong>Eixo 1 (Plausibilidade Clínica):</strong>
-            <ul>
-              ${soap.assessment.primaryDifferentials.map((d) => `<li><strong>${d.diagnosis}</strong> (${d.status.toUpperCase()}): ${d.justification}</li>`).join('') || '<li>Aguardando dados</li>'}
-            </ul>
+            <strong>Hipóteses mais prováveis:</strong>
+            <ul>${soap.assessment.priorityDifferentials.length
+              ? soap.assessment.priorityDifferentials.map((d) => `<li><strong>${escapeHtml(d.name)}</strong> — ${escapeHtml(d.oneLineRationale)} ${d.severityTag ? escapeHtml(d.severityTag) : ''}</li>`).join('')
+              : '<li>Aguardando dados discriminatórios.</li>'}</ul>
           </div>
           <div class="soap-axis-subblock soap-critical-subblock">
-            <strong>Eixo 2 (Não Deixar Passar - Condições Críticas):</strong>
-            <ul>
-              ${soap.assessment.criticalNotToMiss.map((c) => `<li><strong>${c.diagnosis}</strong>: ${c.statusAndExclusion}</li>`).join('') || '<li>Nenhuma pendência crítica</li>'}
-            </ul>
+            <strong>Condições graves ainda não excluídas:</strong>
+            <ul>${soap.assessment.unruledOutDangerous.length
+              ? soap.assessment.unruledOutDangerous.map((d) => `<li><strong>${escapeHtml(d.name)}</strong> — ${escapeHtml(d.whatIsMissingToExclude)}</li>`).join('')
+              : '<li>Nenhuma condição adicional identificada nesta etapa.</li>'}</ul>
           </div>
-          ${
-            soap.assessment.ruledOutConditions.length > 0
-              ? `
-            <div class="soap-axis-subblock">
-              <strong>Condições Excluídas Formalmente:</strong>
-              <ul>${soap.assessment.ruledOutConditions.map((r) => `<li><strong>${r.diagnosis}</strong>: ${r.reason}</li>`).join('')}</ul>
-            </div>
-          `
-              : ''
-          }
+          <p><strong>Incerteza:</strong> ${escapeHtml(soap.assessment.uncertaintyDegree)}</p>
+          ${soap.assessment.criticalGaps.length
+            ? `<p><strong>Lacunas relevantes:</strong> ${escapeHtml(soap.assessment.criticalGaps.join('; '))}</p>`
+            : ''}
         </div>
       </div>
 
       <div class="soap-block soap-block-p">
-        <div class="soap-block-header">
-          <span class="soap-letter">P</span>
-          <h4>Plano Terapêutico & Diagnóstico</h4>
-        </div>
+        <div class="soap-block-header"><span class="soap-letter">P</span><h4>Plano / Conduta</h4></div>
         <div class="soap-content">
-          ${
-            soap.plan.immediateActions.length > 0
-              ? `
-            <div class="soap-plan-alert">
-              <strong>Conduta Imediata:</strong>
-              <ul>${soap.plan.immediateActions.map((a) => `<li>${a}</li>`).join('')}</ul>
-            </div>
-          `
-              : ''
-          }
-          <p><strong>Investigação Propedêutica Prioritária:</strong></p>
-          <ul>
-            ${soap.plan.diagnosticWorkup.map((w) => `<li><strong>${w.test}:</strong> ${w.rationale} <small class="workup-caveat">(Limitação: ${w.limitations}; Falso Negativo: ${w.falseNegativeRisk})</small></li>`).join('') || '<li>Sem exames adicionais recomendados</li>'}
-          </ul>
-          <p><strong>Metas de Reavaliação:</strong> ${soap.plan.monitoringAndReassessment.join('; ')}</p>
+          ${soap.plan.immediate.length
+            ? `<div class="soap-plan-alert"><strong>Ações imediatas sugeridas:</strong><ul>${list(soap.plan.immediate, '')}</ul></div>`
+            : ''}
+          <p><strong>Investigação sugerida:</strong></p>
+          <ul>${list(soap.plan.investigation, 'Nenhum exame adicional priorizado pela base de conhecimento para os dados atuais.')}</ul>
+          ${soap.plan.therapeuticsToConsider.length
+            ? `<p><strong>Intervenções terapêuticas a considerar:</strong></p><ul>${list(soap.plan.therapeuticsToConsider, '')}</ul>`
+            : ''}
+          <p><strong>Reavaliação:</strong></p>
+          <ul>${list(soap.plan.reassessmentAndAlerts, 'Reavaliar conforme evolução clínica.')}</ul>
         </div>
       </div>
-
-      <div class="synth-block synth-caveat">
-        <small>${evaluation.synthesis.disclaimer}</small>
-      </div>
+      <div class="synth-block synth-caveat"><small>${escapeHtml(evaluation.synthesis.disclaimer)}</small></div>
     `;
   }
 </script>

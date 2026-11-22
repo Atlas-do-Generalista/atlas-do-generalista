@@ -90,18 +90,50 @@ export class IDGKnowledgeRegistry {
     return this.hypotheses.find((h) => h.id === id);
   }
 
+  static findHypothesesByNames(names: string[]): ClinicalHypothesisDef[] {
+    const normalize = (value: string) =>
+      value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+    const aliases: Record<string, string[]> = {
+      infarto: ['sca'],
+      iam: ['sca'],
+      'infarto agudo do miocardio': ['sca'],
+      'sindrome coronariana aguda': ['sca'],
+      'embolia pulmonar': ['tep'],
+      'tromboembolismo pulmonar': ['tep'],
+      'disseccao de aorta': ['disseccao_aorta'],
+      'disseccao aortica': ['disseccao_aorta'],
+    };
+
+    const queries = names
+      .map((name) => normalize(name))
+      .filter(Boolean)
+      .flatMap((query) => [query, ...(aliases[query] || []).map(normalize)]);
+
+    const matched = new Set<string>();
+    for (const query of queries) {
+      for (const hypothesis of this.hypotheses) {
+        const id = normalize(hypothesis.id.replace(/_/g, ' '));
+        const name = normalize(hypothesis.name);
+        const exact = id === query || name === query;
+        const phraseMatch = query.length >= 5 && name.includes(query);
+        if (exact || phraseMatch) matched.add(hypothesis.id);
+      }
+    }
+    return this.hypotheses.filter((hypothesis) => matched.has(hypothesis.id));
+  }
+
   static getHypothesesForPresentations(
     presentations: ClinicalPresentationId[],
     extraHypothesisIds: string[] = [],
+    extraHypothesisNames: string[] = [],
   ): ClinicalHypothesisDef[] {
-    if (presentations.length === 0 && extraHypothesisIds.length === 0) return [];
     const set = new Set(presentations);
     const extraSet = new Set(extraHypothesisIds);
+    this.findHypothesesByNames(extraHypothesisNames).forEach((h) => extraSet.add(h.id));
 
-    // Obstipação se correlaciona com patologias de abdome agudo
-    if (set.has('obstipacao')) {
-      set.add('dor_abdominal');
-    }
+    // Obstipação também exige considerar hipóteses cadastradas para abdome agudo.
+    if (set.has('obstipacao')) set.add('dor_abdominal');
 
     return this.hypotheses.filter(
       (h) => set.has(h.presentationId) || extraSet.has(h.id),

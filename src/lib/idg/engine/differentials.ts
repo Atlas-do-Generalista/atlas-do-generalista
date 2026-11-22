@@ -24,6 +24,7 @@ export function evaluateHypotheses(state: IDGState): {
   const candidateDefs = IDGKnowledgeRegistry.getHypothesesForPresentations(
     state.presentations,
     extraSharedIds,
+    state.userInitialHypotheses || [],
   );
 
   const evaluated: EvaluatedHypothesis[] = candidateDefs.map((def) => {
@@ -61,9 +62,13 @@ export function evaluateHypotheses(state: IDGState): {
   const userHypSet = new Set(
     (state.userInitialHypotheses || []).map((h) => h.toLowerCase().trim()),
   );
+  const manuallyMatchedIds = new Set(
+    IDGKnowledgeRegistry.findHypothesesByNames(state.userInitialHypotheses || []).map((h) => h.id),
+  );
 
   const unconsideredDangerous = axis2Critical.filter((h) => {
     if (userHypSet.size === 0) return true;
+    if (manuallyMatchedIds.has(h.def.id)) return false;
     const nameLower = h.def.name.toLowerCase();
     const idLower = h.def.id.toLowerCase();
     const isConsidered = Array.from(userHypSet).some((userH) =>

@@ -112,6 +112,21 @@ describe('IDG — Os Quatro Módulos Clínicos Iniciais', () => {
   });
 
   describe('Módulo 4 — Suspeita de Infecção / Sepse Inicial', () => {
+    it('não inventa valores numéricos para calcular escores a partir de achados qualitativos', () => {
+      const store = new InMemoryIDGStore(['febre']);
+      store.setFinding('taquicardia_fc_maior_100', 'present');
+      store.setFinding('lactato_serico_elevado', 'present');
+
+      const evaluation = store.getEvaluation();
+      const news2 = evaluation.integratedScores.find((score) => score.scoreId === 'news2');
+      const sofa = evaluation.integratedScores.find((score) => score.scoreId === 'sofa-2');
+
+      expect(news2?.status).toBe('incompleto');
+      expect(news2?.value).toBeUndefined();
+      expect(sofa?.status).toBe('incompleto');
+      expect(sofa?.value).toBeUndefined();
+    });
+
     it('Diferencia foco infeccioso de disfunção orgânica de gravidade', () => {
       const store = new InMemoryIDGStore(['febre']);
 
