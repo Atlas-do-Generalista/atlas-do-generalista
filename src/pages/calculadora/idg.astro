@@ -1,0 +1,1767 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { IDGKnowledgeRegistry } from '../../lib/idg/knowledge/registry';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const presentations = IDGKnowledgeRegistry.getAllPresentations();
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Investigação Diagnóstica Guiada (IDG)',
+    description:
+      'Sistema estruturado de apoio à investigação diagnóstica e raciocínio clínico para emergência e medicina interna.',
+    tableOfContents: false,
+  }}
+>
+  <main class="idg-container">
+    <!-- BARRA SUPERIOR DE PRIVACIDADE E NAVEGAÇÃO -->
+    <div class="top-nav-bar">
+      <a class="back-link" href={`${base}/calculadora/`}>
+        ← Voltar ao Motor de Decisão Clínica
+      </a>
+
+      <div class="privacy-badge" title="Processamento 100% no navegador. Dados descartados ao fechar ou recarregar a página.">
+        <span class="privacy-dot" aria-hidden="true"></span>
+        <span>Privacidade Offline Estrita · Estado em Memória</span>
+      </div>
+
+      <button type="button" id="btn-reset-investigation" class="btn-clear" title="Descartar todos os dados e reiniciar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+        </svg>
+        <span>Reiniciar Investigação</span>
+      </button>
+    </div>
+
+    <!-- CABEÇALHO -->
+    <header class="page-header">
+      <div class="eyebrow">MOTOR DE DECISÃO CLÍNICA · SEGUNDA LINHA COGNITIVA</div>
+      <h1>Investigação Diagnóstica Guiada (IDG)</h1>
+      <p class="lead-quote">
+        <em>"Medicina não é sobre estar certo. É sobre minimizar a chance de estar errado e, por consequência, acertar mais."</em>
+      </p>
+      <p class="lead-desc">
+        Apoio estruturado à investigação beira-leito para o emergencista. Confronta suas hipóteses,
+        rastreia condições potencialmente fatais esquecidas e orienta próximos passos discriminatórios
+        sem viés de fechamento prematuro.
+      </p>
+    </header>
+
+    <!-- ÁREA 4: SEGURANÇA DIAGNÓSTICA (ALERTAS CRÍTICOS IMEDIATOS) -->
+    <section id="sec-safety-alerts" class="alerts-container" aria-live="assertive" style="display: none;">
+      <div class="alerts-header">
+        <span class="alert-icon">🚨</span>
+        <h3>ALERTAS CRÍTICOS DE SEGURANÇA DIAGNÓSTICA</h3>
+      </div>
+      <div id="alerts-list" class="alerts-list"></div>
+    </section>
+
+    <!-- GRID PRINCIPAL DE TRABALHO -->
+    <div class="workspace-grid">
+      <!-- COLUNA DA ESQUERDA: APRESENTAÇÃO E INVESTIGAÇÃO GUIADA -->
+      <div class="left-column">
+        <!-- ÁREA 1: APRESENTAÇÃO CLÍNICA -->
+        <section class="card-section">
+          <div class="section-title">
+            <span class="section-number">01</span>
+            <div>
+              <h2>Apresentação Clínica e Contexto</h2>
+              <p>Selecione as queixas principais e registre a contextualização do caso.</p>
+            </div>
+          </div>
+
+          <div class="field-block">
+            <label class="field-label">Apresentações clínicas observadas:</label>
+            <div class="presentations-chips">
+              {
+                presentations.map((p) => (
+                  <button
+                    type="button"
+                    class="chip-button"
+                    data-presentation-id={p.id}
+                  >
+                    <span class="chip-icon">{p.icon}</span>
+                    <span class="chip-label">{p.label}</span>
+                  </button>
+                ))
+              }
+            </div>
+          </div>
+
+          <div class="field-block">
+            <label for="txt-free-description" class="field-label">Descrição livre do caso (anamnese resumida / impressão inicial):</label>
+            <textarea
+              id="txt-free-description"
+              class="clinical-textarea"
+              rows="3"
+              placeholder="Ex.: Paciente masculino 62 anos, hipertenso, com dor torácica retroesternal de início súbito após esforço moderado, irradiando para dorso..."
+            ></textarea>
+          </div>
+
+          <div class="field-block">
+            <label for="txt-initial-hypotheses" class="field-label">
+              Suas hipóteses diagnósticas iniciais (separadas por vírgula):
+              <small class="field-help">Usado para identificar diagnósticos perigosos esquecidos (Cognitive Forcing)</small>
+            </label>
+            <input
+              id="txt-initial-hypotheses"
+              type="text"
+              class="clinical-input"
+              placeholder="Ex.: Síndrome coronariana aguda, espasmo esofágico"
+            />
+          </div>
+
+          <div class="integration-toolbar">
+            <button type="button" id="btn-import-context" class="btn-secondary" title="Lê em memória dados já digitados no formulário de Condição Atual">
+              📥 Importar dados do ContextoPaciente
+            </button>
+            <span id="import-status-msg" class="import-status-text"></span>
+          </div>
+        </section>
+
+        <!-- ÁREA 3: INVESTIGAÇÃO ADAPTATIVA (PERGUNTAS DISCRIMINATÓRIAS) -->
+        <section class="card-section">
+          <div class="section-title">
+            <span class="section-number">03</span>
+            <div>
+              <h2>Investigação Guiada Adaptativa</h2>
+              <p>Perguntas priorizadas pelo poder de discriminar entre as hipóteses ativas.</p>
+            </div>
+          </div>
+
+          <div id="questions-container" class="questions-stream">
+            <div class="empty-hint">Selecione ao menos uma apresentação clínica acima para iniciar as perguntas direcionadas.</div>
+          </div>
+        </section>
+
+        <!-- ÁREA 3.1: EXAMES RECOMENDADOS E LIMITAÇÕES -->
+        <section class="card-section">
+          <div class="section-title">
+            <span class="section-number">3.1</span>
+            <div>
+              <h2>Exames Recomendados & Risco de Falso Negativo</h2>
+              <p>Avaliação criteriosa de acurácia, limitações e potencial de exclusão.</p>
+            </div>
+          </div>
+
+          <div id="tests-container" class="tests-stream">
+            <div class="empty-hint">Nenhum exame pendente no momento.</div>
+          </div>
+        </section>
+
+        <!-- ÁREA 3.2: CRITÉRIOS E ESCORES INTEGRADOS (CALC-ENGINE) -->
+        <section class="card-section">
+          <div class="section-title">
+            <span class="section-number">3.2</span>
+            <div>
+              <h2>Critérios e Escores Clínicos Integrados</h2>
+              <p>Cálculos objetivos alimentados transparentemente pelo Motor de Decisão Clínica.</p>
+            </div>
+          </div>
+
+          <div id="scores-container" class="scores-stream">
+            <div class="empty-hint">Aguardando dados clínicos para avaliação de escores.</div>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLUNA DA DIREITA: DIAGNÓSTICO DIFERENCIAL (DOIS EIXOS) E SÍNTESE -->
+      <div class="right-column">
+        <!-- COGNITIVE FORCING BANNER -->
+        <div id="cognitive-forcing-box" class="cognitive-forcing-banner" style="display: none;">
+          <div class="cf-header">
+            <span class="cf-icon">⚠️</span>
+            <strong>ALERTA DE SEGURANÇA COGNITIVA (Segunda Linha):</strong>
+          </div>
+          <p id="cf-message"></p>
+        </div>
+
+        <!-- ÁREA 2: DIAGNÓSTICO DIFERENCIAL EM DOIS EIXOS -->
+        <section class="card-section differential-section">
+          <div class="section-title">
+            <span class="section-number">02</span>
+            <div>
+              <h2>Diagnóstico Diferencial em Dois Eixos</h2>
+              <p>Segregação ortogonal: probabilidade estatística vs periculosidade iminente.</p>
+            </div>
+          </div>
+
+          <!-- EIXO 2: O QUE NÃO POSSO DEIXAR PASSAR? -->
+          <div class="axis-block axis-critical-block">
+            <div class="axis-header">
+              <span class="axis-tag axis-tag-critical">EIXO 2</span>
+              <h3>O que não posso deixar passar?</h3>
+              <small>Condições graves/tempo-dependentes mantidas até exclusão formal</small>
+            </div>
+            <div id="axis2-list" class="hypotheses-list">
+              <div class="empty-hint">Nenhuma condição crítica detectada para a queixa selecionada.</div>
+            </div>
+          </div>
+
+          <!-- EIXO 1: O QUE É MAIS PROVÁVEL? -->
+          <div class="axis-block axis-probable-block">
+            <div class="axis-header">
+              <span class="axis-tag axis-tag-probable">EIXO 1</span>
+              <h3>O que é mais provável?</h3>
+              <small>Hipóteses que melhor explicam o conjunto dos achados</small>
+            </div>
+            <div id="axis1-list" class="hypotheses-list">
+              <div class="empty-hint">Aguardando achados para ordenar a plausibilidade clínica.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ÁREA 5: SÍNTESE DA INVESTIGAÇÃO E EXPORTAÇÃO SEGURA -->
+        <section class="card-section synthesis-section">
+          <div class="section-title">
+            <span class="section-number">05</span>
+            <div>
+              <h2>Síntese Clínica Estruturada (SOAP)</h2>
+              <p>Única fonte de verdade da sessão, atualizada dinamicamente com estilo telegráfico.</p>
+            </div>
+          </div>
+
+          <div class="soap-header-bar">
+            <span id="soap-tag-badge" class="soap-tag-badge">[Inicial]</span>
+            <small class="soap-session-note">Estado exclusivamente em memória · Sem persistência externa</small>
+          </div>
+
+          <div id="synthesis-output" class="synthesis-box">
+            <p class="empty-hint">A síntese será formulada dinamicamente à medida que você registrar os dados do paciente.</p>
+          </div>
+
+          <div class="synthesis-actions">
+            <button type="button" id="btn-copy-synthesis" class="btn-copy" title="Copia a síntese clínica SOAP para a área de transferência">
+              📋 Copiar Síntese SOAP para Prontuário
+            </button>
+            <button type="button" id="btn-record-reassessment" class="btn-secondary" title="Registra ponto de reavaliação clínica com timestamp [Reavaliação - HH:MM]">
+              ⏱️ Registrar Reavaliação no Leito
+            </button>
+            <span id="copy-feedback" class="copy-feedback-text"></span>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</StarlightPage>
+
+<script>
+  import { InMemoryIDGStore } from '../../lib/idg/state/in-memory-store';
+  import type {
+    IDGEvaluation,
+    IDGState,
+    ClinicalPresentationId,
+    FindingStatus,
+    EvaluatedHypothesis,
+    ClinicalSafetyAlert,
+    DiagnosticQuestionDef,
+    DiagnosticTestDef,
+    ScoreAdapterResult,
+  } from '../../lib/idg/types';
+
+  // Cria instância 100% em memória da IDG
+  const store = new InMemoryIDGStore();
+
+  // Elementos do DOM
+  const chips = document.querySelectorAll<HTMLButtonElement>('.chip-button');
+  const txtFreeDescription = document.getElementById('txt-free-description') as HTMLTextAreaElement;
+  const txtInitialHypotheses = document.getElementById('txt-initial-hypotheses') as HTMLInputElement;
+  const btnReset = document.getElementById('btn-reset-investigation') as HTMLButtonElement;
+  const btnImportContext = document.getElementById('btn-import-context') as HTMLButtonElement;
+  const importStatusMsg = document.getElementById('import-status-msg') as HTMLSpanElement;
+
+  const secSafetyAlerts = document.getElementById('sec-safety-alerts') as HTMLElement;
+  const alertsList = document.getElementById('alerts-list') as HTMLElement;
+
+  const cognitiveForcingBox = document.getElementById('cognitive-forcing-box') as HTMLElement;
+  const cfMessage = document.getElementById('cf-message') as HTMLElement;
+
+  const axis1List = document.getElementById('axis1-list') as HTMLElement;
+  const axis2List = document.getElementById('axis2-list') as HTMLElement;
+
+  const questionsContainer = document.getElementById('questions-container') as HTMLElement;
+  const testsContainer = document.getElementById('tests-container') as HTMLElement;
+  const scoresContainer = document.getElementById('scores-container') as HTMLElement;
+
+  const synthesisOutput = document.getElementById('synthesis-output') as HTMLElement;
+  const btnCopySynthesis = document.getElementById('btn-copy-synthesis') as HTMLButtonElement;
+  const btnRecordReassessment = document.getElementById('btn-record-reassessment') as HTMLButtonElement;
+  const soapTagBadge = document.getElementById('soap-tag-badge') as HTMLSpanElement;
+  const copyFeedback = document.getElementById('copy-feedback') as HTMLSpanElement;
+
+  let latestSoapMarkdown = '';
+
+  // Interação com Chips de Apresentações
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const pId = chip.getAttribute('data-presentation-id') as ClinicalPresentationId;
+      store.togglePresentation(pId);
+    });
+  });
+
+  // Atualização da descrição livre
+  txtFreeDescription?.addEventListener('input', () => {
+    store.setFreeTextDescription(txtFreeDescription.value);
+  });
+
+  // Atualização das hipóteses iniciais do médico
+  txtInitialHypotheses?.addEventListener('change', () => {
+    const raw = txtInitialHypotheses.value;
+    const items = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    store.setUserInitialHypotheses(items);
+  });
+
+  // Botão Limpar / Reset
+  btnReset?.addEventListener('click', () => {
+    if (confirm('Tem certeza de que deseja descartar todos os dados desta investigação? Esta ação é irreversível.')) {
+      store.reset();
+      if (txtFreeDescription) txtFreeDescription.value = '';
+      if (txtInitialHypotheses) txtInitialHypotheses.value = '';
+      if (importStatusMsg) importStatusMsg.textContent = '';
+      if (copyFeedback) copyFeedback.textContent = '';
+    }
+  });
+
+  // Botão Importar ContextoPaciente (leitura em memória)
+  btnImportContext?.addEventListener('click', () => {
+    const res = store.importContextoPaciente();
+    if (importStatusMsg) {
+      if (res.importedCount > 0) {
+        importStatusMsg.textContent = `✓ ${res.importedCount} parâmetro(s) importado(s) para a memória.`;
+        importStatusMsg.style.color = 'var(--sl-color-accent-high)';
+      } else {
+        importStatusMsg.textContent = 'Nenhum dado prévio encontrado na sessão geral.';
+        importStatusMsg.style.color = 'var(--sl-color-gray-3)';
+      }
+    }
+  });
+
+  // Botão Copiar Síntese SOAP
+  btnCopySynthesis?.addEventListener('click', () => {
+    const textToCopy = latestSoapMarkdown || synthesisOutput?.innerText || '';
+    if (!textToCopy.trim()) return;
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      if (copyFeedback) {
+        copyFeedback.textContent = '✓ Síntese SOAP copiada em Markdown para o prontuário!';
+        setTimeout(() => {
+          if (copyFeedback) copyFeedback.textContent = '';
+        }, 3000);
+      }
+    }).catch(() => {
+      if (copyFeedback) copyFeedback.textContent = 'Falha ao copiar automaticamente. Selecione e copie manualmente.';
+    });
+  });
+
+  // Botão Registrar Reavaliação no Leito
+  btnRecordReassessment?.addEventListener('click', () => {
+    store.recordReassessment();
+    if (copyFeedback) {
+      copyFeedback.textContent = '⏱️ Ponto de reavaliação registrado com sucesso.';
+      setTimeout(() => {
+        if (copyFeedback) copyFeedback.textContent = '';
+      }, 2500);
+    }
+  });
+
+  // Subscrição reativa ao store
+  store.subscribe((evaluation, state) => {
+    renderPresentationsState(state.presentations);
+    renderAlerts(evaluation.activeSafetyAlerts);
+    renderCognitiveForcing(evaluation.unconsideredDangerous);
+    renderAxis2(evaluation.axis2Critical, state);
+    renderAxis1(evaluation.axis1Probable, state);
+    renderQuestions(evaluation.suggestedQuestions, state);
+    renderTests(evaluation.suggestedTests);
+    renderScores(evaluation.integratedScores);
+    renderSynthesis(evaluation, state);
+  });
+
+  function renderPresentationsState(selected: ClinicalPresentationId[]) {
+    chips.forEach((chip) => {
+      const pId = chip.getAttribute('data-presentation-id') as ClinicalPresentationId;
+      if (selected.includes(pId)) {
+        chip.classList.add('chip-selected');
+      } else {
+        chip.classList.remove('chip-selected');
+      }
+    });
+  }
+
+  function renderAlerts(alerts: ClinicalSafetyAlert[]) {
+    if (!secSafetyAlerts || !alertsList) return;
+    if (alerts.length === 0) {
+      secSafetyAlerts.style.display = 'none';
+      alertsList.innerHTML = '';
+      return;
+    }
+
+    secSafetyAlerts.style.display = 'block';
+    alertsList.innerHTML = alerts
+      .map(
+        (a) => `
+        <div class="alert-card alert-card-${a.severity}">
+          <div class="alert-card-title">
+            <strong>${a.title}</strong>
+          </div>
+          <p class="alert-card-desc">${a.description}</p>
+          <div class="alert-card-action">
+            <span class="action-badge">CONDUTA IMEDIATA:</span>
+            <span>${a.immediateActionRequired}</span>
+          </div>
+          <small class="alert-ref">Diretriz: ${a.ruleReference}</small>
+        </div>
+      `,
+      )
+      .join('');
+  }
+
+  function renderCognitiveForcing(unconsidered: EvaluatedHypothesis[]) {
+    if (!cognitiveForcingBox || !cfMessage) return;
+    if (unconsidered.length === 0) {
+      cognitiveForcingBox.style.display = 'none';
+      return;
+    }
+
+    cognitiveForcingBox.style.display = 'block';
+    const names = unconsidered.map((h) => `<strong>${h.def.name}</strong>`).join(', ');
+    cfMessage.innerHTML = `Você não incluiu inicialmente entre as suas hipóteses as seguintes condições de alto risco que se enquadram nesta queixa: ${names}. Certifique-se de investigá-las ou justificá-las antes de encerrar o raciocínio.`;
+  }
+
+  function getStatusBadge(status: string): string {
+    const map: Record<string, { label: string; cls: string }> = {
+      sustentada: { label: 'Sustentada', cls: 'badge-sustentada' },
+      em_investigacao: { label: 'Em Investigação', cls: 'badge-investigacao' },
+      enfraquecida: { label: 'Enfraquecida', cls: 'badge-enfraquecida' },
+      nao_demonstrada: { label: 'Não Demonstrada', cls: 'badge-nao-demonstrada' },
+      confirmada: { label: 'Confirmada', cls: 'badge-confirmada' },
+      nao_avaliada: { label: 'Não Avaliada', cls: 'badge-nao-avaliada' },
+    };
+    const item = map[status] || { label: status, cls: 'badge-nao-avaliada' };
+    return `<span class="status-badge ${item.cls}">${item.label}</span>`;
+  }
+
+  function renderAxis2(hypotheses: EvaluatedHypothesis[], state: IDGState) {
+    if (!axis2List) return;
+    if (hypotheses.length === 0) {
+      axis2List.innerHTML = '<div class="empty-hint">Nenhuma condição crítica pendente de exclusão.</div>';
+      return;
+    }
+
+    axis2List.innerHTML = hypotheses
+      .map((h) => {
+        const timeBadge = h.def.isTimeSensitive
+          ? `<span class="time-sensitive-pill">⏱️ Tempo-Dependente: ${h.def.timeWindowDescription || 'Intervenção imediata'}</span>`
+          : '';
+
+        const missing = h.missingCriticalFindings.length > 0
+          ? `<div class="missing-findings-line">
+              <span class="missing-label">Dados críticos pendentes:</span>
+              ${h.missingCriticalFindings.slice(0, 3).map((f) => `<span class="missing-pill">${f}</span>`).join('')}
+             </div>`
+          : '';
+
+        const bayes = h.bayesianCalculation
+          ? `<div class="bayes-box">
+              <span class="bayes-title">Estimativa Bayesiana:</span>
+              <span>Pós-teste: ~${(h.bayesianCalculation.postTestProb * 100).toFixed(0)}% (RV combinada: ${h.bayesianCalculation.combinedLR.toFixed(1)})</span>
+              <small class="bayes-caution">${h.bayesianCalculation.cautionNote}</small>
+             </div>`
+          : '';
+
+        return `
+          <div class="hypothesis-card hypothesis-card-critical">
+            <div class="hypo-header">
+              <div>
+                <strong class="hypo-title">${h.def.name}</strong>
+                <span class="danger-pill danger-pill-${h.def.dangerLevel}">${h.def.dangerLevel.toUpperCase()}</span>
+              </div>
+              ${getStatusBadge(h.status)}
+            </div>
+            ${timeBadge}
+
+            <!-- Barra de priorização multidimensional -->
+            <div class="matrix-scores-bar">
+              <span class="matrix-pill">Compatibilidade: ${h.priorityMatrix.compatibility}%</span>
+              <span class="matrix-pill matrix-pill-severity">Gravidade: ${h.priorityMatrix.severity}/10</span>
+              <span class="matrix-pill matrix-pill-urgency">Urgência: ${h.priorityMatrix.urgency}/10</span>
+            </div>
+
+            <div class="hypo-guidance">
+              <strong>Próximo passo obrigatório:</strong> ${h.investigationGuidance}
+            </div>
+
+            ${missing}
+
+            <!-- Divulgação progressiva: detalhes adicionais sob demanda -->
+            <details class="progressive-details">
+              <summary class="progressive-summary">Ver justificativa e estimativa bayesiana</summary>
+              <p class="hypo-rationale">${h.def.summaryRationale}</p>
+              ${bayes}
+              <div class="matched-pills">
+                <span class="pill-fav">✓ ${h.matchedFavorableFindings.length} achado(s) a favor</span>
+                <span class="pill-con">✗ ${h.matchedContraryFindings.length} achado(s) contra</span>
+              </div>
+            </details>
+          </div>
+        `;
+      })
+      .join('');
+  }
+
+  function renderAxis1(hypotheses: EvaluatedHypothesis[], state: IDGState) {
+    if (!axis1List) return;
+    if (hypotheses.length === 0) {
+      axis1List.innerHTML = '<div class="empty-hint">Aguardando achados para ordenar a plausibilidade clínica.</div>';
+      return;
+    }
+
+    axis1List.innerHTML = hypotheses
+      .map((h) => {
+        const favCount = h.matchedFavorableFindings.length;
+        const conCount = h.matchedContraryFindings.length;
+
+        const exclusionTag = h.exclusionStatus?.excluded
+          ? `<div class="exclusion-banner">
+              <strong>Excluída por critério formal:</strong> ${h.exclusionStatus.reason}
+              <small>${h.exclusionStatus.caveats || ''}</small>
+             </div>`
+          : '';
+
+        return `
+          <div class="hypothesis-card ${h.exclusionStatus?.excluded ? 'hypothesis-card-excluded' : ''}">
+            <div class="hypo-header">
+              <div>
+                <strong class="hypo-title">${h.def.name}</strong>
+                <span class="category-pill">${h.def.category.replace('_', ' ')}</span>
+              </div>
+              <div class="hypo-right">
+                <span class="score-pill">Plausibilidade: ${h.scoreProbable}%</span>
+                ${getStatusBadge(h.status)}
+              </div>
+            </div>
+
+            <div class="matrix-scores-bar">
+              <span class="matrix-pill">Compatibilidade: ${h.priorityMatrix.compatibility}%</span>
+              <span class="matrix-pill">Prioridade Composta: ${h.priorityMatrix.compositePriority}</span>
+            </div>
+
+            ${exclusionTag}
+
+            <!-- Divulgação progressiva -->
+            <details class="progressive-details">
+              <summary class="progressive-summary">Ver justificativa e achados confrontados</summary>
+              <p class="hypo-rationale">${h.def.summaryRationale}</p>
+              <div class="matched-pills">
+                <span class="pill-fav">✓ ${favCount} achado(s) a favor</span>
+                <span class="pill-con">✗ ${conCount} achado(s) contra</span>
+              </div>
+            </details>
+          </div>
+        `;
+      })
+      .join('');
+  }
+
+  function renderQuestions(questions: DiagnosticQuestionDef[], state: IDGState) {
+    if (!questionsContainer) return;
+    if (questions.length === 0) {
+      questionsContainer.innerHTML = '<div class="empty-hint">Nenhuma pergunta adicional pendente para as hipóteses ativas.</div>';
+      return;
+    }
+
+    questionsContainer.innerHTML = questions
+      .slice(0, 6)
+      .map((q) => {
+        const currentVal = state.findings[q.targetFindingId] || 'desconhecido';
+        return `
+          <div class="question-item">
+            <div class="question-header">
+              <span class="priority-pill priority-${q.priority}">${q.priority.toUpperCase()}</span>
+              <p class="question-text">${q.text}</p>
+            </div>
+            <small class="question-utility"><strong>Utilidade Clínica:</strong> ${q.clinicalUtility}</small>
+            <div class="answer-buttons">
+              <button type="button" class="btn-ans btn-ans-pos ${currentVal === 'presente' ? 'ans-active' : ''}" data-fid="${q.targetFindingId}" data-val="presente">
+                ✓ Presente
+              </button>
+              <button type="button" class="btn-ans btn-ans-neg ${currentVal === 'ausente' ? 'ans-active' : ''}" data-fid="${q.targetFindingId}" data-val="ausente">
+                ✗ Ausente
+              </button>
+              <button type="button" class="btn-ans btn-ans-unk ${currentVal === 'desconhecido' || currentVal === 'nao_avaliado' ? 'ans-active' : ''}" data-fid="${q.targetFindingId}" data-val="desconhecido">
+                ? Desconhecido
+              </button>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+
+    // Listener para botões de resposta
+    questionsContainer.querySelectorAll<HTMLButtonElement>('.btn-ans').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const fid = btn.getAttribute('data-fid')!;
+        const val = btn.getAttribute('data-val') as FindingStatus;
+        store.setFinding(fid, val);
+      });
+    });
+  }
+
+  function renderTests(tests: DiagnosticTestDef[]) {
+    if (!testsContainer) return;
+    if (tests.length === 0) {
+      testsContainer.innerHTML = '<div class="empty-hint">Nenhum exame prioritário pendente.</div>';
+      return;
+    }
+
+    testsContainer.innerHTML = tests
+      .map((t) => {
+        const canExcludeBadge = t.canExclude
+          ? '<span class="can-exclude-pill">Pode Excluir se Negativo</span>'
+          : '<span class="cannot-exclude-pill">Não Exclui a Doença se Normal</span>';
+
+        return `
+          <div class="test-item test-priority-${t.priority}">
+            <div class="test-header">
+              <strong class="test-name">${t.name}</strong>
+              <span class="test-priority-badge">${t.priority.toUpperCase()}</span>
+            </div>
+            <div class="test-meta">
+              ${canExcludeBadge}
+              <small>Investiga: <em>${t.targetHypothesisIds.join(', ')}</em></small>
+            </div>
+            <details class="progressive-details">
+              <summary class="progressive-summary">Ver limitações e risco de falso negativo</summary>
+              <div class="test-details">
+                <div><strong>Limitações:</strong> ${t.limitations}</div>
+                <div><strong>Risco de Falso Negativo:</strong> ${t.falseNegativeRisk}</div>
+              </div>
+            </details>
+          </div>
+        `;
+      })
+      .join('');
+  }
+
+  function renderScores(scores: ScoreAdapterResult[]) {
+    if (!scoresContainer) return;
+    if (scores.length === 0) {
+      scoresContainer.innerHTML = '<div class="empty-hint">Nenhum escore aplicável no momento.</div>';
+      return;
+    }
+
+    scoresContainer.innerHTML = scores
+      .map((s) => {
+        if (s.status === 'ok') {
+          return `
+            <div class="score-card score-ok">
+              <div class="score-top">
+                <strong>${s.scoreName}</strong>
+                <span class="score-val">${s.value} ${s.summary ? `(${s.summary})` : ''}</span>
+              </div>
+              <p class="score-desc">${s.clinicalInterpretation}</p>
+              <small class="score-limits"><strong>Limitações:</strong> ${s.limitations}</small>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="score-card score-pending">
+              <div class="score-top">
+                <strong>${s.scoreName}</strong>
+                <span class="score-status-badge">Aguardando dados</span>
+              </div>
+              <p class="score-desc">${s.clinicalInterpretation}</p>
+            </div>
+          `;
+        }
+      })
+      .join('');
+  }
+
+  function renderSynthesis(evaluation: IDGEvaluation, state: IDGState) {
+    if (!synthesisOutput) return;
+    const soap = evaluation.soap;
+    latestSoapMarkdown = soap.formattedMarkdown;
+
+    if (soapTagBadge) {
+      soapTagBadge.textContent = soap.currentTag;
+      const cleanCls = soap.currentTag.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+      soapTagBadge.className = `soap-tag-badge soap-tag-${cleanCls}`;
+    }
+
+    if (state.presentations.length === 0 && !state.freeTextDescription) {
+      synthesisOutput.innerHTML = '<p class="empty-hint">A síntese SOAP será formulada dinamicamente com estilo telegráfico à medida que você registrar os dados do paciente.</p>';
+      return;
+    }
+
+    synthesisOutput.innerHTML = `
+      <div class="soap-block soap-block-s">
+        <div class="soap-block-header">
+          <span class="soap-letter">S</span>
+          <h4>Subjetivo</h4>
+        </div>
+        <div class="soap-content">
+          <p><strong>Apresentação:</strong> ${soap.subjective.chiefComplaint || 'Não informada'}</p>
+          <p><strong>Histórico / Sintomas:</strong> ${soap.subjective.hpiSummary || 'Sem descrição adicional'}</p>
+          ${soap.subjective.pertinentPositives.length > 0 ? `<p><strong>Sintomas relatados:</strong> ${soap.subjective.pertinentPositives.join('; ')}</p>` : ''}
+          ${soap.subjective.pertinentNegatives.length > 0 ? `<p><strong>Sintomas negados:</strong> ${soap.subjective.pertinentNegatives.join('; ')}</p>` : ''}
+        </div>
+      </div>
+
+      <div class="soap-block soap-block-o">
+        <div class="soap-block-header">
+          <span class="soap-letter">O</span>
+          <h4>Objetivo</h4>
+        </div>
+        <div class="soap-content">
+          <p><strong>Sinais Vitais:</strong> ${soap.objective.vitalsSummary || 'Não registrados'}</p>
+          <p><strong>Exame Físico:</strong> ${soap.objective.physicalExamSummary || 'Não avaliado'}</p>
+          <p><strong>Exames Complementares:</strong> ${soap.objective.diagnosticTestsSummary || 'Nenhum resultado disponível'}</p>
+          ${soap.objective.missingVitalOrExamGaps.length > 0 ? `<p class="soap-missing-highlight"><strong>Lacunas Críticas (Não Avaliadas):</strong> ${soap.objective.missingVitalOrExamGaps.join('; ')}</p>` : ''}
+        </div>
+      </div>
+
+      <div class="soap-block soap-block-a">
+        <div class="soap-block-header">
+          <span class="soap-letter">A</span>
+          <h4>Avaliação (Raciocínio Clínico)</h4>
+        </div>
+        <div class="soap-content">
+          <p><strong>Síntese Sindrômica:</strong> ${soap.assessment.syndromicImpression}</p>
+          <div class="soap-axis-subblock">
+            <strong>Eixo 1 (Plausibilidade Clínica):</strong>
+            <ul>
+              ${soap.assessment.primaryDifferentials.map((d) => `<li><strong>${d.diagnosis}</strong> (${d.status.toUpperCase()}): ${d.justification}</li>`).join('') || '<li>Aguardando dados</li>'}
+            </ul>
+          </div>
+          <div class="soap-axis-subblock soap-critical-subblock">
+            <strong>Eixo 2 (Não Deixar Passar - Condições Críticas):</strong>
+            <ul>
+              ${soap.assessment.criticalNotToMiss.map((c) => `<li><strong>${c.diagnosis}</strong>: ${c.statusAndExclusion}</li>`).join('') || '<li>Nenhuma pendência crítica</li>'}
+            </ul>
+          </div>
+          ${
+            soap.assessment.ruledOutConditions.length > 0
+              ? `
+            <div class="soap-axis-subblock">
+              <strong>Condições Excluídas Formalmente:</strong>
+              <ul>${soap.assessment.ruledOutConditions.map((r) => `<li><strong>${r.diagnosis}</strong>: ${r.reason}</li>`).join('')}</ul>
+            </div>
+          `
+              : ''
+          }
+        </div>
+      </div>
+
+      <div class="soap-block soap-block-p">
+        <div class="soap-block-header">
+          <span class="soap-letter">P</span>
+          <h4>Plano Terapêutico & Diagnóstico</h4>
+        </div>
+        <div class="soap-content">
+          ${
+            soap.plan.immediateActions.length > 0
+              ? `
+            <div class="soap-plan-alert">
+              <strong>Conduta Imediata:</strong>
+              <ul>${soap.plan.immediateActions.map((a) => `<li>${a}</li>`).join('')}</ul>
+            </div>
+          `
+              : ''
+          }
+          <p><strong>Investigação Propedêutica Prioritária:</strong></p>
+          <ul>
+            ${soap.plan.diagnosticWorkup.map((w) => `<li><strong>${w.test}:</strong> ${w.rationale} <small class="workup-caveat">(Limitação: ${w.limitations}; Falso Negativo: ${w.falseNegativeRisk})</small></li>`).join('') || '<li>Sem exames adicionais recomendados</li>'}
+          </ul>
+          <p><strong>Metas de Reavaliação:</strong> ${soap.plan.monitoringAndReassessment.join('; ')}</p>
+        </div>
+      </div>
+
+      <div class="synth-block synth-caveat">
+        <small>${evaluation.synthesis.disclaimer}</small>
+      </div>
+    `;
+  }
+</script>
+
+<style>
+  .idg-container {
+    width: 100%;
+    padding: 8px 0 40px;
+  }
+
+  .top-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--sl-color-gray-5);
+    flex-wrap: wrap;
+  }
+
+  .back-link {
+    color: var(--sl-color-gray-2);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+  .back-link:hover {
+    color: var(--sl-color-white);
+  }
+
+  .privacy-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--sl-color-accent) 15%, transparent);
+    color: var(--sl-color-accent-high);
+    font-size: 0.76rem;
+    font-weight: 600;
+  }
+
+  .privacy-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    display: inline-block;
+  }
+
+  .btn-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid var(--sl-color-gray-5);
+    color: var(--sl-color-gray-3);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .btn-clear:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+  }
+  .eyebrow {
+    color: var(--sl-color-accent-high);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--sl-color-white);
+  }
+  .lead-quote {
+    color: var(--sl-color-accent);
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+  }
+  .lead-desc {
+    color: var(--sl-color-gray-2);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 900px;
+  }
+
+  /* ALERTAS DE SEGURANÇA */
+  .alerts-container {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid #ef4444;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+  }
+  .alerts-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .alerts-header h3 {
+    margin: 0;
+    color: #ef4444;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .alert-card {
+    background: var(--sl-color-bg);
+    border-left: 4px solid #ef4444;
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+  .alert-card-title strong {
+    color: #f87171;
+    font-size: 0.95rem;
+  }
+  .alert-card-desc {
+    margin: 6px 0;
+    color: var(--sl-color-gray-1);
+    font-size: 0.88rem;
+  }
+  .alert-card-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: rgba(239, 68, 68, 0.15);
+    border-radius: 6px;
+    color: var(--sl-color-white);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+  .action-badge {
+    background: #ef4444;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+  }
+  .alert-ref {
+    color: var(--sl-color-gray-3);
+    font-size: 0.72rem;
+  }
+
+  /* COGNITIVE FORCING BANNER */
+  .cognitive-forcing-banner {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid #f59e0b;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .cf-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #f59e0b;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+  .cognitive-forcing-banner p {
+    margin: 0;
+    color: var(--sl-color-gray-1);
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  /* WORKSPACE GRID */
+  .workspace-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1.2fr;
+    gap: 24px;
+  }
+
+  .card-section {
+    background: var(--sl-color-bg-nav);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .section-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--sl-color-accent-high);
+    color: white;
+    font-weight: 800;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  .section-title h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--sl-color-white);
+  }
+  .section-title p {
+    font-size: 0.82rem;
+    color: var(--sl-color-gray-3);
+    margin: 0;
+  }
+
+  /* APRESENTAÇÃO */
+  .field-block {
+    margin-bottom: 16px;
+  }
+  .field-label {
+    display: block;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--sl-color-gray-2);
+    margin-bottom: 8px;
+  }
+  .field-help {
+    display: block;
+    font-weight: 400;
+    color: var(--sl-color-gray-4);
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+  .presentations-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-5);
+    color: var(--sl-color-gray-2);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.15s ease;
+  }
+  .chip-button:hover {
+    border-color: var(--sl-color-accent);
+    color: var(--sl-color-white);
+  }
+  .chip-selected {
+    background: var(--sl-color-accent);
+    border-color: var(--sl-color-accent);
+    color: white;
+    font-weight: 600;
+  }
+
+  .clinical-textarea,
+  .clinical-input {
+    width: 100%;
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--sl-color-white);
+    font-family: inherit;
+    font-size: 0.88rem;
+    box-sizing: border-box;
+  }
+  .clinical-textarea:focus,
+  .clinical-input:focus {
+    outline: none;
+    border-color: var(--sl-color-accent);
+  }
+
+  .integration-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--sl-color-accent);
+    color: var(--sl-color-accent-high);
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .btn-secondary:hover {
+    background: color-mix(in srgb, var(--sl-color-accent) 20%, transparent);
+  }
+  .import-status-text {
+    font-size: 0.78rem;
+  }
+
+  /* DOIS EIXOS DIAGNÓSTICOS */
+  .axis-block {
+    margin-bottom: 24px;
+    background: var(--sl-color-bg);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--sl-color-gray-6);
+  }
+  .axis-critical-block {
+    border-top: 3px solid #ef4444;
+  }
+  .axis-probable-block {
+    border-top: 3px solid var(--sl-color-accent);
+  }
+
+  .axis-header {
+    margin-bottom: 12px;
+  }
+  .axis-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .axis-tag-critical {
+    background: #ef4444;
+    color: white;
+  }
+  .axis-tag-probable {
+    background: var(--sl-color-accent);
+    color: white;
+  }
+  .axis-header h3 {
+    margin: 2px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sl-color-white);
+  }
+  .axis-header small {
+    color: var(--sl-color-gray-3);
+    font-size: 0.75rem;
+  }
+
+  .hypotheses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .hypothesis-card {
+    background: var(--sl-color-bg-nav);
+    border: 1px solid var(--sl-color-gray-6);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .hypothesis-card-critical {
+    border-left: 3px solid #ef4444;
+  }
+  .hypothesis-card-excluded {
+    opacity: 0.6;
+    border-left: 3px solid var(--sl-color-gray-5);
+  }
+  .hypo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .hypo-title {
+    color: var(--sl-color-white);
+    font-size: 0.95rem;
+    margin-right: 6px;
+  }
+  .hypo-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .danger-pill {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .danger-pill-critico {
+    background: #ef4444;
+    color: white;
+  }
+  .danger-pill-alto {
+    background: #f97316;
+    color: white;
+  }
+  .danger-pill-moderado {
+    background: #eab308;
+    color: black;
+  }
+  .danger-pill-baixo {
+    background: #10b981;
+    color: white;
+  }
+
+  .status-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .badge-sustentada {
+    background: #10b981;
+    color: white;
+  }
+  .badge-investigacao {
+    background: #3b82f6;
+    color: white;
+  }
+  .badge-enfraquecida {
+    background: #6b7280;
+    color: white;
+  }
+  .badge-nao-demonstrada {
+    background: #9ca3af;
+    color: black;
+  }
+  .badge-confirmada {
+    background: #8b5cf6;
+    color: white;
+  }
+  .badge-nao-avaliada {
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-3);
+  }
+
+  .time-sensitive-pill {
+    display: inline-block;
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .score-pill {
+    font-size: 0.72rem;
+    color: var(--sl-color-accent-high);
+    font-weight: 700;
+  }
+  .category-pill {
+    font-size: 0.68rem;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .hypo-rationale {
+    margin: 4px 0 8px;
+    color: var(--sl-color-gray-2);
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+  .matched-pills {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    font-size: 0.72rem;
+  }
+  .pill-fav {
+    color: #10b981;
+  }
+  .pill-con {
+    color: #ef4444;
+  }
+  .hypo-guidance {
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--sl-color-accent) 10%, transparent);
+    color: var(--sl-color-accent-high);
+    font-size: 0.78rem;
+  }
+  .missing-findings-line {
+    margin: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .missing-label {
+    font-size: 0.72rem;
+    color: var(--sl-color-gray-3);
+  }
+  .missing-pill {
+    font-size: 0.7rem;
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .bayes-box {
+    margin: 6px 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--sl-color-bg);
+    border: 1px dashed var(--sl-color-gray-5);
+    font-size: 0.75rem;
+    color: var(--sl-color-gray-2);
+  }
+  .bayes-title {
+    font-weight: 700;
+    color: var(--sl-color-white);
+    margin-right: 6px;
+  }
+  .bayes-caution {
+    display: block;
+    margin-top: 4px;
+    color: var(--sl-color-gray-4);
+    font-style: italic;
+  }
+  .exclusion-banner {
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: rgba(107, 114, 128, 0.15);
+    border-left: 3px solid #6b7280;
+    border-radius: 4px;
+    color: var(--sl-color-gray-2);
+    font-size: 0.75rem;
+  }
+
+  /* INVESTIGAÇÃO ADAPTATIVA (PERGUNTAS) */
+  .questions-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .question-item {
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-6);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .question-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .priority-pill {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .priority-critica {
+    background: #ef4444;
+    color: white;
+  }
+  .priority-alta {
+    background: #f97316;
+    color: white;
+  }
+  .priority-moderada {
+    background: #3b82f6;
+    color: white;
+  }
+  .question-text {
+    margin: 0;
+    color: var(--sl-color-white);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+  .question-utility {
+    display: block;
+    color: var(--sl-color-gray-3);
+    font-size: 0.75rem;
+    margin-bottom: 10px;
+  }
+  .answer-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-ans {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--sl-color-gray-5);
+    background: transparent;
+    color: var(--sl-color-gray-2);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    transition: all 0.15s ease;
+  }
+  .btn-ans:hover {
+    border-color: var(--sl-color-accent);
+    color: white;
+  }
+  .btn-ans-pos.ans-active {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+  }
+  .btn-ans-neg.ans-active {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+  }
+  .btn-ans-unk.ans-active {
+    background: var(--sl-color-gray-5);
+    border-color: var(--sl-color-gray-4);
+    color: white;
+  }
+
+  /* EXAMES */
+  .tests-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .test-item {
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-6);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .test-priority-emergencial {
+    border-left: 3px solid #ef4444;
+  }
+  .test-priority-urgente {
+    border-left: 3px solid #f97316;
+  }
+  .test-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .test-name {
+    color: var(--sl-color-white);
+    font-size: 0.88rem;
+  }
+  .test-priority-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-3);
+  }
+  .test-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .can-exclude-pill {
+    font-size: 0.65rem;
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .cannot-exclude-pill {
+    font-size: 0.65rem;
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .test-details {
+    color: var(--sl-color-gray-3);
+    font-size: 0.74rem;
+    line-height: 1.4;
+  }
+
+  /* ESCORES */
+  .scores-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .score-card {
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-6);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .score-ok {
+    border-left: 3px solid var(--sl-color-accent);
+  }
+  .score-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .score-top strong {
+    color: var(--sl-color-white);
+    font-size: 0.88rem;
+  }
+  .score-val {
+    color: var(--sl-color-accent-high);
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .score-desc {
+    margin: 4px 0;
+    font-size: 0.8rem;
+    color: var(--sl-color-gray-2);
+  }
+  .score-limits {
+    display: block;
+    color: var(--sl-color-gray-4);
+    font-size: 0.7rem;
+  }
+  .score-status-badge {
+    font-size: 0.7rem;
+    color: var(--sl-color-gray-4);
+  }
+
+  /* SÍNTESE E SOAP */
+  .soap-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--sl-color-gray-6);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .soap-tag-badge {
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--sl-color-accent);
+    color: white;
+    letter-spacing: 0.04em;
+  }
+  .soap-session-note {
+    font-size: 0.72rem;
+    color: var(--sl-color-gray-3);
+  }
+  .synthesis-box {
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-6);
+    border-radius: 10px;
+    padding: 16px;
+    color: var(--sl-color-gray-1);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+  .soap-block {
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--sl-color-bg-nav);
+    border-left: 3px solid var(--sl-color-accent);
+  }
+  .soap-block-s {
+    border-left-color: #3b82f6;
+  }
+  .soap-block-o {
+    border-left-color: #10b981;
+  }
+  .soap-block-a {
+    border-left-color: #f59e0b;
+  }
+  .soap-block-p {
+    border-left-color: #8b5cf6;
+  }
+  .soap-block-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .soap-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-white);
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+  .soap-block h4 {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--sl-color-white);
+  }
+  .soap-content {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+  .soap-content p {
+    margin: 4px 0;
+  }
+  .soap-content ul {
+    margin: 4px 0 6px 16px;
+    padding: 0;
+  }
+  .soap-content li {
+    margin-bottom: 4px;
+  }
+  .soap-missing-highlight {
+    background: rgba(239, 68, 68, 0.12);
+    border-left: 2px solid #ef4444;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #f87171;
+  }
+  .soap-axis-subblock {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--sl-color-gray-6);
+  }
+  .soap-critical-subblock {
+    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid #ef4444;
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-top: 6px;
+  }
+  .soap-plan-alert {
+    background: rgba(239, 68, 68, 0.12);
+    border-left: 3px solid #ef4444;
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-bottom: 8px;
+  }
+  .workup-caveat {
+    display: block;
+    color: var(--sl-color-gray-4);
+    font-size: 0.7rem;
+    margin-top: 2px;
+  }
+
+  .matrix-scores-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 6px 0;
+  }
+  .matrix-pill {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-2);
+  }
+  .matrix-pill-severity {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+  }
+  .matrix-pill-urgency {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+  }
+
+  .progressive-details {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid var(--sl-color-gray-6);
+  }
+  .progressive-summary {
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--sl-color-accent-high);
+    font-weight: 600;
+    outline: none;
+    user-select: none;
+  }
+  .progressive-summary:hover {
+    text-decoration: underline;
+  }
+
+  .synth-block {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--sl-color-gray-6);
+  }
+  .synth-block h4 {
+    margin: 0 0 6px;
+    color: var(--sl-color-accent-high);
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+  .synth-block ul {
+    margin: 4px 0 0 16px;
+    padding: 0;
+  }
+  .synth-block li {
+    margin-bottom: 4px;
+  }
+  .synth-critical-box {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .synth-critical-box h4 {
+    color: #f87171;
+  }
+  .synth-caveat {
+    border-bottom: none;
+    padding-bottom: 0;
+    color: var(--sl-color-gray-4);
+    font-size: 0.72rem;
+  }
+
+  .synthesis-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .btn-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--sl-color-accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: background 0.15s ease;
+  }
+  .btn-copy:hover {
+    background: var(--sl-color-accent-high);
+  }
+  .copy-feedback-text {
+    font-size: 0.8rem;
+    color: #10b981;
+    font-weight: 600;
+  }
+
+  .empty-hint {
+    color: var(--sl-color-gray-4);
+    font-style: italic;
+    font-size: 0.82rem;
+    padding: 12px;
+    text-align: center;
+  }
+
+  @media (max-width: 1024px) {
+    .workspace-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

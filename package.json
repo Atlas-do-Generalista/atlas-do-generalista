@@ -3,12 +3,12 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
+    "dev": "node run-astro.mjs dev",
+    "start": "node run-astro.mjs dev",
+    "build": "node run-astro.mjs build",
+    "preview": "node run-astro.mjs preview",
     "test": "vitest run",
-    "astro": "astro"
+    "astro": "node run-astro.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

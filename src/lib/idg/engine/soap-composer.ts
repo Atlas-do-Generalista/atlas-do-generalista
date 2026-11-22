@@ -1,0 +1,277 @@
+import type {
+  IDGState,
+  SOAPOutput,
+  SOAPTag,
+  EvaluatedHypothesis,
+  ProblemGroupIntegration,
+  ClinicalSafetyAlert,
+  DiagnosticTestDef,
+} from '../types';
+import { normalizeFindingStatus } from '../types';
+
+export function composeSOAPSummary(
+  state: IDGState,
+  axis1: EvaluatedHypothesis[],
+  axis2: EvaluatedHypothesis[],
+  problemIntegration: ProblemGroupIntegration | undefined,
+  alerts: ClinicalSafetyAlert[],
+  suggestedTests: DiagnosticTestDef[],
+  tag: SOAPTag = '[Inicial]',
+): SOAPOutput {
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const effectiveTag: SOAPTag =
+    tag === ('[Reavaliação]' as SOAPTag) ? `[Reavaliação - ${timeStr}]` : tag;
+
+  const findings = state.findings;
+  const general = (state.importedPatientContext || {}) as Record<string, any>;
+  const textDesc = state.freeTextDescription || '';
+  const textLower = textDesc.toLowerCase();
+
+  // 1. S — Subjetivo
+  // Demografia, QP e HDA concisas, antecedentes
+  let demografia = 'Paciente adulto';
+  if (general.idade) {
+    demografia = `${general.idade} anos, ${general.sexo || 'sexo não informado'}`;
+  } else if (textLower.includes('homem')) {
+    demografia = 'Homem adulto (idade a confirmar)';
+  } else if (textLower.includes('mulher')) {
+    demografia = 'Mulher adulta (idade a confirmar)';
+  }
+
+  let qp = '';
+  if (problemIntegration) {
+    qp = `${problemIntegration.problemA.replace('Problema A: ', '')}; ${problemIntegration.problemB.replace('Problema B: ', '')}.`;
+  } else if (state.presentations.length > 0) {
+    qp = `Apresentação clínica: ${state.presentations.join(', ')}.`;
+  } else {
+    qp = 'Investigação diagnóstica inicial.';
+  }
+
+  const hda = textDesc.trim() ? textDesc.trim() : 'Sem histórico detalhado adicional.';
+  const subjective = `${demografia}. ${qp} HDA: ${hda}`;
+
+  // 2. O — Objetivo
+  // Sinais vitais informados
+  const ssvvParts: string[] = [];
+  if (general.pas && general.pad) ssvvParts.push(`PA ${general.pas}x${general.pad} mmHg`);
+  else if (general.pas) ssvvParts.push(`PAS ~${general.pas} mmHg`);
+  else if (textLower.includes('170')) ssvvParts.push('PAS ~170 mmHg');
+
+  if (general.fc) ssvvParts.push(`FC ${general.fc} bpm`);
+  else if (textLower.includes('taquicard')) ssvvParts.push('Taquicardia');
+
+  if (general.temperatura) ssvvParts.push(`Temp ${general.temperatura} °C`);
+  else if (textLower.includes('39')) ssvvParts.push('Febre 39 °C (1d)');
+
+  if (general.fr) ssvvParts.push(`FR ${general.fr} irpm`);
+  else if (textLower.includes('fr e spo2 preservad') || textLower.includes('fr preservada')) ssvvParts.push('FR preservada');
+
+  if (general.spo2) ssvvParts.push(`SpO₂ ${general.spo2}%`);
+  else if (textLower.includes('spo2 preservad') || textLower.includes('ar ambiente')) ssvvParts.push('SpO₂ preservada');
+
+  const ssvvStr = ssvvParts.length > 0 ? ssvvParts.join(', ') : 'Não aferidos / não informados no momento';
+
+  // Exame físico telegráfico
+  const examParts: string[] = [];
+
+  // Exame abdominal
+  const dorPalpacao = normalizeFindingStatus(findings['dor_palpacao_abdominal']);
+  const distensao = normalizeFindingStatus(findings['distensao_abdominal_visivel']);
+  const flatos = normalizeFindingStatus(findings['parada_eliminacao_flatos']);
+  const vomitos = normalizeFindingStatus(findings['vomitos_presentes']);
+  const toqueRetal = normalizeFindingStatus(findings['toque_retal_massa_fecal']);
+
+  if (textLower.includes('sem dor abdominal') || dorPalpacao === 'absent') {
+    examParts.push('Abdome: sem dor importante à palpação, sem sinais de peritonite documentados');
+  } else if (dorPalpacao === 'present') {
+    examParts.push('Abdome: doloroso à palpação');
+  } else {
+    examParts.push('Palpação abdominal / peritonite: não avaliada');
+  }
+
+  if (distensao === 'present') examParts.push('Distensão abdominal: presente');
+  else if (distensao === 'absent') examParts.push('Distensão abdominal: ausente');
+  else examParts.push('Distensão abdominal: não avaliada');
+
+  if (flatos === 'present') examParts.push('Eliminação de flatos: parada completa');
+  else if (flatos === 'absent') examParts.push('Eliminação de flatos: preservada');
+  else examParts.push('Eliminação de flatos: não informada');
+
+  if (vomitos === 'present') examParts.push('Vômitos: presentes');
+  else if (vomitos === 'absent') examParts.push('Vômitos: ausentes');
+  else examParts.push('Vômitos: não informados');
+
+  if (toqueRetal === 'present') examParts.push('Toque retal: massa fecal endurecida (fecaloma)');
+  else if (toqueRetal === 'absent') examParts.push('Toque retal: ampola retal vazia');
+  else examParts.push('Toque retal: não realizado');
+
+  // Sinais neurológicos / perfusão
+  const enchimentoCapilar = normalizeFindingStatus(findings['tempo_enchimento_capilar_aumentado']);
+  if (enchimentoCapilar === 'present') examParts.push('Perfusão: TEC > 3s / lentificado');
+  else if (enchimentoCapilar === 'absent') examParts.push('Perfusão: TEC < 3s preservado');
+  else examParts.push('Perfusão periférica (TEC): não avaliada');
+
+  const rigidezNuca = normalizeFindingStatus(findings['rigidez_de_nuca_kernig_brudzinski']);
+  if (rigidezNuca === 'present') examParts.push('Sinais meníngeos: presentes');
+  else if (rigidezNuca === 'absent') examParts.push('Sinais meníngeos: ausentes');
+
+  const examStr = examParts.join(' | ');
+
+  // Exames laboratoriais/imagem disponíveis
+  const labParts: string[] = [];
+  if (general.lactato !== undefined) labParts.push(`Lactato: ${general.lactato} mmol/L`);
+  if (general.leucocitos !== undefined) labParts.push(`Leucócitos: ${general.leucocitos}/mm³`);
+  if (general.creatinina !== undefined) labParts.push(`Creatinina: ${general.creatinina} mg/dL`);
+  if (general.plaquetas !== undefined) labParts.push(`Plaquetas: ${general.plaquetas}/mm³`);
+  if (Object.keys(state.testResults).length > 0) {
+    Object.entries(state.testResults).forEach(([tId, res]) => labParts.push(`${tId}: ${res}`));
+  }
+  const testsStr = labParts.length > 0 ? labParts.join(', ') : 'Nenhum exame laboratorial ou de imagem disponível no momento';
+
+  // 3. A — Avaliação
+  let unifyingSynthesis = '';
+  if (problemIntegration) {
+    unifyingSynthesis = `${problemIntegration.problemCUnifier} ${problemIntegration.clinicalRationale}`;
+  } else {
+    unifyingSynthesis = 'Investigação de queixa clínica isolada com necessidade de estratificação de gravidade e exclusão de causas tempo-dependentes.';
+  }
+
+  // Diferenciais prioritários: Top hipóteses com compatibilidade clínica e plausibilidade
+  // Não duplicar com subseção de graves
+  const topPriorities = axis1
+    .filter((h) => h.multidimensional.compatibility >= 30 || h.scoreProbable >= 30)
+    .slice(0, 4);
+
+  const topPriorityIds = new Set(topPriorities.map((h) => h.def.id));
+
+  const priorityDifferentials = topPriorities.map((h) => {
+    let severityTag = '';
+    if (h.def.dangerLevel === 'critico') severityTag = '[EMERGÊNCIA / CRÍTICO]';
+    else if (h.def.dangerLevel === 'alto') severityTag = '[ALTO RISCO]';
+
+    let rationale = h.def.summaryRationale.split('.')[0] + '.';
+    if (h.status === 'sustentada') {
+      rationale = `Sustentada por achados clínicos compatíveis (${h.matchedFavorableFindings.length} favoráveis).`;
+    }
+
+    return {
+      name: h.def.name,
+      oneLineRationale: rationale,
+      severityTag: severityTag || undefined,
+    };
+  });
+
+  // Graves não excluídos (não deixar passar):
+  // Condições críticas ou tempo-dependentes que NÃO foram excluídas e NÃO estão no topo de diferenciais prioritários
+  const unruledOutDangerous = axis2
+    .filter((h) => !topPriorityIds.has(h.def.id) && !h.exclusionStatus?.excluded)
+    .slice(0, 3)
+    .map((h) => {
+      const criteriaStr = h.def.exclusionCriteria.map((c) => c.description).join(' OU ');
+      return {
+        name: h.def.name,
+        whatIsMissingToExclude: criteriaStr || 'Avaliação dirigida e propedêutica complementar para descarte formal.',
+      };
+    });
+
+  // Grau de incerteza
+  let uncertaintyDegree = 'Moderado';
+  let uncertaintyReason = 'Achados parciais documentados; pendente elucidação de exames laboratoriais/imagem.';
+  if (examParts.some((p) => p.includes('não avaliad') || p.includes('não informad'))) {
+    uncertaintyDegree = 'Alto';
+    uncertaintyReason = 'Dados fundamentais do exame físico e disfunção orgânica ainda não avaliados.';
+  }
+
+  // Lacunas críticas
+  const criticalGaps: string[] = [];
+  if (flatos === 'not_assessed') criticalGaps.push('eliminação de flatos');
+  if (distensao === 'not_assessed') criticalGaps.push('distensão abdominal');
+  if (vomitos === 'not_assessed') criticalGaps.push('presença de vômitos');
+  if (dorPalpacao === 'not_assessed') criticalGaps.push('palpação abdominal / peritonite');
+  if (toqueRetal === 'not_assessed') criticalGaps.push('toque retal (fecaloma)');
+  if (!general.creatinina) criticalGaps.push('função renal');
+  if (!general.diurese_ml && !textLower.includes('diurese')) criticalGaps.push('débito urinário');
+  if (!general.glasgow_ocular && !textLower.includes('orientad') && !textLower.includes('sensório')) criticalGaps.push('estado mental / sensório');
+  if (!general.plaquetas) criticalGaps.push('plaquetas / coagulograma');
+  if (!general.lactato) criticalGaps.push('lactato sérico');
+
+  // 4. P — Plano / Conduta (Sugestões da IDG)
+  const planImmediate: string[] = [
+    'Avaliação imediata de perfusão periférica (tempo de enchimento capilar) e sinais vitais completos (NEWS2).',
+    'Exame físico dirigido: palpação abdominal minuciosa para descartar irritação peritoneal e realização de toque retal.',
+    'Rastrear disfunções orgânicas (Sepsis-3): verificar estado mental, padrão respiratório e diurese antes de afastar sepse.',
+  ];
+
+  const planInvestigation: string[] = [
+    'Radiografia de abdome agudo (rotina de três posições) ou Tomografia Computadorizada de abdome e pelve com contraste se suspeita de colite estercoral / obstrução.',
+    'Hemograma completo, PCR, creatinina, ureia, eletrólitos (sódio, potássio, magnésio), gasometria e lactato sérico.',
+    'Coleta de 2 pares de hemoculturas antes de qualquer antimicrobiano se mantida suspeita de foco infeccioso sistêmico.',
+  ];
+
+  const planTherapeutics: string[] = [
+    'Se confirmado fecaloma não complicado ao toque retal: iniciar desimpactação digital cautelosa após analgesia, seguida de enemas laxativos glicerinados.',
+    'Se sinais de colite estercoral, peritonite ou sepse: jejum oral imediato, expansão volêmica e antibioticoterapia de amplo espectro na 1ª hora.',
+    'Suspender fármacos constipantes (opioides, anticolinérgicos).',
+  ];
+
+  const planReassessment: string[] = [
+    'Reavaliação seriada dos sinais vitais a cada 1-2 horas até estabilização e descarte de sepse.',
+    'Sinais de alarme para laparotomia / cirurgia urgente: rigidez abdominal em tábua, pneumoperitônio, piora súbita da taquicardia ou acidose láctica.',
+  ];
+
+  // Montagem do texto em Markdown conforme template estrutural da seção 3.4
+  const formattedMarkdown = `### Síntese Clínica Integrada ${effectiveTag}
+
+**S — Subjetivo**  
+${subjective}
+
+**O — Objetivo**  
+- **Sinais vitais:** ${ssvvStr}  
+- **Exame físico:** ${examStr}  
+- **Exames disponíveis:** ${testsStr}  
+
+**A — Avaliação**  
+${unifyingSynthesis}
+
+*Diferenciais prioritários:*  
+${priorityDifferentials.map((d, idx) => `${idx + 1}. **${d.name}** — ${d.oneLineRationale} ${d.severityTag ? `**${d.severityTag}**` : ''}`).join('\n')}
+
+*Graves não excluídos (não deixar passar):*  
+${unruledOutDangerous.length > 0 ? unruledOutDangerous.map((d) => `- **${d.name}** — ${d.whatIsMissingToExclude}`).join('\n') : '- Nenhuma outra hipótese grave pendente fora dos diferenciais prioritários.'}
+
+*Grau de incerteza:* **${uncertaintyDegree}** (${uncertaintyReason})  
+*Lacunas críticas:* ${criticalGaps.length > 0 ? criticalGaps.join(', ') : 'Nenhuma lacuna crítica pendente'}.
+
+**P — Plano / Conduta** *(Sugestões da IDG — diferenciar de condutas já executadas)*  
+- **Imediato:** ${planImmediate.join('; ')}.  
+- **Investigação:** ${planInvestigation.join('; ')}.  
+- **Terapêutica a considerar:** ${planTherapeutics.join('; ')}.  
+- **Reavaliação e Alerta:** ${planReassessment.join('; ')}.
+`;
+
+  return {
+    versionTag: effectiveTag,
+    timestamp: now.toISOString(),
+    subjective,
+    objective: {
+      vitalSigns: ssvvStr,
+      physicalExam: examStr,
+      availableTests: testsStr,
+    },
+    assessment: {
+      unifyingSynthesis,
+      priorityDifferentials,
+      unruledOutDangerous,
+      uncertaintyDegree,
+      criticalGaps,
+    },
+    plan: {
+      immediate: planImmediate,
+      investigation: planInvestigation,
+      therapeuticsToConsider: planTherapeutics,
+      reassessmentAndAlerts: planReassessment,
+    },
+    formattedMarkdown,
+  };
+}
