@@ -88,6 +88,7 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
                 ))
               }
             </div>
+            <p id="presentation-feedback" class="import-status-text" role="status" aria-live="polite"></p>
           </div>
 
           <div class="field-block">
@@ -295,12 +296,37 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
 
   let latestSoapMarkdown = '';
 
-  // Interação com Chips de Apresentações
-  chips.forEach((chip) => {
-    chip.addEventListener('click', () => {
-      const pId = chip.getAttribute('data-presentation-id') as ClinicalPresentationId;
+  // Interação delegada com as apresentações clínicas.
+  // A delegação evita perder eventos caso os chips sejam recriados pela interface
+  // ou a página seja restaurada por navegação parcial do Starlight.
+  const presentationsContainer = document.querySelector('.presentations-chips');
+  const presentationFeedback = document.getElementById('presentation-feedback');
+
+  presentationsContainer?.addEventListener('click', (event: MouseEvent) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const chip = target.closest<HTMLButtonElement>('.chip-button[data-presentation-id]');
+    if (!chip || !presentationsContainer.contains(chip)) return;
+
+    event.preventDefault();
+    const pId = chip.getAttribute('data-presentation-id') as ClinicalPresentationId;
+    if (!pId) return;
+
+    try {
       store.togglePresentation(pId);
-    });
+      renderPresentationsState(store.getState().presentations);
+      if (presentationFeedback) presentationFeedback.textContent = '';
+    } catch (error) {
+      // O estado pode ter sido atualizado antes de uma falha na reavaliação.
+      // Mantém o feedback visual e informa explicitamente que o motor falhou.
+      console.error('[IDG] Falha ao processar a apresentação selecionada:', error);
+      renderPresentationsState(store.getState().presentations);
+      if (presentationFeedback) {
+        presentationFeedback.textContent =
+          'Apresentação selecionada, mas houve falha ao reavaliar o caso. Abra o console para identificar o erro.';
+      }
+    }
   });
 
   // Atualização da descrição livre
@@ -406,11 +432,9 @@ const presentations = IDGKnowledgeRegistry.getAllPresentations();
   function renderPresentationsState(selected: ClinicalPresentationId[]) {
     chips.forEach((chip) => {
       const pId = chip.getAttribute('data-presentation-id') as ClinicalPresentationId;
-      if (selected.includes(pId)) {
-        chip.classList.add('chip-selected');
-      } else {
-        chip.classList.remove('chip-selected');
-      }
+      const isSelected = selected.includes(pId);
+      chip.classList.toggle('chip-selected', isSelected);
+      chip.setAttribute('aria-pressed', String(isSelected));
     });
   }
 
