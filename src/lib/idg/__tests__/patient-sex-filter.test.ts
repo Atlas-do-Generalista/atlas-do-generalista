@@ -6,6 +6,7 @@ describe('IDG — filtro de hipóteses por sexo informado', () => {
     const store = new InMemoryIDGStore(['dor_abdominal']);
     store.setFreeTextDescription('Paciente do sexo masculino, 55 anos, com dor abdominal.');
     store.setFinding('sangramento_vaginal_com_dor_pelvica', 'presente');
+    store.setFinding('beta_hcg_positivo', 'presente');
 
     const evaluation = store.getEvaluation();
     const activeHypotheses = [...evaluation.axis1Probable, ...evaluation.axis2Critical];
