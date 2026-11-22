@@ -27,7 +27,7 @@ export function analyzeProblemGroups(state: IDGState): ProblemGroupIntegration |
     textLower.includes('evacuar') ||
     textLower.includes('obstipa') ||
     textLower.includes('constipa') ||
-    textLower.includes('14 dias') ||
+    /\b\d+\s*dias?\s*sem\s*(?:evacuar|defecar)/.test(textLower) ||
     textLower.includes('fecaloma') ||
     findings['obstipacao_prolongada_dias'] === 'present' ||
     findings['obstipacao_prolongada_dias'] === 'presente';
