@@ -24,6 +24,7 @@ export function evaluateHypotheses(state: IDGState): {
   const candidateDefs = IDGKnowledgeRegistry.getHypothesesForPresentations(
     state.presentations,
     extraSharedIds,
+    state.userInitialHypotheses || [],
   );
 
   const evaluated: EvaluatedHypothesis[] = candidateDefs.map((def) => {
