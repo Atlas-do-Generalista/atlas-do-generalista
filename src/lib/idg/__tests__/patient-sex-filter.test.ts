@@ -22,6 +22,7 @@ describe('IDG — filtro de hipóteses por sexo informado', () => {
     const store = new InMemoryIDGStore(['dor_abdominal']);
     store.setPatientDemographics({ sexo: 'feminino' });
     store.setFinding('sangramento_vaginal_com_dor_pelvica', 'presente');
+    store.setFinding('beta_hcg_positivo', 'presente');
 
     const evaluation = store.getEvaluation();
 
