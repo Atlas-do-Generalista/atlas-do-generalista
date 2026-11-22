@@ -152,6 +152,7 @@ export function composeSOAPSummary(
   const labParts: string[] = [];
   const initialLabLabels: Record<string, string> = {
     hemoglobina: 'Hb',
+    hematocrito: 'Ht',
     leucocitos: 'Leucócitos',
     plaquetas: 'Plaquetas',
     creatinina: 'Creatinina',
@@ -159,6 +160,9 @@ export function composeSOAPSummary(
     tgo: 'TGO/AST',
     tgp: 'TGP/ALT',
     bilirrubina_total: 'Bilirrubina total',
+    fosfatase_alcalina: 'FA',
+    ggt: 'GGT',
+    albumina: 'Albumina',
     sodio: 'Na',
     potassio: 'K',
     lactato: 'Lactato',
