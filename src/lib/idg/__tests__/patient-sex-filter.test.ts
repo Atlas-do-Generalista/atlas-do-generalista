@@ -13,6 +13,7 @@ describe('IDG — filtro de hipóteses por sexo informado', () => {
 
     expect(activeHypotheses.some((hypothesis) => hypothesis.def.id === 'gravidez_ectopica_rota')).toBe(false);
     expect(evaluation.suggestedTests.some((test) => test.id === 'beta_hcg_quantitativo')).toBe(false);
+    expect(evaluation.suggestedQuestions.some((question) => question.targetFindingId === 'sangramento_vaginal_com_dor_pelvica')).toBe(false);
     expect(evaluation.activeSafetyAlerts.some((alert) => alert.relatedHypothesisId === 'gravidez_ectopica_rota')).toBe(false);
     expect(evaluation.soap.subjective).toContain('55 anos, sexo masculino');
   });
