@@ -18,9 +18,10 @@ import { getPatientSession } from '../../patient-state';
 export class InMemoryIDGStore {
   private state: IDGState;
   private listeners: Array<(evaluation: IDGEvaluation, state: IDGState) => void> = [];
-  private initialEvaluated = false;
+  private hasInteracted = false;
 
   constructor(initialPresentations: ClinicalPresentationId[] = []) {
+    this.hasInteracted = initialPresentations.length > 0;
     this.state = {
       presentations: initialPresentations,
       freeTextDescription: '',
@@ -47,7 +48,7 @@ export class InMemoryIDGStore {
       ...init,
       currentTag: '[Inicial]',
     };
-    this.initialEvaluated = true;
+    this.hasInteracted = true;
     const evaluation = evaluateIDGState(this.state);
     this.notify();
     return evaluation;
@@ -75,9 +76,8 @@ export class InMemoryIDGStore {
 
   setPresentations(presentations: ClinicalPresentationId[]): void {
     this.state.presentations = [...presentations];
-    if (this.initialEvaluated) {
-      this.state.currentTag = '[Atualizado]';
-    }
+    this.state.currentTag = this.hasInteracted ? '[Atualizado]' : '[Inicial]';
+    this.hasInteracted = true;
     this.notify();
   }
 
@@ -87,25 +87,22 @@ export class InMemoryIDGStore {
     } else {
       this.state.presentations.push(presentationId);
     }
-    if (this.initialEvaluated) {
-      this.state.currentTag = '[Atualizado]';
-    }
+    this.state.currentTag = this.hasInteracted ? '[Atualizado]' : '[Inicial]';
+    this.hasInteracted = true;
     this.notify();
   }
 
   setFreeTextDescription(description: string): void {
     this.state.freeTextDescription = description;
-    if (this.initialEvaluated) {
-      this.state.currentTag = '[Atualizado]';
-    }
+    this.state.currentTag = this.hasInteracted ? '[Atualizado]' : '[Inicial]';
+    this.hasInteracted = true;
     this.notify();
   }
 
   setUserInitialHypotheses(hypotheses: string[]): void {
     this.state.userInitialHypotheses = [...hypotheses];
-    if (this.initialEvaluated) {
-      this.state.currentTag = '[Atualizado]';
-    }
+    this.state.currentTag = this.hasInteracted ? '[Atualizado]' : '[Inicial]';
+    this.hasInteracted = true;
     this.notify();
   }
 
@@ -114,9 +111,8 @@ export class InMemoryIDGStore {
       ...this.state.findings,
       [findingId]: status,
     };
-    if (this.initialEvaluated) {
-      this.state.currentTag = '[Atualizado]';
-    }
+    this.state.currentTag = this.hasInteracted ? '[Atualizado]' : '[Inicial]';
+    this.hasInteracted = true;
     this.notify();
   }
 
@@ -125,9 +121,8 @@ export class InMemoryIDGStore {
       ...this.state.findings,
       ...patch,
     };
-    if (this.initialEvaluated) {
-      this.state.currentTag = '[Atualizado]';
-    }
+    this.state.currentTag = this.hasInteracted ? '[Atualizado]' : '[Inicial]';
+    this.hasInteracted = true;
     this.notify();
   }
 
@@ -137,6 +132,7 @@ export class InMemoryIDGStore {
       [testId]: result,
     };
     this.state.currentTag = '[Resultado]';
+    this.hasInteracted = true;
     this.notify();
   }
 
@@ -195,6 +191,7 @@ export class InMemoryIDGStore {
    * Descarta e reinicializa completamente todo o estado em memória.
    */
   reset(): void {
+    this.hasInteracted = false;
     this.state = {
       presentations: [],
       freeTextDescription: '',
