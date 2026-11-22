@@ -11,13 +11,8 @@ export function evaluateIntegratedScores(
     ...state.importedPatientContext,
   };
 
-  // Mapeia achados da IDG para variáveis conhecidas do ContextoPaciente caso estejam presentes
-  if (state.findings['taquicardia_fc_maior_100'] === 'presente' && !patientContext.fc) {
-    patientContext.fc = 110;
-  }
-  if (state.findings['lactato_serico_elevado'] === 'presente' && !patientContext.lactato) {
-    patientContext.lactato = 3.5;
-  }
+  // Achados qualitativos não são convertidos em valores numéricos fictícios.
+  // Cada escore recebe apenas medidas efetivamente registradas no ContextoPaciente.
 
   // Seleciona escores relevantes dependendo da apresentação e hipóteses
   const relevantCalcIds = new Set<string>();
